@@ -19,32 +19,36 @@ class DroidBot(object):
     """
     The main class of droidbot
     """
+
     # this is a single instance class
     instance = None
 
-    def __init__(self,
-                 app_path=None,
-                 device_serial=None,
-                 is_emulator=False,
-                 output_dir=None,
-                 env_policy=None,
-                 policy_name=None,
-                 random_input=False,
-                 script_path=None,
-                 event_count=None,
-                 event_interval=None,
-                 timeout=None,
-                 keep_app=None,
-                 keep_env=False,
-                 cv_mode=False,
-                 debug_mode=False,
-                 profiling_method=None,
-                 grant_perm=False,
-                 enable_accessibility_hard=False,
-                 master=None,
-                 humanoid=None,
-                 ignore_ad=False,
-                 replay_output=None):
+    def __init__(
+        self,
+        app_path=None,
+        device_serial=None,
+        is_emulator=False,
+        output_dir=None,
+        env_policy=None,
+        policy_name=None,
+        random_input=False,
+        script_path=None,
+        event_count=None,
+        event_interval=None,
+        timeout=None,
+        keep_app=None,
+        keep_env=False,
+        cv_mode=False,
+        debug_mode=False,
+        profiling_method=None,
+        grant_perm=False,
+        enable_accessibility_hard=False,
+        master=None,
+        humanoid=None,
+        ignore_ad=False,
+        replay_output=None,
+        android_check=None,
+    ):
         """
         initiate droidbot with configurations
         :return:
@@ -58,8 +62,12 @@ class DroidBot(object):
         if output_dir is not None:
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir)
-            html_index_path = pkg_resources.resource_filename("droidbot", "resources/index.html")
-            stylesheets_path = pkg_resources.resource_filename("droidbot", "resources/stylesheets")
+            html_index_path = pkg_resources.resource_filename(
+                "droidbot", "resources/index.html"
+            )
+            stylesheets_path = pkg_resources.resource_filename(
+                "droidbot", "resources/stylesheets"
+            )
             target_stylesheets_dir = os.path.join(output_dir, "stylesheets")
             if os.path.exists(target_stylesheets_dir):
                 shutil.rmtree(target_stylesheets_dir)
@@ -82,7 +90,7 @@ class DroidBot(object):
         self.replay_output = replay_output
 
         self.enabled = True
-
+        self.android_check = android_check
         try:
             self.device = Device(
                 device_serial=device_serial,
@@ -92,13 +100,13 @@ class DroidBot(object):
                 grant_perm=grant_perm,
                 enable_accessibility_hard=self.enable_accessibility_hard,
                 humanoid=self.humanoid,
-                ignore_ad=ignore_ad)
+                ignore_ad=ignore_ad,
+            )
             self.app = App(app_path, output_dir=self.output_dir)
 
             self.env_manager = AppEnvManager(
-                device=self.device,
-                app=self.app,
-                env_policy=env_policy)
+                device=self.device, app=self.app, env_policy=env_policy
+            )
             self.input_manager = InputManager(
                 device=self.device,
                 app=self.app,
@@ -109,9 +117,12 @@ class DroidBot(object):
                 script_path=script_path,
                 profiling_method=profiling_method,
                 master=master,
-                replay_output=replay_output)
+                replay_output=replay_output,
+                android_check=android_check,
+            )
         except Exception:
             import traceback
+
             traceback.print_exc()
             self.stop()
             sys.exit(-1)
@@ -165,6 +176,7 @@ class DroidBot(object):
             pass
         except Exception:
             import traceback
+
             traceback.print_exc()
             self.stop()
             sys.exit(-1)
@@ -188,9 +200,12 @@ class DroidBot(object):
             self.device.tear_down()
         if not self.keep_app:
             self.device.uninstall_app(self.app)
-        if hasattr(self.input_manager.policy, "master") and \
-           self.input_manager.policy.master:
+        if (
+            hasattr(self.input_manager.policy, "master")
+            and self.input_manager.policy.master
+        ):
             import xmlrpc.client
+
             proxy = xmlrpc.client.ServerProxy(self.input_manager.policy.master)
             proxy.stop_worker(self.device.serial)
 

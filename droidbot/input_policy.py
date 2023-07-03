@@ -4,7 +4,15 @@ import logging
 import random
 from abc import abstractmethod
 
-from .input_event import InputEvent, KeyEvent, IntentEvent, TouchEvent, ManualEvent, SetTextEvent, KillAppEvent
+from .input_event import (
+    InputEvent,
+    KeyEvent,
+    IntentEvent,
+    TouchEvent,
+    ManualEvent,
+    SetTextEvent,
+    KillAppEvent,
+)
 from .utg import UTG
 
 # Max number of restarts
@@ -45,12 +53,47 @@ class InputPolicy(object):
     It should call AppEventManager.send_event method continuously
     """
 
-    def __init__(self, device, app):
+    def __init__(self, device, app, android_check=None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.device = device
         self.app = app
         self.action_count = 0
         self.master = None
+        self.android_check = android_check
+
+    def check_rule_with_precondition(self):
+        rules_to_check = self.android_check.check_rules_with_preconditions()
+        if len(rules_to_check) == 0:
+            print("No rules match the precondition")
+            # execute event from policy
+            # self.execute_policy_event()
+            return
+            # continue
+        rule_to_check = random.choice(rules_to_check)
+
+        result = True
+        if rule_to_check is not None:
+            result = self.android_check.execute_rule(rule_to_check)
+        if result == True:
+            print("-------check rule : pass------")
+        else:
+            # write_rule_result(f"{rule_to_check.function.__name__} rule failed", self.current_event, self.current_rule_event, None, self.read_trace)
+            print("-------rule execute failed-----------")
+
+    def check_rule_without_precondition(self):
+        rules_to_check = self.android_check.rules_without_preconditions()
+        if len(rules_to_check) > 0:
+            result = self.android_check.execute_rules(
+                self.android_check.rules_without_preconditions()
+            )
+            if result == True:
+
+                print("-------rule_without_precondition execute success-----------")
+            else:
+
+                print("-------rule_without_precondition execute failed-----------")
+        else:
+            print("-------no rule_without_precondition to execute-----------")
 
     def start(self, input_manager):
         """
@@ -82,6 +125,7 @@ class InputPolicy(object):
             except Exception as e:
                 self.logger.warning("exception during sending events: %s" % e)
                 import traceback
+
                 traceback.print_exc()
                 continue
             self.action_count += 1
@@ -116,8 +160,8 @@ class UtgBasedInputPolicy(InputPolicy):
     state-based input policy
     """
 
-    def __init__(self, device, app, random_input):
-        super(UtgBasedInputPolicy, self).__init__(device, app)
+    def __init__(self, device, app, random_input, android_check):
+        super(UtgBasedInputPolicy, self).__init__(device, app, android_check)
         self.random_input = random_input
         self.script = None
         self.master = None
@@ -141,6 +185,7 @@ class UtgBasedInputPolicy(InputPolicy):
         self.current_state = self.device.get_current_state()
         if self.current_state is None:
             import time
+
             time.sleep(5)
             return KeyEvent(name="BACK")
 
@@ -148,7 +193,9 @@ class UtgBasedInputPolicy(InputPolicy):
 
         # update last view trees for humanoid
         if self.device.humanoid is not None:
-            self.humanoid_view_trees = self.humanoid_view_trees + [self.current_state.view_tree]
+            self.humanoid_view_trees = self.humanoid_view_trees + [
+                self.current_state.view_tree
+            ]
             if len(self.humanoid_view_trees) > 4:
                 self.humanoid_view_trees = self.humanoid_view_trees[1:]
 
@@ -156,7 +203,9 @@ class UtgBasedInputPolicy(InputPolicy):
 
         # if the previous operation is not finished, continue
         if len(self.script_events) > self.script_event_idx:
-            event = self.script_events[self.script_event_idx].get_transformed_event(self)
+            event = self.script_events[self.script_event_idx].get_transformed_event(
+                self
+            )
             self.script_event_idx += 1
 
         # First try matching a state defined in the script
@@ -210,8 +259,20 @@ class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
         self.last_event_str = None
         self.last_state = None
 
-        self.preferred_buttons = ["yes", "ok", "activate", "detail", "more", "access",
-                                  "allow", "check", "agree", "try", "go", "next"]
+        self.preferred_buttons = [
+            "yes",
+            "ok",
+            "activate",
+            "detail",
+            "more",
+            "access",
+            "allow",
+            "check",
+            "agree",
+            "try",
+            "go",
+            "next",
+        ]
 
     def generate_event_based_on_utg(self):
         """
@@ -220,7 +281,9 @@ class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
           last_event_flag, last_touched_view, last_state, exploited_views, state_transitions
         @return: InputEvent
         """
-        self.save_state_transition(self.last_event_str, self.last_state, self.current_state)
+        self.save_state_transition(
+            self.last_event_str, self.last_state, self.current_state
+        )
 
         if self.device.is_foreground(self.app):
             # the app is in foreground, clear last_event_flag
@@ -235,7 +298,9 @@ class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
             if self.last_event_flag.endswith(EVENT_FLAG_START_APP):
                 # It seems the app stuck at some state, and cannot be started
                 # just pass to let viewclient deal with this case
-                self.logger.info("The app had been restarted %d times.", number_of_starts)
+                self.logger.info(
+                    "The app had been restarted %d times.", number_of_starts
+                )
                 self.logger.info("Trying to restart app...")
                 pass
             else:
@@ -281,8 +346,10 @@ class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
             random.shuffle(views)
 
         # add a "BACK" view, consider go back first/last according to search policy
-        mock_view_back = {'view_str': 'BACK_%s' % state.foreground_activity,
-                          'text': 'BACK_%s' % state.foreground_activity}
+        mock_view_back = {
+            'view_str': 'BACK_%s' % state.foreground_activity,
+            'text': 'BACK_%s' % state.foreground_activity,
+        }
         if self.search_method == POLICY_NAIVE_DFS:
             views.append(mock_view_back)
         elif self.search_method == POLICY_NAIVE_BFS:
@@ -292,8 +359,11 @@ class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
         for view in views:
             view_text = view['text'] if view['text'] is not None else ''
             view_text = view_text.lower().strip()
-            if view_text in self.preferred_buttons \
-                    and (state.foreground_activity, view['view_str']) not in self.explored_views:
+            if (
+                view_text in self.preferred_buttons
+                and (state.foreground_activity, view['view_str'])
+                not in self.explored_views
+            ):
                 self.logger.info("selected an preferred view: %s" % view['view_str'])
                 return view
 
@@ -352,13 +422,27 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
     DFS/BFS (according to search_method) strategy to explore UFG (new)
     """
 
-    def __init__(self, device, app, random_input, search_method):
-        super(UtgGreedySearchPolicy, self).__init__(device, app, random_input)
+    def __init__(self, device, app, random_input, search_method, android_check=None):
+        super(UtgGreedySearchPolicy, self).__init__(
+            device, app, random_input, android_check
+        )
         self.logger = logging.getLogger(self.__class__.__name__)
         self.search_method = search_method
 
-        self.preferred_buttons = ["yes", "ok", "activate", "detail", "more", "access",
-                                  "allow", "check", "agree", "try", "go", "next"]
+        self.preferred_buttons = [
+            "yes",
+            "ok",
+            "activate",
+            "detail",
+            "more",
+            "access",
+            "allow",
+            "check",
+            "agree",
+            "try",
+            "go",
+            "next",
+        ]
 
         self.__nav_target = None
         self.__nav_num_steps = -1
@@ -390,10 +474,13 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             # 3) nothing
             #    a normal start. clear self.__num_restarts.
 
-            if self.__event_trace.endswith(EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP) \
-                    or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+            if self.__event_trace.endswith(
+                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
                 self.__num_restarts += 1
-                self.logger.info("The app had been restarted %d times.", self.__num_restarts)
+                self.logger.info(
+                    "The app had been restarted %d times.", self.__num_restarts
+                )
             else:
                 self.__num_restarts = 0
 
@@ -453,9 +540,14 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
 
         target_state = self.__get_nav_target(current_state)
         if target_state:
-            navigation_steps = self.utg.get_navigation_steps(from_state=current_state, to_state=target_state)
+            navigation_steps = self.utg.get_navigation_steps(
+                from_state=current_state, to_state=target_state
+            )
             if navigation_steps and len(navigation_steps) > 0:
-                self.logger.info("Navigating to %s, %d steps left." % (target_state.state_str, len(navigation_steps)))
+                self.logger.info(
+                    "Navigating to %s, %d steps left."
+                    % (target_state.state_str, len(navigation_steps))
+                )
                 self.__event_trace += EVENT_FLAG_NAVIGATE
                 return navigation_steps[0][1]
 
@@ -480,8 +572,10 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             "history_view_trees": self.humanoid_view_trees,
             "history_events": [x.__dict__ for x in self.humanoid_events],
             "possible_events": [x.__dict__ for x in possible_events],
-            "screen_res": [self.device.display_info["width"],
-                           self.device.display_info["height"]]
+            "screen_res": [
+                self.device.display_info["width"],
+                self.device.display_info["height"],
+            ],
         }
         result = json.loads(proxy.predict(json.dumps(request_json)))
         new_idx = result["indices"]
@@ -502,7 +596,9 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
     def __get_nav_target(self, current_state):
         # If last event is a navigation event
         if self.__nav_target and self.__event_trace.endswith(EVENT_FLAG_NAVIGATE):
-            navigation_steps = self.utg.get_navigation_steps(from_state=current_state, to_state=self.__nav_target)
+            navigation_steps = self.utg.get_navigation_steps(
+                from_state=current_state, to_state=self.__nav_target
+            )
             if navigation_steps and 0 < len(navigation_steps) <= self.__nav_num_steps:
                 # If last navigation was successful, use current nav target
                 self.__nav_num_steps = len(navigation_steps)
@@ -526,7 +622,9 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             if self.utg.is_state_explored(state):
                 continue
             self.__nav_target = state
-            navigation_steps = self.utg.get_navigation_steps(from_state=current_state, to_state=self.__nav_target)
+            navigation_steps = self.utg.get_navigation_steps(
+                from_state=current_state, to_state=self.__nav_target
+            )
             if len(navigation_steps) > 0:
                 self.__nav_num_steps = len(navigation_steps)
                 return state
@@ -534,6 +632,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
         self.__nav_target = None
         self.__nav_num_steps = -1
         return None
+
 
 class UtgReplayPolicy(InputPolicy):
     """
@@ -546,10 +645,15 @@ class UtgReplayPolicy(InputPolicy):
         self.replay_output = replay_output
 
         import os
+
         event_dir = os.path.join(replay_output, "events")
-        self.event_paths = sorted([os.path.join(event_dir, x) for x in
-                                   next(os.walk(event_dir))[2]
-                                   if x.endswith(".json")])
+        self.event_paths = sorted(
+            [
+                os.path.join(event_dir, x)
+                for x in next(os.walk(event_dir))[2]
+                if x.endswith(".json")
+            ]
+        )
         # skip HOME and start app intent
         self.device = device
         self.app = app
@@ -566,8 +670,11 @@ class UtgReplayPolicy(InputPolicy):
         @return: InputEvent
         """
         import time
-        while self.event_idx < len(self.event_paths) and \
-              self.num_replay_tries < MAX_REPLY_TRIES:
+
+        while (
+            self.event_idx < len(self.event_paths)
+            and self.num_replay_tries < MAX_REPLY_TRIES
+        ):
             self.num_replay_tries += 1
             current_state = self.device.get_current_state()
             if current_state is None:
@@ -596,7 +703,7 @@ class UtgReplayPolicy(InputPolicy):
                         if self.app.get_main_activity():
                             component += "/%s" % self.app.get_main_activity()
                         return IntentEvent(Intent(suffix=component))
-                    
+
                     self.logger.info("Replaying %s" % event_path)
                     self.event_idx = curr_event_idx
                     self.num_replay_tries = 0
@@ -604,11 +711,12 @@ class UtgReplayPolicy(InputPolicy):
                     event = InputEvent.from_dict(event_dict["event"])
                     self.last_state = self.current_state
                     self.last_event = event
-                    return event                    
+                    return event
 
             time.sleep(5)
 
         # raise InputInterruptedException("No more record can be replayed.")
+
     def __update_utg(self):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)
 

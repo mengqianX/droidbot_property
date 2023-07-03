@@ -148,6 +148,7 @@ class AndroidCheck(object):
             humanoid=humanoid,
             ignore_ad=ignore_ad,
             replay_output=replay_output,
+            android_check=self,
         )
         self.device = u2.connect(self.device_serial)
         self.device.implicitly_wait(5)  # set default element wait timeout = 5 seconds

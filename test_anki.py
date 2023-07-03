@@ -19,7 +19,7 @@ class Test(AndroidCheck):
 
     @precondition(
         lambda self: self.device.app_current()['activity'].split('.')[-1]
-        == "Preferences"
+        == "DeckPicker"
     )
     @rule()
     def rule2(self):
@@ -29,6 +29,10 @@ class Test(AndroidCheck):
         )
         t = time.time()
         reach_time_list.append(t - start_time)
+
+    @rule()
+    def rule3(self):
+        print("reach rule 3")
 
 
 start_time = time.time()
