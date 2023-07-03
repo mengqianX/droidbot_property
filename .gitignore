@@ -6,6 +6,7 @@ __pycache__/
 *$py.class
 droidbot/output*/*
 droidbot/apk/*
+*output/
 # Distribution / packaging
 .Python
 env/
