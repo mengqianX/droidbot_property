@@ -397,4 +397,4 @@ class AndroidCheck(object):
         return self.device(**kwargs).exists()
 
 
-t = AndroidCheck("droidbot\\apk\\amaze_3.4.3.apk").start()
+# t = AndroidCheck("droidbot\\apk\\amaze_3.4.3.apk").start()
