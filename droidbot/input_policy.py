@@ -422,7 +422,9 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
     DFS/BFS (according to search_method) strategy to explore UFG (new)
     """
 
-    def __init__(self, device, app, random_input, search_method, android_check=None):
+    def __init__(
+        self, device, app, random_input, search_method, android_check=None, guide=None
+    ):
         super(UtgGreedySearchPolicy, self).__init__(
             device, app, random_input, android_check
         )
@@ -451,6 +453,8 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
         self.__event_trace = ""
         self.__missed_states = set()
         self.__random_explore = False
+
+        self.guide = guide
 
     def generate_event_based_on_utg(self):
         """
@@ -515,6 +519,12 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             # If the app is in foreground
             self.__num_steps_outside = 0
 
+        if self.guide:
+            if not self.guide.check_node_connect_to_target(
+                self.device.get_top_activity_name().split(".")[-1]
+            ):
+                self.logger.info("Not connected to target activity, try to go back")
+                return KeyEvent(name="BACK")
         # Get all possible input events
         possible_events = current_state.get_possible_input()
 

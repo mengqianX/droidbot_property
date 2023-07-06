@@ -25,6 +25,8 @@ from uiautomator2.exceptions import UiObjectNotFoundError
 # from util import *
 import time
 
+from droidbot.guide import Guide
+
 # from uiobject import MyUiObject
 
 
@@ -124,7 +126,7 @@ class AndroidCheck(object):
     ):
         self.apk_path = apk_path
         self.device_serial = device_serial
-
+        self.guide = Guide()
         self.droidbot = DroidBot(
             app_path=apk_path,
             device_serial=device_serial,
@@ -149,6 +151,7 @@ class AndroidCheck(object):
             ignore_ad=ignore_ad,
             replay_output=replay_output,
             android_check=self,
+            guide=self.guide,
         )
         self.device = u2.connect(self.device_serial)
         self.device.implicitly_wait(5)  # set default element wait timeout = 5 seconds

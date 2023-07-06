@@ -48,6 +48,7 @@ class DroidBot(object):
         ignore_ad=False,
         replay_output=None,
         android_check=None,
+        guide=None,
     ):
         """
         initiate droidbot with configurations
@@ -91,6 +92,7 @@ class DroidBot(object):
 
         self.enabled = True
         self.android_check = android_check
+        self.guide = guide
         try:
             self.device = Device(
                 device_serial=device_serial,
@@ -119,6 +121,7 @@ class DroidBot(object):
                 master=master,
                 replay_output=replay_output,
                 android_check=android_check,
+                guide=self.guide,
             )
         except Exception:
             import traceback

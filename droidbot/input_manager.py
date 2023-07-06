@@ -49,6 +49,7 @@ class InputManager(object):
         master=None,
         replay_output=None,
         android_check=None,
+        guide=None,
     ):
         """
         manage input event sent to the target device
@@ -81,6 +82,7 @@ class InputManager(object):
             self.script = DroidBotScript(script_dict)
 
         self.android_check = android_check
+        self.guide = guide
         self.policy = self.get_input_policy(device, app, master)
         self.profiling_method = profiling_method
 
@@ -95,7 +97,12 @@ class InputManager(object):
             )
         elif self.policy_name in [POLICY_GREEDY_DFS, POLICY_GREEDY_BFS]:
             input_policy = UtgGreedySearchPolicy(
-                device, app, self.random_input, self.policy_name, self.android_check
+                device,
+                app,
+                self.random_input,
+                self.policy_name,
+                self.android_check,
+                self.guide,
             )
         elif self.policy_name == POLICY_MEMORY_GUIDED:
             from .input_policy2 import MemoryGuidedPolicy
