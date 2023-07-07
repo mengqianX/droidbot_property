@@ -160,7 +160,7 @@ class UtgBasedInputPolicy(InputPolicy):
     state-based input policy
     """
 
-    def __init__(self, device, app, random_input, android_check):
+    def __init__(self, device, app, random_input, android_check, guide=None):
         super(UtgBasedInputPolicy, self).__init__(device, app, android_check)
         self.random_input = random_input
         self.script = None
@@ -169,7 +169,10 @@ class UtgBasedInputPolicy(InputPolicy):
         self.last_event = None
         self.last_state = None
         self.current_state = None
-        self.utg = UTG(device=device, app=app, random_input=random_input)
+        self.guide = guide
+        self.utg = UTG(
+            device=device, app=app, random_input=random_input, guide=self.guide
+        )
         self.script_event_idx = 0
         if self.device.humanoid is not None:
             self.humanoid_view_trees = []
@@ -426,7 +429,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
         self, device, app, random_input, search_method, android_check=None, guide=None
     ):
         super(UtgGreedySearchPolicy, self).__init__(
-            device, app, random_input, android_check
+            device, app, random_input, android_check, guide
         )
         self.logger = logging.getLogger(self.__class__.__name__)
         self.search_method = search_method
@@ -571,6 +574,9 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
         self.logger.info("Cannot find an exploration target. Trying to restart app...")
         self.__event_trace += EVENT_FLAG_STOP_APP
         return IntentEvent(intent=stop_app_intent)
+
+    def __update_utg(self):
+        self.utg.add_transition(self.last_event, self.last_state, self.current_state)
 
     def __sort_inputs_by_humanoid(self, possible_events):
         if sys.version.startswith("3"):
