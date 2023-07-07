@@ -468,16 +468,22 @@ class DeviceState(object):
                 ]
             ):
                 enabled_view_ids.append(view_dict['temp_id'])
-        # enabled_view_ids.reverse()
+
+        # Ting: reverse the tree and conduct bottom-up checking
+        enabled_view_ids.reverse()
 
         for view_id in enabled_view_ids:
             if self.__safe_dict_get(self.views[view_id], 'clickable') and not (
                 '.widget.EditText' in self.__safe_dict_get(self.views[view_id], 'class')
             ):
                 # Ting: do not generate the "click" event for EditText
+
                 possible_events.append(TouchEvent(view=self.views[view_id]))
                 touch_exclude_view_ids.add(view_id)
-                touch_exclude_view_ids.union(self.get_all_children(self.views[view_id]))
+                # Ting: fix a bug: add union return values
+                touch_exclude_view_ids = touch_exclude_view_ids.union(
+                    self.get_all_children(self.views[view_id])
+                )
 
         for view_id in enabled_view_ids:
             if self.__safe_dict_get(self.views[view_id], 'scrollable'):
@@ -498,7 +504,10 @@ class DeviceState(object):
             if self.__safe_dict_get(self.views[view_id], 'checkable'):
                 possible_events.append(TouchEvent(view=self.views[view_id]))
                 touch_exclude_view_ids.add(view_id)
-                touch_exclude_view_ids.union(self.get_all_children(self.views[view_id]))
+                # Ting: fix a bug: add union return values
+                touch_exclude_view_ids = touch_exclude_view_ids.union(
+                    self.get_all_children(self.views[view_id])
+                )
 
         for view_id in enabled_view_ids:
             if self.__safe_dict_get(self.views[view_id], 'long_clickable'):
@@ -512,14 +521,20 @@ class DeviceState(object):
                 touch_exclude_view_ids.add(view_id)
                 # TODO figure out what event can be sent to editable views
                 pass
-
+        # Ting: for those views that (1) have not been handled, and (2) are leaf views, generate touch events
         for view_id in enabled_view_ids:
             if view_id in touch_exclude_view_ids:
                 continue
             children = self.__safe_dict_get(self.views[view_id], 'children')
             if children and len(children) > 0:
                 continue
-            possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            # Ting: fix a possible bug: we still need to check the property
+            # before we add them into "possible_events"
+            if self.__safe_dict_get(
+                self.views[view_id], 'clickable'
+            ) or self.__safe_dict_get(self.views[view_id], 'checkable'):
+                possible_events.append(TouchEvent(view=self.views[view_id]))
 
         # For old Android navigation bars
         # possible_events.append(KeyEvent(name="MENU"))
