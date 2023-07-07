@@ -11,14 +11,23 @@ class DeviceState(object):
     the state of the current device
     """
 
-    def __init__(self, device, views, foreground_activity, activity_stack, background_services,
-                 tag=None, screenshot_path=None):
+    def __init__(
+        self,
+        device,
+        views,
+        foreground_activity,
+        activity_stack,
+        background_services,
+        tag=None,
+        screenshot_path=None,
+    ):
         self.device = device
         self.foreground_activity = foreground_activity
         self.activity_stack = activity_stack if isinstance(activity_stack, list) else []
         self.background_services = background_services
         if tag is None:
             from datetime import datetime
+
             tag = datetime.now().strftime("%Y-%m-%d_%H%M%S")
         self.tag = tag
         self.screenshot_path = screenshot_path
@@ -38,19 +47,22 @@ class DeviceState(object):
         return self.foreground_activity.split('.')[-1]
 
     def to_dict(self):
-        state = {'tag': self.tag,
-                 'state_str': self.state_str,
-                 'state_str_content_free': self.structure_str,
-                 'foreground_activity': self.foreground_activity,
-                 'activity_stack': self.activity_stack,
-                 'background_services': self.background_services,
-                 'width': self.width,
-                 'height': self.height,
-                 'views': self.views}
+        state = {
+            'tag': self.tag,
+            'state_str': self.state_str,
+            'state_str_content_free': self.structure_str,
+            'foreground_activity': self.foreground_activity,
+            'activity_stack': self.activity_stack,
+            'background_services': self.background_services,
+            'width': self.width,
+            'height': self.height,
+            'views': self.views,
+        }
         return state
 
     def to_json(self):
         import json
+
         return json.dumps(self.to_dict(), indent=2)
 
     def __parse_views(self, raw_views):
@@ -68,7 +80,7 @@ class DeviceState(object):
         return views
 
     def __assemble_view_tree(self, root_view, views):
-        if not len(self.view_tree): # bootstrap
+        if not len(self.view_tree):  # bootstrap
             self.view_tree = copy.deepcopy(views[0])
             self.__assemble_view_tree(self.view_tree, views)
         else:
@@ -107,38 +119,59 @@ class DeviceState(object):
         if self.device.humanoid is not None:
             import json
             from xmlrpc.client import ServerProxy
+
             proxy = ServerProxy("http://%s/" % self.device.humanoid)
-            return proxy.render_view_tree(json.dumps({
-                "view_tree": self.view_tree,
-                "screen_res": [self.device.display_info["width"],
-                               self.device.display_info["height"]]
-            }))
+            return proxy.render_view_tree(
+                json.dumps(
+                    {
+                        "view_tree": self.view_tree,
+                        "screen_res": [
+                            self.device.display_info["width"],
+                            self.device.display_info["height"],
+                        ],
+                    }
+                )
+            )
         else:
             view_signatures = set()
             for view in self.views:
                 view_signature = DeviceState.__get_view_signature(view)
                 if view_signature:
                     view_signatures.add(view_signature)
-            return "%s{%s}" % (self.foreground_activity, ",".join(sorted(view_signatures)))
+            return "%s{%s}" % (
+                self.foreground_activity,
+                ",".join(sorted(view_signatures)),
+            )
 
     def __get_content_free_state_str(self):
         if self.device.humanoid is not None:
             import json
             from xmlrpc.client import ServerProxy
+
             proxy = ServerProxy("http://%s/" % self.device.humanoid)
-            state_str = proxy.render_content_free_view_tree(json.dumps({
-                "view_tree": self.view_tree,
-                "screen_res": [self.device.display_info["width"],
-                               self.device.display_info["height"]]
-            }))
+            state_str = proxy.render_content_free_view_tree(
+                json.dumps(
+                    {
+                        "view_tree": self.view_tree,
+                        "screen_res": [
+                            self.device.display_info["width"],
+                            self.device.display_info["height"],
+                        ],
+                    }
+                )
+            )
         else:
             view_signatures = set()
             for view in self.views:
                 view_signature = DeviceState.__get_content_free_view_signature(view)
                 if view_signature:
                     view_signatures.add(view_signature)
-            state_str = "%s{%s}" % (self.foreground_activity, ",".join(sorted(view_signatures)))
+            state_str = "%s{%s}" % (
+                self.foreground_activity,
+                ",".join(sorted(view_signatures)),
+            )
         import hashlib
+
         return hashlib.md5(state_str.encode('utf-8')).hexdigest()
 
     def __get_search_content(self):
@@ -146,8 +179,10 @@ class DeviceState(object):
         get a text for searching the state
         :return: str
         """
-        words = [",".join(self.__get_property_from_all_views("resource_id")),
-                 ",".join(self.__get_property_from_all_views("text"))]
+        words = [
+            ",".join(self.__get_property_from_all_views("resource_id")),
+            ",".join(self.__get_property_from_all_views("text")),
+        ]
         return "\n".join(words)
 
     def __get_property_from_all_views(self, property_name):
@@ -180,6 +215,7 @@ class DeviceState(object):
             state_json_file.write(self.to_json())
             state_json_file.close()
             import shutil
+
             shutil.copyfile(self.screenshot_path, dest_screenshot_path)
             self.screenshot_path = dest_screenshot_path
             # from PIL.Image import Image
@@ -205,14 +241,19 @@ class DeviceState(object):
             if os.path.exists(view_file_path):
                 return
             from PIL import Image
+
             # Load the original image:
             view_bound = view_dict['bounds']
             original_img = Image.open(self.screenshot_path)
             # view bound should be in original image bound
-            view_img = original_img.crop((min(original_img.width - 1, max(0, view_bound[0][0])),
-                                          min(original_img.height - 1, max(0, view_bound[0][1])),
-                                          min(original_img.width, max(0, view_bound[1][0])),
-                                          min(original_img.height, max(0, view_bound[1][1]))))
+            view_img = original_img.crop(
+                (
+                    min(original_img.width - 1, max(0, view_bound[0][0])),
+                    min(original_img.height - 1, max(0, view_bound[0][1])),
+                    min(original_img.width, max(0, view_bound[1][0])),
+                    min(original_img.height, max(0, view_bound[1][1])),
+                )
+            )
             view_img.convert("RGB").save(view_file_path)
         except Exception as e:
             self.device.logger.warning(e)
@@ -239,13 +280,14 @@ class DeviceState(object):
         if view_text is None or len(view_text) > 50:
             view_text = "None"
 
-        signature = "[class]%s[resource_id]%s[text]%s[%s,%s,%s]" % \
-                    (DeviceState.__safe_dict_get(view_dict, 'class', "None"),
-                     DeviceState.__safe_dict_get(view_dict, 'resource_id', "None"),
-                     view_text,
-                     DeviceState.__key_if_true(view_dict, 'enabled'),
-                     DeviceState.__key_if_true(view_dict, 'checked'),
-                     DeviceState.__key_if_true(view_dict, 'selected'))
+        signature = "[class]%s[resource_id]%s[text]%s[%s,%s,%s]" % (
+            DeviceState.__safe_dict_get(view_dict, 'class', "None"),
+            DeviceState.__safe_dict_get(view_dict, 'resource_id', "None"),
+            view_text,
+            DeviceState.__key_if_true(view_dict, 'enabled'),
+            DeviceState.__key_if_true(view_dict, 'checked'),
+            DeviceState.__key_if_true(view_dict, 'selected'),
+        )
         view_dict['signature'] = signature
         return signature
 
@@ -258,9 +300,10 @@ class DeviceState(object):
         """
         if 'content_free_signature' in view_dict:
             return view_dict['content_free_signature']
-        content_free_signature = "[class]%s[resource_id]%s" % \
-                                 (DeviceState.__safe_dict_get(view_dict, 'class', "None"),
-                                  DeviceState.__safe_dict_get(view_dict, 'resource_id', "None"))
+        content_free_signature = "[class]%s[resource_id]%s" % (
+            DeviceState.__safe_dict_get(view_dict, 'class', "None"),
+            DeviceState.__safe_dict_get(view_dict, 'resource_id', "None"),
+        )
         view_dict['content_free_signature'] = content_free_signature
         return content_free_signature
 
@@ -281,9 +324,14 @@ class DeviceState(object):
         for child_id in self.get_all_children(view_dict):
             child_strs.append(DeviceState.__get_view_signature(self.views[child_id]))
         child_strs.sort()
-        view_str = "Activity:%s\nSelf:%s\nParents:%s\nChildren:%s" % \
-                   (self.foreground_activity, view_signature, "//".join(parent_strs), "||".join(child_strs))
+        view_str = "Activity:%s\nSelf:%s\nParents:%s\nChildren:%s" % (
+            self.foreground_activity,
+            view_signature,
+            "//".join(parent_strs),
+            "||".join(child_strs),
+        )
         import hashlib
+
         view_str = hashlib.md5(view_str.encode('utf-8')).hexdigest()
         view_dict['view_str'] = view_str
         return view_str
@@ -311,11 +359,11 @@ class DeviceState(object):
                 child_x = child_view['bounds'][0][0]
                 child_y = child_view['bounds'][0][1]
                 relative_x, relative_y = child_x - root_x, child_y - root_y
-                children["(%d,%d)" % (relative_x, relative_y)] = self.__get_view_structure(child_view)
+                children[
+                    "(%d,%d)" % (relative_x, relative_y)
+                ] = self.__get_view_structure(child_view)
 
-        view_structure = {
-            "%s(%d*%d)" % (class_name, width, height): children
-        }
+        view_structure = {"%s(%d*%d)" % (class_name, width, height): children}
         view_dict['view_structure'] = view_structure
         return view_structure
 
@@ -410,26 +458,41 @@ class DeviceState(object):
         touch_exclude_view_ids = set()
         for view_dict in self.views:
             # exclude navigation bar if exists
-            if self.__safe_dict_get(view_dict, 'enabled') and \
-                    self.__safe_dict_get(view_dict, 'visible') and \
-                    self.__safe_dict_get(view_dict, 'resource_id') not in \
-               ['android:id/navigationBarBackground',
-                'android:id/statusBarBackground']:
+            if (
+                self.__safe_dict_get(view_dict, 'enabled')
+                and self.__safe_dict_get(view_dict, 'visible')
+                and self.__safe_dict_get(view_dict, 'resource_id')
+                not in [
+                    'android:id/navigationBarBackground',
+                    'android:id/statusBarBackground',
+                ]
+            ):
                 enabled_view_ids.append(view_dict['temp_id'])
         # enabled_view_ids.reverse()
 
         for view_id in enabled_view_ids:
-            if self.__safe_dict_get(self.views[view_id], 'clickable'):
+            if self.__safe_dict_get(self.views[view_id], 'clickable') and not (
+                '.widget.EditText' in self.__safe_dict_get(self.views[view_id], 'class')
+            ):
+                # Ting: do not generate the "click" event for EditText
                 possible_events.append(TouchEvent(view=self.views[view_id]))
                 touch_exclude_view_ids.add(view_id)
                 touch_exclude_view_ids.union(self.get_all_children(self.views[view_id]))
 
         for view_id in enabled_view_ids:
             if self.__safe_dict_get(self.views[view_id], 'scrollable'):
-                possible_events.append(ScrollEvent(view=self.views[view_id], direction="UP"))
-                possible_events.append(ScrollEvent(view=self.views[view_id], direction="DOWN"))
-                possible_events.append(ScrollEvent(view=self.views[view_id], direction="LEFT"))
-                possible_events.append(ScrollEvent(view=self.views[view_id], direction="RIGHT"))
+                possible_events.append(
+                    ScrollEvent(view=self.views[view_id], direction="UP")
+                )
+                possible_events.append(
+                    ScrollEvent(view=self.views[view_id], direction="DOWN")
+                )
+                possible_events.append(
+                    ScrollEvent(view=self.views[view_id], direction="LEFT")
+                )
+                possible_events.append(
+                    ScrollEvent(view=self.views[view_id], direction="RIGHT")
+                )
 
         for view_id in enabled_view_ids:
             if self.__safe_dict_get(self.views[view_id], 'checkable'):
@@ -443,7 +506,9 @@ class DeviceState(object):
 
         for view_id in enabled_view_ids:
             if self.__safe_dict_get(self.views[view_id], 'editable'):
-                possible_events.append(SetTextEvent(view=self.views[view_id], text="HelloWorld"))
+                possible_events.append(
+                    SetTextEvent(view=self.views[view_id], text="HelloWorld")
+                )
                 touch_exclude_view_ids.add(view_id)
                 # TODO figure out what event can be sent to editable views
                 pass
