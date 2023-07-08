@@ -64,9 +64,11 @@ class Guide(object):
         '''
         Returns a list of nodes that are connected to the target node, include the target activity
         '''
-        return list(self.G_activity.predecessors(self.target_activity)).append(
-            self.target_activity
+        nodes_connected_to_target = list(
+            self.G_activity.predecessors(self.target_activity)
         )
+        nodes_connected_to_target.append(self.target_activity)
+        return nodes_connected_to_target
 
     def check_node_connect_to_target(self, activity: str):
         '''
