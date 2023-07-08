@@ -523,6 +523,21 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             self.__num_steps_outside = 0
 
         if self.guide:
+            # yiheng: if encounter target activity, set target state
+            if (
+                self.device.get_top_activity_name().split(".")[-1]
+                == self.guide.target_activity
+            ):
+                self.utg.set_target_state(current_state)
+
+            # yiheng: if it has encountered the target activity and current state is on
+            # the path to the target state, select the next event based on the guide
+            if self.utg.target_state is not None:
+                prefer_event = self.utg.get_G2_nav_action(current_state)
+                if prefer_event is not None:
+                    self.logger.info("Select event based on guide: " + prefer_event)
+                    return prefer_event
+            # yiheng: if current activity is not on the path to the target activity, back
             if not self.guide.check_node_connect_to_target(
                 self.device.get_top_activity_name().split(".")[-1]
             ):

@@ -33,7 +33,7 @@ class UTG(object):
         self.start_time = datetime.datetime.now()
 
         self.guide = guide
-        self.target_state_str = None
+        self.target_state = None
 
     @property
     def first_state_str(self):
@@ -50,6 +50,10 @@ class UTG(object):
     @property
     def num_transitions(self):
         return len(self.transitions)
+
+    # yiheng: set the target state
+    def set_target_state(self, state):
+        self.target_state = state
 
     def add_transition(self, event, old_state, new_state):
         self.add_node(old_state)
@@ -374,10 +378,10 @@ class UTG(object):
             return None
 
     def highlight_shortest_path(self, from_state_str, to_state_str):
-        if self.target_state_str is None:
+        if self.target_state is None:
             return False
         first_state_structure_str = self.first_state.structure_str
-        target_state_structure_str = self.target_state_structure_str
+        target_state_structure_str = self.target_state.structure_str
 
         from_state_structure_str = self.find_structure_str(from_state_str)
         to_state_structure_str = self.find_structure_str(to_state_str)
@@ -467,9 +471,11 @@ class UTG(object):
             return None
         current_structure_str = current_state.structure_str
         nav_edges = self.get_G2_nav_edges(
-            self.first_state.structure_str, self.target_state_structure_str
+            self.first_state.structure_str, self.target_state.structure_str
         )
         if nav_edges is not None:
             for start_structure_str, to_state_str, event in nav_edges:
                 if start_structure_str == current_structure_str:
                     return event
+        self.logger.info("No next action found")
+        return None
