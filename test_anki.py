@@ -36,7 +36,7 @@ class Test(AndroidCheck):
 
 
 start_time = time.time()
-t = Test(apk_path=".\\apk\\AnkiDroid-2.15.2.apk", event_count=200)
+t = Test(apk_path=".\\apk\\AnkiDroid-2.15.2.apk", event_count=300)
 t.start()
 for item in reach_time_list:
     print(item)

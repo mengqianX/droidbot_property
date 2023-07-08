@@ -107,7 +107,7 @@ class AndroidCheck(object):
         output_dir="output",
         is_emulator=True,
         policy_name=input_manager.DEFAULT_POLICY,
-        random_input=False,
+        random_input=True,
         script_path=None,
         event_interval=input_manager.DEFAULT_EVENT_INTERVAL,
         timeout=input_manager.DEFAULT_TIMEOUT,
