@@ -535,7 +535,9 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             if self.utg.target_state is not None:
                 prefer_event = self.utg.get_G2_nav_action(current_state)
                 if prefer_event is not None:
-                    self.logger.info("Select event based on guide: " + prefer_event)
+                    self.logger.info(
+                        "Select event based on guide: " + prefer_event.__str__()
+                    )
                     return prefer_event
             # yiheng: if current activity is not on the path to the target activity, back
             if not self.guide.check_node_connect_to_target(
@@ -656,7 +658,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             navigation_steps = self.utg.get_navigation_steps(
                 from_state=current_state, to_state=self.__nav_target
             )
-            if len(navigation_steps) > 0:
+            if navigation_steps is not None and len(navigation_steps) > 0:
                 self.__nav_num_steps = len(navigation_steps)
                 return state
 
