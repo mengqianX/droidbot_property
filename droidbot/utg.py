@@ -295,6 +295,17 @@ class UTG(object):
             reachable_states.append(target_state)
         return reachable_states
 
+    # yiheng: get states on the shortest path to the target state
+    def get_states_on_shortest_path(self):
+        if self.first_state is None or self.target_state is None:
+            return None
+        state_strs = nx.shortest_path(
+            G=self.G2,
+            source=self.first_state.struction_str,
+            target=self.target_state.struction_str,
+        )
+        return state_strs
+
     def get_navigation_steps(self, from_state, to_state):
         if from_state is None or to_state is None:
             return None
@@ -478,4 +489,30 @@ class UTG(object):
                 if start_structure_str == current_structure_str:
                     return event
         self.logger.info("No next action found")
+        return None
+
+    def is_on_shortest_path(self, current_state):
+        if current_state is None:
+            return False
+        current_structure_str = current_state.structure_str
+        nav_edges = self.get_G2_nav_edges(
+            self.first_state.structure_str, self.target_state.structure_str
+        )
+        if nav_edges is not None:
+            for start_structure_str, to_state_str, event in nav_edges:
+                if start_structure_str == current_structure_str:
+                    return True
+        return False
+
+    def get_state_close_to_the_target(self, current_state):
+        if current_state is None:
+            return None
+        current_structure_str = current_state.structure_str
+        nav_edges = self.get_G2_nav_edges(
+            self.first_state.structure_str, self.target_state.structure_str
+        )
+        if nav_edges is not None:
+            for start_structure_str, to_state_str, event in nav_edges:
+                if start_structure_str == current_structure_str:
+                    return self.find_state_according_to_state_str(to_state_str)
         return None
