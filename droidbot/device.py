@@ -906,3 +906,6 @@ class Device(object):
         if self.minicap.check_connectivity():
             print("[CONNECTION] %s is reconnected." % self.minicap.__class__.__name__)
         self.pause_sending_event = False
+
+    def get_activity_short_name(self):
+        return self.get_top_activity_name().split(".")[-1]
