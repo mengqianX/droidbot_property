@@ -598,7 +598,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
                             "Allow the exploration outside the shortest path for most 10 events"
                         )
                         self.logger.info(
-                            self.number_of_steps_outside_the_shortest_path
+                            str(self.number_of_steps_outside_the_shortest_path)
                             + "steps has explored"
                         )
 
