@@ -592,6 +592,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
                                 )
                                 self.__event_trace += EVENT_FLAG_NAVIGATE
                                 return navigation_steps[0][1]
+                        # TODO yiheng: if cannot find a way to the shortest path, what to do?
                     else:
                         self.logger.info(
                             "Allow the exploration outside the shortest path for most 10 events"
@@ -603,13 +604,13 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
 
                 # yiheng: if it has encountered the target activity and current state is on
                 # the path to the target state, select the next event based on the guide
-                if self.utg.target_state is not None:
-                    prefer_event = self.utg.get_G2_nav_action(current_state)
-                    if prefer_event is not None:
-                        self.logger.info(
-                            "Select event based on guide: " + prefer_event.__str__()
-                        )
-                        return prefer_event
+                # if self.utg.target_state is not None:
+                #     prefer_event = self.utg.get_G2_nav_action(current_state)
+                #     if prefer_event is not None:
+                #         self.logger.info(
+                #             "Select event based on guide: " + prefer_event.__str__()
+                #         )
+                #         return prefer_event
             else:
                 self.logger.info("invalid explore mode")
 
