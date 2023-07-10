@@ -301,8 +301,8 @@ class UTG(object):
             return None
         state_strs = nx.shortest_path(
             G=self.G2,
-            source=self.first_state.struction_str,
-            target=self.target_state.struction_str,
+            source=self.first_state.structure_str,
+            target=self.target_state.structure_str,
         )
         return state_strs
 
