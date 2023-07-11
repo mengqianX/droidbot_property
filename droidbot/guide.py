@@ -5,15 +5,20 @@ import matplotlib.pyplot as plt
 
 
 class Guide(object):
-    def __init__(self):
+    def __init__(
+        self,
+        xml_path=None,
+        source_activity=None,
+        target_activity=None,
+    ):
         self.G_activity = nx.DiGraph()
-        self.graph_path = "xml_graph\\Anki_CTG.xml"
-        if not os.path.exists(self.graph_path):
+        self.xml_path = xml_path
+        if not os.path.exists(self.xml_path):
             print(os.getcwd())
             print("Graph file not found")
-        self.read_graph_from_xml_file(self.graph_path)
-        self.target_activity = "Preferences"
-        self.source_activity = "DeckPicker"
+        self.read_graph_from_xml_file(self.xml_path)
+        self.target_activity = target_activity
+        self.source_activity = source_activity
 
     def read_graph_from_xml_file(self, file_path):
         '''

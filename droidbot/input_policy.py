@@ -472,6 +472,87 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
         self.number_of_steps_outside_the_shortest_path = 0
         self.reached_state_on_the_shortest_path = []
 
+    def guide_the_exploration(self):
+        if self.device.get_activity_short_name() == self.guide.target_activity:
+            # yiheng: if encounter target activity,
+            # 1. set the target state
+            # 2. back to the main activity and enter the diverse mode
+            self.explore_mode = DIVERSE
+            self.utg.set_target_state(self.current_state)
+            stop_app_intent = self.app.get_stop_intent()
+            go_back_event = IntentEvent(stop_app_intent)
+            self.logger.info("stop the app and go back to the main activity")
+            return go_back_event
+
+        if self.explore_mode == GUIDE:
+
+            # yiheng: if current activity is not on the shortest path to the target activity, back
+            if (
+                self.device.get_activity_short_name()
+                not in self.guide.get_shortest_path(
+                    self.guide.source_activity, self.guide.target_activity
+                )
+            ):
+                self.logger.info(
+                    "Not on the shortest path to target activity, try to go back"
+                )
+                return KeyEvent(name="BACK")
+        elif self.explore_mode == DIVERSE:
+
+            if self.utg.is_on_shortest_path(self.current_state):
+                self.reached_state_on_the_shortest_path.append(self.current_state)
+                self.logger.info(
+                    "Current state is on the shortest path to target state"
+                )
+                self.number_of_steps_outside_the_shortest_path = 0
+            else:
+                # yiheng: if current state is not on the shortest path to the target state,
+                # allow the exploration outside the shortest path for most N events.
+                self.number_of_steps_outside_the_shortest_path += 1
+                if (
+                    self.number_of_steps_outside_the_shortest_path
+                    > MAX_NUM_STEPS_OUTSIDE_THE_SHORTEST_PATH
+                ):
+                    self.number_of_steps_outside_the_shortest_path = 0
+                    # find a way to the shortest path. tha target state is the next state on the shortest path.
+                    target_state = self.__get_nav_target_on_the_shortest_path(
+                        self.current_state
+                    )
+                    if target_state:
+                        navigation_steps = self.utg.get_navigation_steps(
+                            from_state=self.current_state, to_state=target_state
+                        )
+                        if navigation_steps and len(navigation_steps) > 0:
+                            self.logger.info(
+                                "Navigating to %s, %d steps left."
+                                % (target_state.state_str, len(navigation_steps))
+                            )
+                            self.__event_trace += EVENT_FLAG_NAVIGATE
+                            return navigation_steps[0][1]
+                    # TODO yiheng: if cannot find a way to the shortest path, what to do?
+                else:
+                    self.logger.info(
+                        "Allow the exploration outside the shortest path for most 10 events"
+                    )
+                    self.logger.info(
+                        str(self.number_of_steps_outside_the_shortest_path)
+                        + "steps has explored"
+                    )
+
+            # yiheng: if it has encountered the target activity and current state is on
+            # the path to the target state, select the next event based on the guide
+            # if self.utg.target_state is not None:
+            #     prefer_event = self.utg.get_G2_nav_action(current_state)
+            #     if prefer_event is not None:
+            #         self.logger.info(
+            #             "Select event based on guide: " + prefer_event.__str__()
+            #         )
+            #         return prefer_event
+        else:
+            self.logger.info("invalid explore mode")
+
+        return None
+
     def generate_event_based_on_utg(self):
         """
         generate an event based on current UTG
@@ -536,83 +617,9 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             self.__num_steps_outside = 0
 
         if self.guide:
-            if self.device.get_activity_short_name() == self.guide.target_activity:
-                # yiheng: if encounter target activity,
-                # 1. set the target state
-                # 2. back to the main activity and enter the diverse mode
-                self.explore_mode = DIVERSE
-                self.utg.set_target_state(current_state)
-                stop_app_intent = self.app.get_stop_intent()
-                go_back_event = IntentEvent(stop_app_intent)
-                self.logger.info("stop the app and go back to the main activity")
-                return go_back_event
-
-            if self.explore_mode == GUIDE:
-
-                # yiheng: if current activity is not on the shortest path to the target activity, back
-                if (
-                    self.device.get_activity_short_name()
-                    not in self.guide.get_shortest_path(
-                        self.guide.source_activity, self.guide.target_activity
-                    )
-                ):
-                    self.logger.info(
-                        "Not on the shortest path to target activity, try to go back"
-                    )
-                    return KeyEvent(name="BACK")
-            elif self.explore_mode == DIVERSE:
-
-                if self.utg.is_on_shortest_path(current_state):
-                    self.reached_state_on_the_shortest_path.append(current_state)
-                    self.logger.info(
-                        "Current state is on the shortest path to target state"
-                    )
-                    self.number_of_steps_outside_the_shortest_path = 0
-                else:
-                    # yiheng: if current state is not on the shortest path to the target state,
-                    # allow the exploration outside the shortest path for most N events.
-                    self.number_of_steps_outside_the_shortest_path += 1
-                    if (
-                        self.number_of_steps_outside_the_shortest_path
-                        > MAX_NUM_STEPS_OUTSIDE_THE_SHORTEST_PATH
-                    ):
-                        self.number_of_steps_outside_the_shortest_path = 0
-                        # find a way to the shortest path. tha target state is the next state on the shortest path.
-                        target_state = self.__get_nav_target_on_the_shortest_path(
-                            current_state
-                        )
-                        if target_state:
-                            navigation_steps = self.utg.get_navigation_steps(
-                                from_state=current_state, to_state=target_state
-                            )
-                            if navigation_steps and len(navigation_steps) > 0:
-                                self.logger.info(
-                                    "Navigating to %s, %d steps left."
-                                    % (target_state.state_str, len(navigation_steps))
-                                )
-                                self.__event_trace += EVENT_FLAG_NAVIGATE
-                                return navigation_steps[0][1]
-                        # TODO yiheng: if cannot find a way to the shortest path, what to do?
-                    else:
-                        self.logger.info(
-                            "Allow the exploration outside the shortest path for most 10 events"
-                        )
-                        self.logger.info(
-                            str(self.number_of_steps_outside_the_shortest_path)
-                            + "steps has explored"
-                        )
-
-                # yiheng: if it has encountered the target activity and current state is on
-                # the path to the target state, select the next event based on the guide
-                # if self.utg.target_state is not None:
-                #     prefer_event = self.utg.get_G2_nav_action(current_state)
-                #     if prefer_event is not None:
-                #         self.logger.info(
-                #             "Select event based on guide: " + prefer_event.__str__()
-                #         )
-                #         return prefer_event
-            else:
-                self.logger.info("invalid explore mode")
+            event = self.guide_the_exploration()
+            if event is not None:
+                return event
 
         # Get all possible input events
         possible_events = current_state.get_possible_input()

@@ -105,6 +105,9 @@ class AndroidCheck(object):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
+        xml_path=None,
+        source_activity=None,
+        target_activity=None,
         is_emulator=True,
         policy_name=input_manager.DEFAULT_POLICY,
         random_input=True,
@@ -126,7 +129,11 @@ class AndroidCheck(object):
     ):
         self.apk_path = apk_path
         self.device_serial = device_serial
-        self.guide = Guide()
+        self.guide = Guide(
+            xml_path=xml_path,
+            source_activity=source_activity,
+            target_activity=target_activity,
+        )
         self.droidbot = DroidBot(
             app_path=apk_path,
             device_serial=device_serial,

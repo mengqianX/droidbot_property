@@ -9,8 +9,17 @@ class Test(AndroidCheck):
         self,
         apk_path,
         event_count=100,
+        xml_path=None,
+        source_activity=None,
+        target_activity=None,
     ):
-        super().__init__(apk_path, event_count=event_count)
+        super().__init__(
+            apk_path,
+            event_count=event_count,
+            xml_path=xml_path,
+            source_activity=source_activity,
+            target_activity=target_activity,
+        )
 
     @initialize()
     def set_up(self):
@@ -36,7 +45,13 @@ class Test(AndroidCheck):
 
 
 start_time = time.time()
-t = Test(apk_path=".\\apk\\AnkiDroid-2.15.2.apk", event_count=300)
+t = Test(
+    apk_path=".\\apk\\AnkiDroid-2.15.2.apk",
+    event_count=300,
+    xml_path=".\\xml_graph\\Anki_CTG.xml",
+    source_activity="DeckPicker",
+    target_activity="Preferences",
+)
 t.start()
-for item in reach_time_list:
-    print(item)
+execution_time = time.time() - start_time
+print("execution time: " + str(execution_time))
