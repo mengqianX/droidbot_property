@@ -8,6 +8,7 @@ class Test(AndroidCheck):
     def __init__(
         self,
         apk_path,
+        output_dir="output",
         event_count=100,
         xml_path=None,
         source_activity=None,
@@ -16,6 +17,7 @@ class Test(AndroidCheck):
     ):
         super().__init__(
             apk_path,
+            output_dir=output_dir,
             event_count=event_count,
             xml_path=xml_path,
             source_activity=source_activity,
@@ -49,7 +51,8 @@ class Test(AndroidCheck):
 start_time = time.time()
 t = Test(
     apk_path=".\\apk\\AnkiDroid-2.15.2.apk",
-    event_count=300,
+    output_dir=".\\output\\anki\\random3",
+    event_count=1000,
     xml_path=".\\xml_graph\\Anki_CTG.xml",
     source_activity="DeckPicker",
     target_activity="Preferences",

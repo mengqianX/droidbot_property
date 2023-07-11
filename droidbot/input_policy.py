@@ -124,6 +124,7 @@ class InputPolicy(object):
                 break
             except InputInterruptedException as e:
                 self.logger.info("stop sending events: %s" % e)
+                self.logger.info("action count: %d" % self.action_count)
                 break
             # except RuntimeError as e:
             #     self.logger.warning(e.message)
@@ -646,7 +647,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             # yiheng: if encounter target activity,
             # 1. set the target state
             # 2. back to the main activity and enter the diverse mode
-            raise
+            raise InputInterruptedException("Target state reached.")
             self.explore_mode = DIVERSE
             self.utg.set_target_state(self.current_state)
             stop_app_intent = self.app.get_stop_intent()
