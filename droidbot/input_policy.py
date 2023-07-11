@@ -666,6 +666,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
                 self.logger.info(
                     "Not on the shortest path to target activity, try to go back"
                 )
+                self.__event_trace += EVENT_FLAG_EXPLORE
                 return KeyEvent(name="BACK")
         elif self.explore_mode == DIVERSE:
 
