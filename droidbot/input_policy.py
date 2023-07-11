@@ -32,6 +32,7 @@ EVENT_FLAG_NAVIGATE = "+navigate"
 EVENT_FLAG_TOUCH = "+touch"
 
 # Policy taxanomy
+POLICY_RANDOM = "random"
 POLICY_NAIVE_DFS = "dfs_naive"
 POLICY_GREEDY_DFS = "dfs_greedy"
 POLICY_NAIVE_BFS = "bfs_naive"
@@ -122,11 +123,14 @@ class InputPolicy(object):
             except KeyboardInterrupt:
                 break
             except InputInterruptedException as e:
-                self.logger.warning("stop sending events: %s" % e)
+                self.logger.info("stop sending events: %s" % e)
                 break
             # except RuntimeError as e:
             #     self.logger.warning(e.message)
             #     break
+            except RuntimeError as e:
+                self.logger.info("RuntimeError: %s, stop sending events" % e)
+                break
             except Exception as e:
                 self.logger.warning("exception during sending events: %s" % e)
                 import traceback
@@ -165,7 +169,7 @@ class UtgBasedInputPolicy(InputPolicy):
     state-based input policy
     """
 
-    def __init__(self, device, app, random_input, android_check, guide=None):
+    def __init__(self, device, app, random_input, android_check=None, guide=None):
         super(UtgBasedInputPolicy, self).__init__(device, app, android_check)
         self.random_input = random_input
         self.script = None
@@ -248,6 +252,171 @@ class UtgBasedInputPolicy(InputPolicy):
         :return: InputEvent
         """
         pass
+
+
+class UtgRandomPolicy(UtgBasedInputPolicy):
+    """
+    random input policy based on UTG
+    """
+
+    def __init__(self, device, app, random_input=True, android_check=None, guide=None):
+        super(UtgRandomPolicy, self).__init__(
+            device, app, random_input, android_check, guide
+        )
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        self.preferred_buttons = [
+            "yes",
+            "ok",
+            "activate",
+            "detail",
+            "more",
+            "access",
+            "allow",
+            "check",
+            "agree",
+            "try",
+            "go",
+            "next",
+        ]
+
+        self.__nav_target = None
+        self.__nav_num_steps = -1
+        self.__num_restarts = 0
+        self.__num_steps_outside = 0
+        self.__event_trace = ""
+        self.__missed_states = set()
+        self.__random_explore = False
+
+        self.guide = guide
+        # yiheng: add a new variable to record the current explore mode
+        # if mode = GUIDE, it means we didn't encounter the target state,
+        #   so we choose to guide the exploration to the target state.
+        # if mode = DIVERSE, it means we have encountered the target state,
+        #   we choose to explore the app in order to generate more states to encounter the target state.
+        self.explore_mode = GUIDE
+        self.number_of_steps_outside_the_shortest_path = 0
+        self.reached_state_on_the_shortest_path = []
+
+    def generate_event_based_on_utg(self):
+        """
+        generate an event based on current UTG
+        @return: InputEvent
+        """
+        current_state = self.current_state
+        self.logger.info("Current state: %s" % current_state.state_str)
+        if current_state.state_str in self.__missed_states:
+            self.__missed_states.remove(current_state.state_str)
+
+        if current_state.get_app_activity_depth(self.app) < 0:
+            # If the app is not in the activity stack
+            start_app_intent = self.app.get_start_intent()
+
+            # It seems the app stucks at some state, has been
+            # 1) force stopped (START, STOP)
+            #    just start the app again by increasing self.__num_restarts
+            # 2) started at least once and cannot be started (START)
+            #    pass to let viewclient deal with this case
+            # 3) nothing
+            #    a normal start. clear self.__num_restarts.
+
+            if self.__event_trace.endswith(
+                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                self.__num_restarts += 1
+                self.logger.info(
+                    "The app had been restarted %d times.", self.__num_restarts
+                )
+            else:
+                self.__num_restarts = 0
+
+            # pass (START) through
+            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                if self.__num_restarts > MAX_NUM_RESTARTS:
+                    # If the app had been restarted too many times, enter random mode
+                    msg = "The app had been restarted too many times. Entering random mode."
+                    self.logger.info(msg)
+                    self.__random_explore = True
+                else:
+                    # Start the app
+                    self.__event_trace += EVENT_FLAG_START_APP
+                    self.logger.info("Trying to start the app...")
+                    return IntentEvent(intent=start_app_intent)
+
+        elif current_state.get_app_activity_depth(self.app) > 0:
+            # If the app is in activity stack but is not in foreground
+            self.__num_steps_outside += 1
+
+            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
+                # If the app has not been in foreground for too long, try to go back
+                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
+                    stop_app_intent = self.app.get_stop_intent()
+                    go_back_event = IntentEvent(stop_app_intent)
+                else:
+                    go_back_event = KeyEvent(name="BACK")
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                self.logger.info("Going back to the app...")
+                return go_back_event
+        else:
+            # If the app is in foreground
+            self.__num_steps_outside = 0
+
+        # if self.guide:
+        #     event = self.guide_the_exploration()
+        #     if event is not None:
+        #         return event
+        if self.guide:
+            if self.device.get_activity_short_name() == self.guide.target_activity:
+                raise InputInterruptedException("Target state reached.")
+        # Get all possible input events
+        possible_events = current_state.get_possible_input()
+
+        if self.random_input:
+            random.shuffle(possible_events)
+        possible_events.append(KeyEvent(name="BACK"))
+
+        self.__event_trace += EVENT_FLAG_EXPLORE
+        return random.choice(possible_events)
+        # if self.search_method == POLICY_GREEDY_DFS:
+        #     possible_events.append(KeyEvent(name="BACK"))
+        # elif self.search_method == POLICY_GREEDY_BFS:
+        #     possible_events.insert(0, KeyEvent(name="BACK"))
+
+        # get humanoid result, use the result to sort possible events
+        # including back events
+        # if self.device.humanoid is not None:
+        #     possible_events = self.__sort_inputs_by_humanoid(possible_events)
+
+        # If there is an unexplored event, try the event first
+        # for input_event in possible_events:
+        #     if not self.utg.is_event_explored(event=input_event, state=current_state):
+        #         self.logger.info("Trying an unexplored event.")
+        #         self.__event_trace += EVENT_FLAG_EXPLORE
+        #         return input_event
+
+        # target_state = self.__get_nav_target(current_state)
+        # if target_state:
+        #     navigation_steps = self.utg.get_navigation_steps(
+        #         from_state=current_state, to_state=target_state
+        #     )
+        #     if navigation_steps and len(navigation_steps) > 0:
+        #         self.logger.info(
+        #             "Navigating to %s, %d steps left."
+        #             % (target_state.state_str, len(navigation_steps))
+        #         )
+        #         self.__event_trace += EVENT_FLAG_NAVIGATE
+        #         return navigation_steps[0][1]
+
+        # if self.__random_explore:
+        #     self.logger.info("Trying random event.")
+        #     random.shuffle(possible_events)
+        #     return possible_events[0]
+
+        # # If couldn't find a exploration target, stop the app
+        # stop_app_intent = self.app.get_stop_intent()
+        # self.logger.info("Cannot find an exploration target. Trying to restart app...")
+        # self.__event_trace += EVENT_FLAG_STOP_APP
+        # return IntentEvent(intent=stop_app_intent)
 
 
 class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
@@ -477,6 +646,7 @@ class UtgGreedySearchPolicy(UtgBasedInputPolicy):
             # yiheng: if encounter target activity,
             # 1. set the target state
             # 2. back to the main activity and enter the diverse mode
+            raise
             self.explore_mode = DIVERSE
             self.utg.set_target_state(self.current_state)
             stop_app_intent = self.app.get_stop_intent()

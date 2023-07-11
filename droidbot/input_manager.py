@@ -5,9 +5,11 @@ import time
 
 from .input_event import EventLog
 from .input_policy import (
+    POLICY_RANDOM,
     UtgBasedInputPolicy,
     UtgNaiveSearchPolicy,
     UtgGreedySearchPolicy,
+    UtgRandomPolicy,
     UtgReplayPolicy,
     ManualPolicy,
     POLICY_NAIVE_DFS,
@@ -22,6 +24,7 @@ from .input_policy import (
 )
 
 DEFAULT_POLICY = POLICY_GREEDY_DFS
+RANDOM_POLICY = POLICY_RANDOM
 DEFAULT_EVENT_INTERVAL = 1
 DEFAULT_EVENT_COUNT = 100000000
 DEFAULT_TIMEOUT = -1
@@ -112,6 +115,8 @@ class InputManager(object):
             input_policy = UtgReplayPolicy(device, app, self.replay_output)
         elif self.policy_name == POLICY_MANUAL:
             input_policy = ManualPolicy(device, app)
+        elif self.policy_name == POLICY_RANDOM:
+            input_policy = UtgRandomPolicy(device, app, guide=self.guide)
         else:
             self.logger.warning(
                 "No valid input policy specified. Using policy \"none\"."

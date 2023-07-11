@@ -12,6 +12,7 @@ class Test(AndroidCheck):
         xml_path=None,
         source_activity=None,
         target_activity=None,
+        policy_name="dfs_greedy",
     ):
         super().__init__(
             apk_path,
@@ -19,6 +20,7 @@ class Test(AndroidCheck):
             xml_path=xml_path,
             source_activity=source_activity,
             target_activity=target_activity,
+            policy_name=policy_name,
         )
 
     @initialize()
@@ -51,6 +53,7 @@ t = Test(
     xml_path=".\\xml_graph\\Anki_CTG.xml",
     source_activity="DeckPicker",
     target_activity="Preferences",
+    policy_name="random",
 )
 t.start()
 execution_time = time.time() - start_time
