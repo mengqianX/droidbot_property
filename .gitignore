@@ -9,6 +9,7 @@ droidbot/apk/*
 *output/
 apk/*
 xml_graph/*
+test_*.py
 # Distribution / packaging
 .Python
 env/
