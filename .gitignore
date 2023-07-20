@@ -9,11 +9,8 @@ droidbot/apk/*
 *output/
 apk/*
 xml_graph/*
-<<<<<<< HEAD
 *.sh
-=======
 test_*.py
->>>>>>> 3c8ddcfebce1aa88ac626a657b9a82d51573c568
 # Distribution / packaging
 .Python
 env/
