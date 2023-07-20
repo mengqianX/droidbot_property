@@ -216,7 +216,6 @@ class AndroidCheck(object):
         return self.execute_rule(rule_to_check)
 
     def execute_rule(self, rule):
-
         if len(rule.preconditions) > 0:
             if not all(precond(self) for precond in rule.preconditions):
                 return True

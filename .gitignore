@@ -10,6 +10,7 @@ droidbot/apk/*
 apk/*
 xml_graph/*
 test_*.py
+.vscode/*
 # Distribution / packaging
 .Python
 env/

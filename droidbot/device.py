@@ -25,9 +25,18 @@ class Device(object):
     this class describes a connected device
     """
 
-    def __init__(self, device_serial=None, is_emulator=False, output_dir=None,
-                 cv_mode=False, grant_perm=False, telnet_auth_token=None,
-                 enable_accessibility_hard=False, humanoid=None, ignore_ad=False):
+    def __init__(
+        self,
+        device_serial=None,
+        is_emulator=False,
+        output_dir=None,
+        cv_mode=False,
+        grant_perm=False,
+        telnet_auth_token=None,
+        enable_accessibility_hard=False,
+        humanoid=None,
+        ignore_ad=False,
+    ):
         """
         initialize a device connection
         :param device_serial: serial number of target device
@@ -38,13 +47,16 @@ class Device(object):
 
         if device_serial is None:
             from .utils import get_available_devices
+
             all_devices = get_available_devices()
             if len(all_devices) == 0:
                 self.logger.warning("ERROR: No device connected.")
                 sys.exit(-1)
             device_serial = all_devices[0]
         if "emulator" in device_serial and not is_emulator:
-            self.logger.warning("Seems like you are using an emulator. If so, please add is_emulator option.")
+            self.logger.warning(
+                "Seems like you are using an emulator. If so, please add is_emulator option."
+            )
         self.serial = device_serial
         self.is_emulator = is_emulator
         self.cv_mode = cv_mode
@@ -88,7 +100,7 @@ class Device(object):
             self.logcat: True,
             self.user_input_monitor: True,
             self.process_monitor: True,
-            self.droidbot_ime: True
+            self.droidbot_ime: True,
         }
 
         # minicap currently not working on emulators
@@ -109,7 +121,9 @@ class Device(object):
                 if adapter.check_connectivity():
                     print("[CONNECTION] %s is enabled and connected." % adapter_name)
                 else:
-                    print("[CONNECTION] %s is enabled but not connected." % adapter_name)
+                    print(
+                        "[CONNECTION] %s is enabled but not connected." % adapter_name
+                    )
 
     def wait_for_device(self):
         """
@@ -179,6 +193,7 @@ class Device(object):
             temp_dir = os.path.join(self.output_dir, "temp")
             if os.path.exists(temp_dir):
                 import shutil
+
                 shutil.rmtree(temp_dir)
 
     def tear_down(self):
@@ -289,8 +304,11 @@ class Device(object):
         telnet = self.telnet
         if telnet is None:
             self.logger.warning("Telnet not connected, so can't shake the device.")
-        sensor_xyz = [(-float(v * 10) + 1, float(v) + 9.8, float(v * 2) + 0.5) for v in [1, -1, 1, -1, 1, -1, 0]]
-        for (x, y, z) in sensor_xyz:
+        sensor_xyz = [
+            (-float(v * 10) + 1, float(v) + 9.8, float(v * 2) + 0.5)
+            for v in [1, -1, 1, -1, 1, -1, 0]
+        ]
+        for x, y, z in sensor_xyz:
             telnet.run_cmd("sensor set acceleration %f:%f:%f" % (x, y, z))
 
     def add_env(self, env):
@@ -308,10 +326,12 @@ class Device(object):
         :return:
         """
         assert self.adb is not None
-        contact_intent = Intent(prefix="start",
-                                action="android.intent.action.INSERT",
-                                mime_type="vnd.android.cursor.dir/contact",
-                                extra_string=contact_data)
+        contact_intent = Intent(
+            prefix="start",
+            action="android.intent.action.INSERT",
+            mime_type="vnd.android.cursor.dir/contact",
+            extra_string=contact_data,
+        )
         self.send_intent(intent=contact_intent)
         time.sleep(2)
         self.adb.press("BACK")
@@ -352,9 +372,11 @@ class Device(object):
         :param phone: str, phonenum
         :return:
         """
-        call_intent = Intent(prefix='start',
-                             action="android.intent.action.CALL",
-                             data_uri="tel:%s" % phone)
+        call_intent = Intent(
+            prefix='start',
+            action="android.intent.action.CALL",
+            data_uri="tel:%s" % phone,
+        )
         return self.send_intent(intent=call_intent)
 
     def send_sms(self, phone=DEFAULT_NUM, content=DEFAULT_CONTENT):
@@ -364,11 +386,13 @@ class Device(object):
         :param content: str, content of sms
         :return:
         """
-        send_sms_intent = Intent(prefix='start',
-                                 action="android.intent.action.SENDTO",
-                                 data_uri="sms:%s" % phone,
-                                 extra_string={'sms_body': content},
-                                 extra_boolean={'exit_on_sent': 'true'})
+        send_sms_intent = Intent(
+            prefix='start',
+            action="android.intent.action.SENDTO",
+            data_uri="sms:%s" % phone,
+            extra_string={'sms_body': content},
+            extra_boolean={'exit_on_sent': 'true'},
+        )
         self.send_intent(intent=send_sms_intent)
         time.sleep(2)
         self.adb.press('66')
@@ -395,9 +419,11 @@ class Device(object):
 
     def set_continuous_gps(self, center_x, center_y, delta_x, delta_y):
         import threading
+
         gps_thread = threading.Thread(
             target=self.set_continuous_gps_blocked,
-            args=(center_x, center_y, delta_x, delta_y))
+            args=(center_x, center_y, delta_x, delta_y),
+        )
         gps_thread.start()
         return True
 
@@ -411,6 +437,7 @@ class Device(object):
         @param delta_y: range of y coordinate
         """
         import random
+
         while self.connected:
             x = random.random() * delta_x * 2 + center_x - delta_x
             y = random.random() * delta_y * 2 + center_y - delta_y
@@ -455,8 +482,10 @@ class Device(object):
         """
         db_name = "/data/data/com.android.providers.settings/databases/settings.db"
 
-        self.adb.shell("sqlite3 %s \"update '%s' set value='%s' where name='%s'\""
-                       % (db_name, table_name, value, name))
+        self.adb.shell(
+            "sqlite3 %s \"update '%s' set value='%s' where name='%s'\""
+            % (db_name, table_name, value, name)
+        )
         return True
 
     def send_intent(self, intent):
@@ -504,7 +533,9 @@ class Device(object):
         Get current activity
         """
         r = self.adb.shell("dumpsys activity activities")
-        activity_line_re = re.compile('\* Hist #\d+: ActivityRecord{[^ ]+ [^ ]+ ([^ ]+) t(\d+)}')
+        activity_line_re = re.compile(
+            '\* Hist #\d+: ActivityRecord{[^ ]+ [^ ]+ ([^ ]+) t(\d+)}'
+        )
         m = activity_line_re.search(r)
         if m:
             return m.group(1)
@@ -541,7 +572,9 @@ class Device(object):
         task_to_activities = {}
 
         lines = self.adb.shell("dumpsys activity activities").splitlines()
-        activity_line_re = re.compile('\* Hist #\d+: ActivityRecord{[^ ]+ [^ ]+ ([^ ]+) t(\d+)}')
+        activity_line_re = re.compile(
+            '\* Hist #\d+: ActivityRecord{[^ ]+ [^ ]+ ([^ ]+) t(\d+)}'
+        )
 
         for line in lines:
             line = line.strip()
@@ -626,8 +659,10 @@ class Device(object):
                 install_p.terminate()
                 return
 
-        dumpsys_p = subprocess.Popen(["adb", "-s", self.serial, "shell",
-                                      "dumpsys", "package", package_name], stdout=subprocess.PIPE)
+        dumpsys_p = subprocess.Popen(
+            ["adb", "-s", self.serial, "shell", "dumpsys", "package", package_name],
+            stdout=subprocess.PIPE,
+        )
         dumpsys_lines = []
         while True:
             line = dumpsys_p.stdout.readline()
@@ -637,11 +672,16 @@ class Device(object):
                 line = line.decode()
             dumpsys_lines.append(line)
         if self.output_dir is not None:
-            package_info_file_name = "%s/dumpsys_package_%s.txt" % (self.output_dir, app.get_package_name())
+            package_info_file_name = "%s/dumpsys_package_%s.txt" % (
+                self.output_dir,
+                app.get_package_name(),
+            )
             package_info_file = open(package_info_file_name, "w")
             package_info_file.writelines(dumpsys_lines)
             package_info_file.close()
-        app.dumpsys_main_activity = self.__parse_main_activity_from_dumpsys_lines(dumpsys_lines)
+        app.dumpsys_main_activity = self.__parse_main_activity_from_dumpsys_lines(
+            dumpsys_lines
+        )
 
         self.logger.info("App installed: %s" % package_name)
         self.logger.info("Main activity: %s" % app.get_main_activity())
@@ -666,7 +706,7 @@ class Device(object):
             if m:
                 activities[cur_activity] = {
                     "actions": cur_actions,
-                    "categories": cur_categories
+                    "categories": cur_categories,
                 }
                 cur_package = m.group(1)
                 cur_activity = m.group(2)
@@ -686,12 +726,15 @@ class Device(object):
         if cur_activity is not None:
             activities[cur_activity] = {
                 "actions": cur_actions,
-                "categories": cur_categories
+                "categories": cur_categories,
             }
 
         for activity in activities:
-            if "android.intent.action.MAIN" in activities[activity]["actions"] \
-                    and "android.intent.category.LAUNCHER" in activities[activity]["categories"]:
+            if (
+                "android.intent.action.MAIN" in activities[activity]["actions"]
+                and "android.intent.category.LAUNCHER"
+                in activities[activity]["categories"]
+            ):
                 main_activity = activity
         return main_activity
 
@@ -775,6 +818,7 @@ class Device(object):
             return None
 
         from datetime import datetime
+
         tag = datetime.now().strftime("%Y-%m-%d_%H%M%S")
         local_image_dir = os.path.join(self.output_dir, "temp")
         if not os.path.exists(local_image_dir):
@@ -807,15 +851,19 @@ class Device(object):
             screenshot_path = self.take_screenshot()
             self.logger.debug("finish getting current device state...")
             from .device_state import DeviceState
-            current_state = DeviceState(self,
-                                        views=views,
-                                        foreground_activity=foreground_activity,
-                                        activity_stack=activity_stack,
-                                        background_services=background_services,
-                                        screenshot_path=screenshot_path)
+
+            current_state = DeviceState(
+                self,
+                views=views,
+                foreground_activity=foreground_activity,
+                activity_stack=activity_stack,
+                background_services=background_services,
+                screenshot_path=screenshot_path,
+            )
         except Exception as e:
             self.logger.warning("exception in get_current_state: %s" % e)
             import traceback
+
             traceback.print_exc()
         self.logger.debug("finish getting current device state...")
         self.last_know_state = current_state
@@ -853,7 +901,9 @@ class Device(object):
         if self.droidbot_ime.connected:
             self.droidbot_ime.input_text(text=text, mode=0)
         else:
-            self.logger.warning("`adb shell input text` doesn't support setting text, appending instead.")
+            self.logger.warning(
+                "`adb shell input text` doesn't support setting text, appending instead."
+            )
             self.adb.type(text)
 
     def key_press(self, key_code):
@@ -886,6 +936,7 @@ class Device(object):
         :return: a port number
         """
         import socket
+
         temp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         temp_sock.bind(("", 0))
         port = temp_sock.getsockname()[1]
