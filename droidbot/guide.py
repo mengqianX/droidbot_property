@@ -32,8 +32,8 @@ class Guide(object):
             sources = xml_doc.getElementsByTagName("source")
 
             for source in sources:
-                desinations = source.getElementsByTagName("destination")
-                for destination in desinations:
+                destinations = source.getElementsByTagName("destination")
+                for destination in destinations:
                     type = destination.getAttribute("type")
                     if (
                         type == "Act2Act"

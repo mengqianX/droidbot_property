@@ -8,10 +8,8 @@ from .input_policy import (
     POLICY_RANDOM,
     UtgBasedInputPolicy,
     UtgNaiveSearchPolicy,
-    UtgGreedySearchPolicy,
+    PbtFuzzingPolicy,
     UtgRandomPolicy,
-    UtgReplayPolicy,
-    ManualPolicy,
     POLICY_NAIVE_DFS,
     POLICY_GREEDY_DFS,
     POLICY_NAIVE_BFS,
@@ -47,6 +45,7 @@ class InputManager(object):
         random_input,
         event_count,
         event_interval,
+        explore_event_count=0,  # the number of event generated in the explore phase.
         script_path=None,
         profiling_method=None,
         master=None,
@@ -73,6 +72,7 @@ class InputManager(object):
         self.script = None
         self.event_count = event_count
         self.event_interval = event_interval
+        self.explore_event_count = explore_event_count
         self.replay_output = replay_output
 
         self.monkey = None
@@ -99,7 +99,7 @@ class InputManager(object):
                 device, app, self.random_input, self.policy_name
             )
         elif self.policy_name in [POLICY_GREEDY_DFS, POLICY_GREEDY_BFS]:
-            input_policy = UtgGreedySearchPolicy(
+            input_policy = PbtFuzzingPolicy(
                 device,
                 app,
                 self.random_input,
@@ -111,10 +111,10 @@ class InputManager(object):
             from .input_policy2 import MemoryGuidedPolicy
 
             input_policy = MemoryGuidedPolicy(device, app, self.random_input)
-        elif self.policy_name == POLICY_REPLAY:
-            input_policy = UtgReplayPolicy(device, app, self.replay_output)
-        elif self.policy_name == POLICY_MANUAL:
-            input_policy = ManualPolicy(device, app)
+        # elif self.policy_name == POLICY_REPLAY:
+        #     input_policy = UtgReplayPolicy(device, app, self.replay_output)
+        # elif self.policy_name == POLICY_MANUAL:
+        #     input_policy = ManualPolicy(device, app)
         elif self.policy_name == POLICY_RANDOM:
             input_policy = UtgRandomPolicy(device, app, guide=self.guide)
         else:
@@ -154,47 +154,47 @@ class InputManager(object):
         try:
             if self.policy is not None:
                 self.policy.start(self)
-            elif self.policy_name == POLICY_NONE:
-                self.device.start_app(self.app)
-                if self.event_count == 0:
-                    return
-                while self.enabled:
-                    time.sleep(1)
-            elif self.policy_name == POLICY_MONKEY:
-                throttle = self.event_interval * 1000
-                monkey_cmd = (
-                    "adb -s %s shell monkey %s --ignore-crashes --ignore-security-exceptions"
-                    " --throttle %d -v %d"
-                    % (
-                        self.device.serial,
-                        ""
-                        if self.app.get_package_name() is None
-                        else "-p " + self.app.get_package_name(),
-                        throttle,
-                        self.event_count,
-                    )
-                )
-                self.monkey = subprocess.Popen(
-                    monkey_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-                for monkey_out_line in iter(self.monkey.stdout.readline, ''):
-                    if not isinstance(monkey_out_line, str):
-                        monkey_out_line = monkey_out_line.decode()
-                    self.logger.info(monkey_out_line)
-                # may be disturbed from outside
-                if self.monkey is not None:
-                    self.monkey.wait()
-            elif self.policy_name == POLICY_MANUAL:
-                self.device.start_app(self.app)
-                while self.enabled:
-                    keyboard_input = input(
-                        "press ENTER to save current state, type q to exit..."
-                    )
-                    if keyboard_input.startswith('q'):
-                        break
-                    state = self.device.get_current_state()
-                    if state is not None:
-                        state.save2dir()
+            # elif self.policy_name == POLICY_NONE:
+            #     self.device.start_app(self.app)
+            #     if self.event_count == 0:
+            #         return
+            #     while self.enabled:
+            #         time.sleep(1)
+            # elif self.policy_name == POLICY_MONKEY:
+            #     throttle = self.event_interval * 1000
+            #     monkey_cmd = (
+            #         "adb -s %s shell monkey %s --ignore-crashes --ignore-security-exceptions"
+            #         " --throttle %d -v %d"
+            #         % (
+            #             self.device.serial,
+            #             ""
+            #             if self.app.get_package_name() is None
+            #             else "-p " + self.app.get_package_name(),
+            #             throttle,
+            #             self.event_count,
+            #         )
+            #     )
+            #     self.monkey = subprocess.Popen(
+            #         monkey_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            #     )
+            #     for monkey_out_line in iter(self.monkey.stdout.readline, ''):
+            #         if not isinstance(monkey_out_line, str):
+            #             monkey_out_line = monkey_out_line.decode()
+            #         self.logger.info(monkey_out_line)
+            #     # may be disturbed from outside
+            #     if self.monkey is not None:
+            #         self.monkey.wait()
+            # elif self.policy_name == POLICY_MANUAL:
+            #     self.device.start_app(self.app)
+            #     while self.enabled:
+            #         keyboard_input = input(
+            #             "press ENTER to save current state, type q to exit..."
+            #         )
+            #         if keyboard_input.startswith('q'):
+            #             break
+            #         state = self.device.get_current_state()
+            #         if state is not None:
+            #             state.save2dir()
         except KeyboardInterrupt:
             pass
 
