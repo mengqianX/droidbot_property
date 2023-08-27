@@ -31,7 +31,7 @@ class DroidBot(object):
         output_dir=None,
         env_policy=None,
         policy_name=None,
-        random_input=False,
+        random_input=True,
         script_path=None,
         event_count=None,
         event_interval=None,

@@ -83,3 +83,6 @@ def md5(input_str):
     import hashlib
     return hashlib.md5(input_str.encode('utf-8')).hexdigest()
 
+
+def safe_get_dict(view_dict,key,default=None):
+    return view_dict[key] if (key in view_dict) else default
