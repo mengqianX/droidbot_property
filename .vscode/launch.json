@@ -31,10 +31,10 @@
             "args": [
                 ".\\apk\\AnkiDroid-2.15.2.apk",
                 "emulator-5554",
-                ".\\output\\anki\\test1",
+                ".\\output\\anki\\test6",
                 ".\\xml_graph\\Anki_CTG.xml",
                 "DeckPicker",
-                "Preferences",
+                "Statistics",
                 "dfs_greedy"
             ]
         }

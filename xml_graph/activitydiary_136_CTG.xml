@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+  <source name="org.acra.sender.LegacySenderService"/>
+  <source name="org.osmdroid.tileprovider.modules.MapTileFileStorageProviderBase$MyBroadcastReceiver"/>
+  <source name="de.rampro.activitydiary.ui.history.HistoryActivity">
+    <destination name="de.rampro.activitydiary.ui.history.HistoryDetailActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.history.HistoryActivity: void onItemClick(de.rampro.activitydiary.ui.history.HistoryViewHolders,int,int)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.rampro.activitydiary.ui.settings.SettingsActivity">
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.acra.dialog.CrashReportDialog"/>
+  <source name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity">
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.rampro.activitydiary.helpers.RefreshService">
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="NonAct2Act" method="&lt;de.rampro.activitydiary.helpers.ActivityHelper: void updateNotification()&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.rampro.activitydiary.ui.statistics.StatisticsActivity">
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryDetailActivity$DatePickerFragment" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.statistics.StatisticsActivity: void showDatePickerDialog(android.view.View)&gt;"/>
+  </source>
+  <source name="de.rampro.activitydiary.ui.generic.EditActivity">
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.rampro.activitydiary.ui.generic.ManageActivity">
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.acra.sender.JobSenderService"/>
+  <source name="de.rampro.activitydiary.ui.generic.AboutActivity">
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.rampro.activitydiary.ui.history.HistoryDetailActivity">
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryDetailActivity$DatePickerFragment" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.history.HistoryDetailActivity: void showEndDatePickerDialog(android.view.View)&gt;"/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.squareup.picasso.Dispatcher$NetworkBroadcastReceiver"/>
+  <source name="de.rampro.activitydiary.ui.main.MainActivity">
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryDetailActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.main.MainActivity: void lambda$onCreate$0$de-rampro-activitydiary-ui-main-MainActivity(android.view.View)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.rampro.activitydiary.ui.location.MapActivity">
+    <destination name="de.rampro.activitydiary.ui.statistics.StatisticsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.main.MainActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="de.rampro.activitydiary.ui.history.HistoryActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.settings.SettingsActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.ManageActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.AboutActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.PrivacyPolicyActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.location.MapActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+    <destination name="de.rampro.activitydiary.ui.generic.EditActivity" type="Act2Act" method="&lt;de.rampro.activitydiary.ui.generic.BaseActivity$1: boolean onNavigationItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+</root>
