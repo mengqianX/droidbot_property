@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+  <source name="de.danoeh.antennapod.core.service.playback.PlaybackService">
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="NonAct2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackService: void updateMediaSessionMetadata(de.danoeh.antennapod.model.playback.Playable)&gt;" action="de.danoeh.antennapod.intents.VIDEO_PLAYER, de.danoeh.antennapod.intents.VIDEO_PLAYER, de.danoeh.antennapod.intents.MAIN_ACTIVITY, de.danoeh.antennapod.intents.MAIN_ACTIVITY, de.danoeh.antennapod.intents.MAIN_ACTIVITY, de.danoeh.antennapod.intents.MAIN_ACTIVITY" extras="" flags="FLAG_ACTIVITY_NEW_DOCUMENT , FLAG_ACTIVITY_NEW_DOCUMENT "/>
+    <destination name="de.danoeh.antennapod.activity.VideoplayerActivity" type="NonAct2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackService: void updateMediaSessionMetadata(de.danoeh.antennapod.model.playback.Playable)&gt;" action="de.danoeh.antennapod.intents.VIDEO_PLAYER, de.danoeh.antennapod.intents.VIDEO_PLAYER, de.danoeh.antennapod.intents.MAIN_ACTIVITY, de.danoeh.antennapod.intents.MAIN_ACTIVITY, de.danoeh.antennapod.intents.MAIN_ACTIVITY, de.danoeh.antennapod.intents.MAIN_ACTIVITY" extras="" flags="FLAG_ACTIVITY_NEW_DOCUMENT , FLAG_ACTIVITY_NEW_DOCUMENT "/>
+    <destination name="de.danoeh.antennapod.core.service.playback.PlaybackService" type="NonAct2NonAct" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackServiceNotificationBuilder: void addActions(androidx.core.app.NotificationCompat$Builder,android.support.v4.media.session.MediaSessionCompat$Token,de.danoeh.antennapod.playback.base.PlayerStatus)&gt;" action="MediaCode" extras="" flags=""/>
+  </source>
+  <source name="de.danoeh.antennapod.receiver.PowerConnectionReceiver"/>
+  <source name="de.danoeh.antennapod.activity.VideoplayerActivity">
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackServiceNotificationBuilder: android.app.Notification build()&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.VideoplayerActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackServiceNotificationBuilder: android.app.Notification build()&gt;"/>
+    <destination name="de.danoeh.antennapod.core.service.playback.PlaybackService" type="Act2Act" method="&lt;de.danoeh.antennapod.core.util.playback.PlaybackController: void bindToService()&gt;"/>
+  </source>
+  <source name="de.danoeh.antennapod.receiver.ConnectivityActionReceiver"/>
+  <source name="de.danoeh.antennapod.core.receiver.FeedUpdateReceiver"/>
+  <source name="de.danoeh.antennapod.core.service.QuickSettingsTileService">
+    <destination name="de.danoeh.antennapod.core.receiver.MediaButtonReceiver" type="NonAct2NonAct" method="&lt;de.danoeh.antennapod.core.service.QuickSettingsTileService: void onClick()&gt;" action="de.danoeh.antennapod.NOTIFY_BUTTON_RECEIVER" extras="" flags=""/>
+  </source>
+  <source name="de.danoeh.antennapod.core.receiver.MediaButtonReceiver">
+    <destination name="de.danoeh.antennapod.core.service.playback.PlaybackService" type="NonAct2NonAct" method="&lt;de.danoeh.antennapod.core.receiver.MediaButtonReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" action="de.danoeh.antennapod.intents.PLAYBACK_SERVICE" extras="" flags=""/>
+  </source>
+  <source name="de.danoeh.antennapod.activity.WidgetConfigActivity"/>
+  <source name="de.danoeh.antennapod.activity.DownloadAuthenticationActivity"/>
+  <source name="de.danoeh.antennapod.activity.BugReportActivity"/>
+  <source name="de.danoeh.antennapod.activity.SelectSubscriptionActivity"/>
+  <source name="de.danoeh.antennapod.activity.SplashActivity">
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.activity.SplashActivity: void lambda$onCreate$2()&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.danoeh.antennapod.activity.MainActivity">
+    <destination name="de.danoeh.antennapod.activity.OnlineFeedViewActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.fragment.OnlineSearchFragment: void lambda$onCreateView$0(android.widget.AdapterView,android.view.View,int,long)&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.VideoplayerActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackServiceNotificationBuilder: android.app.Notification build()&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackServiceNotificationBuilder: android.app.Notification build()&gt;"/>
+    <destination name="de.danoeh.antennapod.core.service.playback.PlaybackService" type="Act2Act" method="&lt;de.danoeh.antennapod.core.util.playback.PlaybackController: void bindToService()&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.PreferenceActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.fragment.NavDrawerFragment: void lambda$onCreateView$0(android.view.View)&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.OpmlImportActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.fragment.AddFeedFragment: void chooseOpmlImportPathResult(android.net.Uri)&gt;" extras="" flags=""/>
+    <destination name="de.danoeh.antennapod.core.receiver.MediaButtonReceiver" type="Act2Act" method="&lt;de.danoeh.antennapod.menuhandler.FeedItemMenuHandler: boolean onMenuItemClicked(androidx.fragment.app.Fragment,int,de.danoeh.antennapod.model.feed.FeedItem)&gt;"/>
+  </source>
+  <source name="de.danoeh.antennapod.activity.PreferenceActivity">
+    <destination name="de.danoeh.antennapod.activity.OpmlImportActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.fragment.preferences.ImportExportPreferencesFragment: void chooseOpmlImportPathResult(android.net.Uri)&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackServiceNotificationBuilder: android.app.Notification build()&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.SplashActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.PodcastApp: void forceRestart()&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.BugReportActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.fragment.preferences.MainPreferencesFragment: boolean lambda$setupMainScreen$10(androidx.preference.Preference)&gt;"/>
+    <destination name="de.danoeh.antennapod.activity.VideoplayerActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.core.service.playback.PlaybackServiceNotificationBuilder: android.app.Notification build()&gt;"/>
+    <destination name="de.danoeh.antennapod.core.service.playback.PlaybackService" type="Act2Act" method="&lt;de.danoeh.antennapod.core.util.playback.PlaybackController: void bindToService()&gt;"/>
+  </source>
+  <source name="de.danoeh.antennapod.activity.PlaybackSpeedDialogActivity">
+    <destination name="de.danoeh.antennapod.core.service.playback.PlaybackService" type="Act2NonAct" method="&lt;de.danoeh.antennapod.core.util.playback.PlaybackController: void bindToService()&gt;" extras="" flags=""/>
+    <destination name="de.danoeh.antennapod.activity.PlaybackSpeedDialogActivity$InnerVariableSpeedDialog" type="Act2Act" method="&lt;de.danoeh.antennapod.activity.PlaybackSpeedDialogActivity: void onCreate(android.os.Bundle)&gt;"/>
+  </source>
+  <source name="de.danoeh.antennapod.activity.OpmlImportActivity">
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.activity.OpmlImportActivity: void lambda$onCreate$3()&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+  <source name="de.danoeh.antennapod.core.receiver.PlayerWidget"/>
+  <source name="de.danoeh.antennapod.receiver.SPAReceiver"/>
+  <source name="de.danoeh.antennapod.activity.OnlineFeedViewActivity">
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="Act2Act" method="&lt;de.danoeh.antennapod.activity.OnlineFeedViewActivity: boolean onOptionsItemSelected(android.view.MenuItem)&gt;" extras="" flags=""/>
+  </source>
+  <source name="de.danoeh.antennapod.core.service.download.DownloadService">
+    <destination name="de.danoeh.antennapod.activity.MainActivity" type="NonAct2Act" method="&lt;de.danoeh.antennapod.core.service.download.NewEpisodesNotification: void showGroupSummaryNotification(android.content.Context,androidx.core.app.NotificationManagerCompat)&gt;" action="NewEpisodes" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+</root>

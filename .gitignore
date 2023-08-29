@@ -8,7 +8,6 @@ droidbot/output*/*
 droidbot/apk/*
 *output/
 apk/*
-xml_graph/*
 *.sh
 test_*.py
 .vscode/*

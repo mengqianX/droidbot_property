@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+  <source name="it.feio.android.omninotes.SnoozeActivity">
+    <destination name="it.feio.android.omninotes.MainActivity" type="Act2Act" method="&lt;it.feio.android.omninotes.SnoozeActivity: void manageNotification()&gt;" action="action_notification_click" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.receiver.AlarmReceiver" type="Act2NonAct" method="&lt;it.feio.android.omninotes.utils.ReminderHelper: void addReminder(android.content.Context,it.feio.android.omninotes.models.Note,long)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.acra.sender.LegacySenderService"/>
+  <source name="it.feio.android.omninotes.receiver.AlarmReceiver">
+    <destination name="it.feio.android.omninotes.MainActivity" type="NonAct2Act" method="&lt;it.feio.android.omninotes.helpers.notifications.NotificationsHelper: it.feio.android.omninotes.helpers.notifications.NotificationsHelper show(long)&gt;" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.receiver.AlarmReceiver" type="NonAct2NonAct" method="&lt;it.feio.android.omninotes.utils.ReminderHelper: void addReminder(android.content.Context,it.feio.android.omninotes.models.Note,long)&gt;" extras="" flags=""/>
+  </source>
+  <source name="it.feio.android.omninotes.MainActivity">
+    <destination name="it.feio.android.omninotes.CategoryActivity" type="Act2Act" method="&lt;it.feio.android.omninotes.ListFragment: void editCategory(it.feio.android.omninotes.models.Category)&gt;" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.intro.IntroActivity" type="Act2Act" method="&lt;it.feio.android.omninotes.MainActivity: boolean launchIntroIfRequired()&gt;" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.SnoozeActivity" type="Act2Act" method="&lt;it.feio.android.omninotes.ListFragment: void addReminders()&gt;"/>
+    <destination name="it.feio.android.omninotes.MainActivity" type="*/*" method="&lt;it.feio.android.omninotes.MainActivity: void shareNote(it.feio.android.omninotes.models.Note)&gt;" action="android.intent.action.SEND_MULTIPLE" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.receiver.AlarmReceiver" type="Act2NonAct" method="&lt;it.feio.android.omninotes.utils.ReminderHelper: void addReminder(android.content.Context,it.feio.android.omninotes.models.Note,long)&gt;" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.SettingsActivity" type="Act2Act" method="&lt;it.feio.android.omninotes.async.CategoryMenuTask: void lambda$buildCategoryMenu$0(android.view.View)&gt;"/>
+  </source>
+  <source name="it.feio.android.omninotes.ShortcutActivity"/>
+  <source name="it.feio.android.omninotes.intro.IntroActivity"/>
+  <source name="it.feio.android.omninotes.async.DataBackupIntentService">
+    <destination name="it.feio.android.omninotes.receiver.AlarmReceiver" type="NonAct2NonAct" method="&lt;it.feio.android.omninotes.utils.ReminderHelper: void addReminder(android.content.Context,it.feio.android.omninotes.models.Note,long)&gt;" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.MainActivity" type="NonAct2Act" method="&lt;it.feio.android.omninotes.helpers.notifications.NotificationsHelper: it.feio.android.omninotes.helpers.notifications.NotificationsHelper show(long)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.tbruyelle.rxpermissions.ShadowActivity"/>
+  <source name="it.feio.android.omninotes.widget.ListWidgetService"/>
+  <source name="org.acra.sender.JobSenderService"/>
+  <source name="it.feio.android.omninotes.async.AlarmRestoreOnRebootService">
+    <destination name="it.feio.android.omninotes.receiver.AlarmReceiver" type="NonAct2NonAct" method="&lt;it.feio.android.omninotes.utils.ReminderHelper: void addReminder(android.content.Context,it.feio.android.omninotes.models.Note,long)&gt;" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.async.AlarmRestoreOnRebootService" type="NonAct2NonAct" method="&lt;it.feio.android.omninotes.async.AlarmRestoreOnRebootService: void enqueueWork(android.content.Context,android.content.Intent)&gt;" extras="" flags=""/>
+  </source>
+  <source name="it.feio.android.omninotes.GalleryActivity"/>
+  <source name="it.feio.android.omninotes.services.NotificationListener"/>
+  <source name="it.feio.android.omninotes.extensions.PushBulletExtension"/>
+  <source name="it.feio.android.omninotes.SettingsActivity">
+    <destination name="it.feio.android.omninotes.PasswordActivity" type="Act2Act" method="&lt;it.feio.android.omninotes.SettingsFragment: boolean lambda$onResume$8(androidx.preference.Preference)&gt;"/>
+    <destination name="it.feio.android.omninotes.async.DataBackupIntentService" type="Act2Act" method="&lt;it.feio.android.omninotes.SettingsFragment: void lambda$importNotes$27(java.lang.String,com.afollestad.materialdialogs.MaterialDialog,com.afollestad.materialdialogs.DialogAction)&gt;"/>
+    <destination name="it.feio.android.omninotes.intro.IntroActivity" type="Act2Act" method="&lt;it.feio.android.omninotes.SettingsFragment: void lambda$onResume$22(com.afollestad.materialdialogs.MaterialDialog,com.afollestad.materialdialogs.DialogAction)&gt;"/>
+  </source>
+  <source name="it.feio.android.omninotes.NoteInfosActivity"/>
+  <source name="it.feio.android.omninotes.widget.ListWidgetProvider">
+    <destination name="it.feio.android.omninotes.MainActivity" type="NonAct2Act" method="&lt;it.feio.android.omninotes.widget.ListWidgetProvider: android.widget.RemoteViews getRemoteViews(android.content.Context,int,boolean,boolean,android.util.SparseArray)&gt;" action="action_widget" extras="" flags=""/>
+    <destination name="it.feio.android.omninotes.widget.ListWidgetService" type="NonAct2NonAct" method="&lt;it.feio.android.omninotes.widget.ListWidgetProvider: android.widget.RemoteViews getRemoteViews(android.content.Context,int,boolean,boolean,android.util.SparseArray)&gt;" extras="" flags=""/>
+  </source>
+  <source name="it.feio.android.omninotes.extensions.ONDashClockExtension"/>
+  <source name="it.feio.android.omninotes.StatsActivity"/>
+  <source name="io.nlopez.smartlocation.activity.providers.ActivityGooglePlayServicesProvider$ActivityRecognitionService"/>
+  <source name="it.feio.android.omninotes.PasswordActivity"/>
+  <source name="it.feio.android.omninotes.widget.WidgetConfigurationActivity"/>
+  <source name="it.feio.android.omninotes.CategoryActivity"/>
+  <source name="io.nlopez.smartlocation.geocoding.providers.AndroidGeocodingProvider$AndroidGeocodingService"/>
+  <source name="it.feio.android.omninotes.AboutActivity"/>
+  <source name="io.nlopez.smartlocation.geofencing.providers.GeofencingGooglePlayServicesProvider$GeofencingService"/>
+  <source name="it.feio.android.omninotes.widget.SimpleWidgetProvider"/>
+  <source name="it.feio.android.omninotes.receiver.BootCompleteReceiver">
+    <destination name="it.feio.android.omninotes.async.AlarmRestoreOnRebootService" type="NonAct2NonAct" method="&lt;it.feio.android.omninotes.receiver.BootCompleteReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" extras="" flags=""/>
+  </source>
+</root>

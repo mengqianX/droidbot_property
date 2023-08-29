@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+  <source name="net.gsantner.markor.activity.IntroActivity">
+    <destination name="net.gsantner.markor.activity.IntroActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.IntroActivity: boolean optStart(android.app.Activity)&gt;" extras="" flags=""/>
+  </source>
+  <source name="net.gsantner.markor.activity.DocumentActivity">
+    <destination name="net.gsantner.markor.activity.DocumentActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.DocumentActivity: void lambda$askUserIfWantsToOpenFileInThisApp$0(android.app.Activity,java.io.File,java.lang.Boolean)&gt;" extras="" flags="FLAG_ACTIVITY_SINGLE_TOP , FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="net.gsantner.markor.activity.MainActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.DocumentActivity: void launch(android.app.Activity,java.io.File,java.lang.Boolean,android.content.Intent,java.lang.Integer)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION , FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="net.gsantner.markor.activity.StoragePermissionActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.StoragePermissionActivity: void requestPermissions(net.gsantner.markor.activity.MarkorBaseActivity)&gt;" extras="" flags=""/>
+  </source>
+  <source name="net.gsantner.markor.activity.ActionButtonSettingsActivity"/>
+  <source name="other.writeily.widget.WrFilesWidgetService"/>
+  <source name="net.gsantner.markor.activity.MainActivity">
+    <destination name="net.gsantner.markor.activity.IntroActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.IntroActivity: boolean optStart(android.app.Activity)&gt;" extras="" flags=""/>
+    <destination name="net.gsantner.markor.activity.MainActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.DocumentActivity: void launch(android.app.Activity,java.io.File,java.lang.Boolean,android.content.Intent,java.lang.Integer)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION , FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="net.gsantner.markor.activity.StoragePermissionActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.StoragePermissionActivity: void requestPermissions(net.gsantner.markor.activity.MarkorBaseActivity)&gt;" extras="" flags=""/>
+    <destination name="net.gsantner.markor.activity.SettingsActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.MainActivity: boolean onOptionsItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="net.gsantner.markor.activity.DocumentActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.MainActivity: void lambda$onClickFab$4(java.lang.Boolean,java.io.File)&gt;" extras="" flags="FLAG_ACTIVITY_SINGLE_TOP , FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="other.writeily.widget.WrMarkorWidgetProvider" type="Act2NonAct" method="&lt;other.writeily.widget.WrMarkorWidgetProvider: void updateLauncherWidgets()&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+  </source>
+  <source name="net.gsantner.markor.activity.SettingsActivity">
+    <destination name="net.gsantner.markor.activity.SettingsActivity$SettingsFragmentMaster" type="Act2Act" method="&lt;net.gsantner.markor.activity.SettingsActivity: void showFragment(java.lang.String,boolean)&gt;"/>
+    <destination name="other.writeily.widget.WrMarkorWidgetProvider" type="Act2NonAct" method="&lt;other.writeily.widget.WrMarkorWidgetProvider: void updateLauncherWidgets()&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="net.gsantner.markor.activity.ActionButtonSettingsActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.SettingsActivity$SettingsFragmentMaster: java.lang.Boolean onPreferenceClicked(androidx.preference.Preference,java.lang.String,int)&gt;" extras="" flags=""/>
+  </source>
+  <source name="net.gsantner.markor.activity.openeditor.OpenFromShortcutOrWidgetActivity">
+    <destination name="net.gsantner.markor.activity.DocumentActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.openeditor.OpenFromShortcutOrWidgetActivity: void launchActivityAndFinish(android.content.Intent)&gt;" extras="" flags="FLAG_ACTIVITY_NEW_DOCUMENT FLAG_ACTIVITY_MULTIPLE_TASK , FLAG_ACTIVITY_NEW_DOCUMENT FLAG_ACTIVITY_MULTIPLE_TASK , FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="net.gsantner.markor.activity.MainActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.openeditor.OpenFromShortcutOrWidgetActivity: void launchActivityAndFinish(android.content.Intent)&gt;" extras="" flags="FLAG_ACTIVITY_SINGLE_TOP , FLAG_ACTIVITY_SINGLE_TOP , FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="other.writeily.widget.WrMarkorWidgetProvider">
+    <destination name="net.gsantner.markor.activity.openeditor.OpenFromShortcutOrWidgetActivity" type="NonAct2Act" method="&lt;other.writeily.widget.WrMarkorWidgetProvider: void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[])&gt;" action="android.intent.action.EDIT" extras="" flags=""/>
+    <destination name="net.gsantner.markor.activity.MainActivity" type="NonAct2Act" method="&lt;other.writeily.widget.WrMarkorWidgetProvider: void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[])&gt;" action="android.intent.action.VIEW" extras="" flags=""/>
+    <destination name="other.writeily.widget.WrMarkorWidgetProvider" type="NonAct2NonAct" method="&lt;other.writeily.widget.WrMarkorWidgetProvider: void updateLauncherWidgets()&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="other.writeily.widget.WrFilesWidgetService" type="NonAct2NonAct" method="&lt;other.writeily.widget.WrMarkorWidgetProvider: void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[])&gt;" extras="" flags=""/>
+  </source>
+  <source name="net.gsantner.markor.activity.StoragePermissionActivity">
+    <destination name="net.gsantner.markor.activity.MainActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.StoragePermissionActivity: void processPermissionState()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="net.gsantner.markor.activity.StoragePermissionActivity" type="Act2Act" method="&lt;net.gsantner.markor.activity.StoragePermissionActivity: void requestPermissions(net.gsantner.markor.activity.MarkorBaseActivity)&gt;" extras="" flags=""/>
+  </source>
+  <source name="other.writeily.widget.WrWidgetConfigure">
+    <destination name="other.writeily.widget.WrMarkorWidgetProvider" type="Act2NonAct" method="&lt;other.writeily.widget.WrMarkorWidgetProvider: void updateLauncherWidgets()&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+  </source>
+</root>

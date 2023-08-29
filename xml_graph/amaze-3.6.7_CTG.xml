@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+  <source name="org.acra.sender.LegacySenderService"/>
+  <source name="com.amaze.filemanager.crashreport.ErrorActivity">
+    <destination name="com.amaze.filemanager.crashreport.ErrorActivity" type="Act2Act" method="&lt;com.amaze.filemanager.crashreport.ErrorActivity: void startErrorActivity(android.content.Context,com.amaze.filemanager.crashreport.ErrorActivity$ErrorInfo,java.util.List)&gt;" extras="" flags="FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+  <source name="com.amaze.filemanager.asynchronous.broadcast_receivers.PackageReceiver"/>
+  <source name="com.amaze.filemanager.asynchronous.services.ftp.FtpService">
+    <destination name="com.amaze.filemanager.asynchronous.services.ftp.FtpService" type="NonAct2NonAct" method="&lt;com.amaze.filemanager.asynchronous.services.ftp.FtpService: void onTaskRemoved(android.content.Intent)&gt;" extras="" flags=""/>
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="NonAct2Act" method="&lt;com.amaze.filemanager.ui.notifications.FtpNotification: androidx.core.app.NotificationCompat$Builder buildNotification(android.content.Context,int,java.lang.String,boolean)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP FLAG_ACTIVITY_SINGLE_TOP "/>
+    <destination name="com.amaze.filemanager.asynchronous.services.ftp.FtpReceiver" type="NonAct2NonAct" method="&lt;com.amaze.filemanager.ui.notifications.FtpNotification: androidx.core.app.NotificationCompat$Builder buildNotification(android.content.Context,int,java.lang.String,boolean)&gt;" action="com.amaze.filemanager.services.ftpservice.FTPReceiver.ACTION_STOP_FTPSERVER" extras="" flags=""/>
+  </source>
+  <source name="com.cloudrail.si.servicecode.commands.awaitCodeRedirect.AuthenticationActivity"/>
+  <source name="com.android.billingclient.api.ProxyBillingActivity"/>
+  <source name="com.amaze.filemanager.ui.activities.MainActivity">
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="Act2Act" method="&lt;com.amaze.filemanager.ui.notifications.FtpNotification: androidx.core.app.NotificationCompat$Builder buildNotification(android.content.Context,int,java.lang.String,boolean)&gt;"/>
+    <destination name="com.amaze.filemanager.ui.activities.PreferencesActivity" type="Act2Act" method="&lt;com.amaze.filemanager.ui.views.drawer.Drawer: void lambda$refreshDrawer$4()&gt;" extras="" flags=""/>
+    <destination name="com.amaze.filemanager.ui.activities.DatabaseViewerActivity" type="null, */*" method="&lt;com.amaze.filemanager.filesystem.files.FileUtils: void openFile(java.io.File,com.amaze.filemanager.ui.activities.MainActivity,android.content.SharedPreferences)&gt;" extras="" flags=""/>
+    <destination name="com.amaze.filemanager.asynchronous.services.ftp.FtpReceiver" type="Act2Act" method="&lt;com.amaze.filemanager.ui.fragments.FtpServerFragment: void stopServer()&gt;"/>
+    <destination name="com.amaze.filemanager.asynchronous.services.ExtractService" type="Act2NonAct" method="&lt;com.amaze.filemanager.filesystem.compressed.showcontents.Decompressor: void decompress(java.lang.String)&gt;" extras="" flags=""/>
+    <destination name="com.amaze.filemanager.asynchronous.services.ZipService" type="Act2NonAct" method="&lt;com.amaze.filemanager.utils.MainActivityHelper: void compressFiles(java.io.File,java.util.ArrayList)&gt;" extras="" flags=""/>
+    <destination name="com.amaze.filemanager.asynchronous.services.DecryptService" type="Act2Act" method="&lt;com.amaze.filemanager.ui.fragments.ProcessViewerFragment: void onResume()&gt;"/>
+    <destination name="com.amaze.filemanager.asynchronous.services.CopyService" type="Act2NonAct" method="&lt;com.amaze.filemanager.ui.activities.MainActivity: java.lang.Void lambda$onActivityResult$14(com.amaze.filemanager.ui.fragments.MainFragment)&gt;" extras="" flags=""/>
+    <destination name="com.amaze.filemanager.asynchronous.services.EncryptService" type="Act2Act" method="&lt;com.amaze.filemanager.ui.fragments.ProcessViewerFragment: void onResume()&gt;"/>
+  </source>
+  <source name="com.mikepenz.aboutlibraries.ui.LibsActivity"/>
+  <source name="com.amaze.filemanager.asynchronous.services.ExtractService">
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="NonAct2Act" method="&lt;com.amaze.filemanager.asynchronous.services.AbstractProgressiveService: void finalizeNotification(java.util.ArrayList,boolean)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.amaze.filemanager.ui.activities.AboutActivity"/>
+  <source name="com.amaze.filemanager.asynchronous.services.ftp.FtpTileService">
+    <destination name="com.amaze.filemanager.asynchronous.services.ftp.FtpReceiver" type="NonAct2NonAct" method="&lt;com.amaze.filemanager.asynchronous.services.ftp.FtpTileService: void lambda$onClick$0()&gt;" action="com.amaze.filemanager.services.ftpservice.FTPReceiver.ACTION_STOP_FTPSERVER" extras="" flags=""/>
+  </source>
+  <source name="com.amaze.filemanager.ui.activities.TextEditorActivity">
+    <destination name="com.amaze.filemanager.ui.activities.DatabaseViewerActivity" type="Act2Act" method="&lt;com.amaze.filemanager.filesystem.files.FileUtils: void openWith(android.net.Uri,com.amaze.filemanager.ui.activities.superclasses.PreferenceActivity,boolean)&gt;" action="android.intent.action.VIEW, android.intent.action.VIEW" extras="" flags="FLAG_GRANT_READ_URI_PERMISSION , FLAG_ACTIVITY_RETAIN_IN_RECENTS , FLAG_GRANT_READ_URI_PERMISSION , FLAG_ACTIVITY_TASK_ON_HOME FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+  <source name="com.amaze.filemanager.asynchronous.services.CopyService">
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="NonAct2Act" method="&lt;com.amaze.filemanager.asynchronous.services.AbstractProgressiveService: void finalizeNotification(java.util.ArrayList,boolean)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.acra.sender.JobSenderService"/>
+  <source name="com.amaze.filemanager.ui.activities.PreferencesActivity">
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="Act2Act" method="&lt;com.amaze.filemanager.ui.activities.PreferencesActivity: boolean onOptionsItemSelected(android.view.MenuItem)&gt;" action="android.intent.action.MAIN, android.intent.category.LAUNCHER" extras="" flags=""/>
+  </source>
+  <source name="com.amaze.filemanager.asynchronous.services.EncryptService">
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="NonAct2Act" method="&lt;com.amaze.filemanager.asynchronous.services.AbstractProgressiveService: void finalizeNotification(java.util.ArrayList,boolean)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.amaze.filemanager.ui.activities.DatabaseViewerActivity"/>
+  <source name="com.amaze.filemanager.asynchronous.services.DecryptService">
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="NonAct2Act" method="&lt;com.amaze.filemanager.asynchronous.services.AbstractProgressiveService: void finalizeNotification(java.util.ArrayList,boolean)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.amaze.filemanager.asynchronous.services.ftp.FtpReceiver">
+    <destination name="com.amaze.filemanager.asynchronous.services.ftp.FtpService" type="NonAct2NonAct" method="&lt;com.amaze.filemanager.asynchronous.services.ftp.FtpReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.amaze.filemanager.asynchronous.services.ZipService">
+    <destination name="com.amaze.filemanager.ui.activities.MainActivity" type="NonAct2Act" method="&lt;com.amaze.filemanager.asynchronous.services.AbstractProgressiveService: void finalizeNotification(java.util.ArrayList,boolean)&gt;" extras="" flags=""/>
+  </source>
+</root>

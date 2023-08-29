@@ -611,7 +611,9 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             # yiheng: if encounter target activity,
             # 1. set the target state
             # 2. back to the main activity and enter the diverse mode
-            # raise InputInterruptedException("Target state reached.")
+            self.logger.info("Target activity reached.")
+            self.logger.info("event count " + str(self.action_count))
+            raise InputInterruptedException("Target state reached.")
             self.logger.info("Target state reached.")
             self.explore_mode = DIVERSE
             self.utg.set_target_state(self.current_state)

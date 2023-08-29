@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+  <source name="org.acra.sender.LegacySenderService"/>
+  <source name="com.ichi2.anki.FilteredDeckOptions$1"/>
+  <source name="com.ichi2.anki.ModelFieldEditor">
+    <destination name="com.ichi2.anki.IntentHandler" type="Act2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+  <source name="com.ichi2.anki.Info">
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.anki.Info: void lambda$onCreate$1(android.view.View)&gt;" action="android.intent.action.VIEW" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+  <source name="com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity">
+    <destination name="com.ichi2.anki.multimediacard.activity.TranslationActivity" type="Act2Act" method="&lt;com.ichi2.anki.multimediacard.fields.BasicTextFieldController: void startTranslationWithGlosbe()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.yalantis.ucrop.UCropActivity" type="Act2Act" method="&lt;com.yalantis.ucrop.UCrop: void start(android.app.Activity,int)&gt;" extras="" flags=""/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity" type="Act2Act" method="&lt;com.ichi2.anki.multimediacard.fields.BasicTextFieldController: void lambda$createPronounceButton$1(android.view.View)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.VideoPlayer">
+    <destination name="com.ichi2.anki.VideoPlayer" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void playVideo(java.lang.String)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.FilteredDeckOptions"/>
+  <source name="com.ichi2.widget.AddNoteWidget">
+    <destination name="com.ichi2.anki.NoteEditor" type="NonAct2Act" method="&lt;com.ichi2.widget.AddNoteWidget: void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[])&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.receiver.SdCardReceiver">
+    <destination name="com.ichi2.anki.NoteEditor$2" type="NonAct2NonAct" method="&lt;com.ichi2.anki.receiver.SdCardReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" action="com.ichi2.anki.action.MEDIA_EJECT" extras="" flags=""/>
+    <destination name="com.ichi2.anki.AbstractFlashcardViewer$8" type="NonAct2NonAct" method="&lt;com.ichi2.anki.receiver.SdCardReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" action="com.ichi2.anki.action.MEDIA_EJECT" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckOptions$1" type="NonAct2NonAct" method="&lt;com.ichi2.anki.receiver.SdCardReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" action="com.ichi2.anki.action.MEDIA_EJECT" extras="" flags=""/>
+    <destination name="com.ichi2.anki.FilteredDeckOptions$1" type="NonAct2NonAct" method="&lt;com.ichi2.anki.receiver.SdCardReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" action="com.ichi2.anki.action.MEDIA_EJECT" extras="" flags=""/>
+    <destination name="com.ichi2.anki.CardBrowser$6" type="NonAct2NonAct" method="&lt;com.ichi2.anki.receiver.SdCardReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" action="com.ichi2.anki.action.MEDIA_EJECT" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckPicker$4" type="NonAct2NonAct" method="&lt;com.ichi2.anki.receiver.SdCardReceiver: void onReceive(android.content.Context,android.content.Intent)&gt;" action="com.ichi2.anki.action.MEDIA_MOUNT" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.IntentHandler">
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.anki.IntentHandler: void handleReviewIntent(android.content.Intent)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity"/>
+  <source name="com.ichi2.anki.analytics.AnkiDroidCrashReportDialog"/>
+  <source name="com.ichi2.anki.services.BootService">
+    <destination name="com.ichi2.anki.services.ReminderService" type="NonAct2NonAct" method="&lt;com.ichi2.anki.services.BootService: void scheduleDeckReminder(android.content.Context)&gt;" extras="" flags=""/>
+    <destination name="com.ichi2.anki.services.NotificationService" type="NonAct2NonAct" method="&lt;com.ichi2.anki.services.BootService: void scheduleNotification(com.ichi2.libanki.utils.Time,android.content.Context)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.MyAccount">
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+  <source name="com.ichi2.anki.CardTemplateEditor">
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.CardInfo">
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+  </source>
+  <source name="org.acra.sender.JobSenderService"/>
+  <source name="com.ichi2.anki.Previewer">
+    <destination name="com.ichi2.anki.NoteEditor" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void editCard()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardInfo" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void openCardInfo()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Statistics" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.CardBrowser" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void openCardBrowser()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.VideoPlayer" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void playVideo(java.lang.String)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.multimediacard.activity.TranslationActivity"/>
+  <source name="com.ichi2.anki.DeckPicker$4"/>
+  <source name="com.yalantis.ucrop.UCropActivity"/>
+  <source name="com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService">
+    <destination name="com.ichi2.anki.IntentHandler" type="NonAct2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.AbstractFlashcardViewer$8"/>
+  <source name="com.ichi2.anki.CardTemplatePreviewer">
+    <destination name="com.ichi2.anki.NoteEditor" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void editCard()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Statistics" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.VideoPlayer" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void playVideo(java.lang.String)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardInfo" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void openCardInfo()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardBrowser" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void openCardBrowser()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.DeckPicker">
+    <destination name="com.ichi2.anki.DeckOptions" type="Act2Act" method="&lt;com.ichi2.anki.DeckPicker: void showContextMenuDeckOptions()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.MyAccount" type="Act2Act" method="&lt;com.ichi2.anki.DeckPicker: void loginToSyncServer()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.FilteredDeckOptions" type="Act2Act" method="&lt;com.ichi2.anki.DeckPicker: void showContextMenuDeckOptions()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.IntentHandler" type="Act2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Statistics" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Info" type="Act2Act" method="&lt;com.ichi2.anki.DeckPicker: void showStartupScreensAndDialogs(android.content.SharedPreferences,int)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardBrowser" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void openCardBrowser()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.ModelBrowser" type="Act2Act" method="&lt;com.ichi2.anki.DeckPicker: boolean onOptionsItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.NoteEditor" type="Act2Act" method="&lt;com.ichi2.anki.DeckPicker: void addNote()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.StudyOptionsActivity" type="Act2Act" method="&lt;com.ichi2.anki.DeckPicker: void openStudyOptions(boolean)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="org.acra.dialog.CrashReportDialog"/>
+  <source name="com.ichi2.anki.services.ReminderService">
+    <destination name="com.ichi2.anki.services.ReminderService" type="NonAct2NonAct" method="&lt;com.ichi2.anki.services.ReminderService: void onReceive(android.content.Context,android.content.Intent)&gt;" extras="" flags=""/>
+    <destination name="com.ichi2.anki.IntentHandler" type="NonAct2Act" method="&lt;com.ichi2.anki.services.ReminderService: void onReceive(android.content.Context,android.content.Intent)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.CardBrowser">
+    <destination name="com.ichi2.anki.IntentHandler" type="Act2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+    <destination name="com.ichi2.anki.CardBrowser" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void openCardBrowser()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Statistics" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardInfo" type="Act2Act" method="&lt;com.ichi2.anki.CardBrowser: boolean onOptionsItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.CardBrowser$6"/>
+  <source name="com.ichi2.anki.StudyOptionsActivity">
+    <destination name="com.ichi2.anki.IntentHandler" type="Act2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Statistics" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardBrowser" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void openCardBrowser()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.Reviewer">
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckOptions" type="Act2Act" method="&lt;com.ichi2.anki.Reviewer: boolean onOptionsItemSelected(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardBrowser" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void openCardBrowser()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.IntentHandler" type="Act2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+    <destination name="com.ichi2.anki.VideoPlayer" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void playVideo(java.lang.String)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Statistics" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.NoteEditor" type="Act2Act" method="&lt;com.ichi2.anki.Reviewer: void addNote()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.CardInfo" type="Act2Act" method="&lt;com.ichi2.anki.AbstractFlashcardViewer: void openCardInfo()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.Statistics">
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.Statistics" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void lambda$onNavigationItemSelected$2(android.view.MenuItem)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.CardBrowser" type="Act2Act" method="&lt;com.ichi2.anki.NavigationDrawerActivity: void openCardBrowser()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.services.NotificationService">
+    <destination name="com.ichi2.anki.DeckPicker" type="NonAct2Act" method="&lt;com.ichi2.anki.services.NotificationService: void onReceive(android.content.Context,android.content.Intent)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+  </source>
+  <source name="com.ichi2.anki.DeckOptions$1"/>
+  <source name="com.ichi2.anki.NoteEditor">
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.NoteEditor" type="Act2Act" method="&lt;com.ichi2.anki.NoteEditor: void openNewNoteEditor(com.ichi2.utils.FunctionalInterfaces$Consumer)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.IntentHandler" type="Act2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+    <destination name="com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity" type="Act2Act" method="&lt;com.ichi2.anki.NoteEditor: void startMultimediaFieldEditor(int,com.ichi2.anki.multimediacard.IMultimediaEditableNote)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardTemplatePreviewer" type="Act2Act" method="&lt;com.ichi2.anki.NoteEditor: void performPreview()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardTemplateEditor" type="Act2Act" method="&lt;com.ichi2.anki.NoteEditor: void showCardTemplateEditor()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+  </source>
+  <source name="com.ichi2.anki.NoteEditor$2"/>
+  <source name="com.ichi2.anki.Preferences">
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.anki.Preferences: boolean lambda$addThirdPartyAppsListener$15(android.preference.Preference)&gt;" action="android.intent.action.VIEW" data="https://github.com/ankidroid/Anki-Android/wiki/Third-Party-Apps" extras="" flags=""/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.Preferences: void restartWithNewDeckPicker()&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Preferences" type="Act2Act" method="&lt;com.ichi2.anki.Preferences: boolean lambda$initSubscreen$7(android.preference.Preference)&gt;" extras="" flags=""/>
+    <destination name="com.ichi2.anki.services.NotificationService" type="Act2NonAct" method="&lt;com.ichi2.anki.services.BootService: void scheduleNotification(com.ichi2.libanki.utils.Time,android.content.Context)&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.widget.AnkiDroidWidgetSmall">
+    <destination name="com.ichi2.anki.IntentHandler" type="NonAct2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.DeckOptions">
+    <destination name="com.ichi2.anki.services.ReminderService" type="Act2NonAct" method="&lt;com.ichi2.anki.DeckOptions$DeckPreferenceHack$Editor: boolean commit()&gt;" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.ModelBrowser">
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+    <destination name="com.ichi2.anki.ModelFieldEditor" type="Act2Act" method="&lt;com.ichi2.anki.ModelBrowser: void lambda$fillModelList$1(android.widget.AdapterView,android.view.View,int,long)&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.CardTemplateEditor" type="Act2Act" method="&lt;com.ichi2.anki.ModelBrowser: void openTemplateEditor()&gt;" extras="" flags="FLAG_ACTIVITY_NO_ANIMATION "/>
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.IntentHandler" type="Act2Act" method="&lt;com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService: android.widget.RemoteViews buildUpdate(android.content.Context,boolean)&gt;" action="android.intent.action.MAIN" category="android.intent.category.LAUNCHER" extras="" flags=""/>
+  </source>
+  <source name="com.ichi2.anki.CardTemplateBrowserAppearanceEditor">
+    <destination name="com.ichi2.anki.DeckPicker" type="Act2Act" method="&lt;com.ichi2.anki.AnkiActivity: void showSimpleNotification(java.lang.String,java.lang.String,com.ichi2.anki.NotificationChannels$Channel)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_NEW_TASK "/>
+    <destination name="com.ichi2.anki.Reviewer" type="Act2Act" method="&lt;com.ichi2.compat.customtabs.CustomTabsHelper: java.lang.String getPackageNameToUse(android.content.Context)&gt;" action="android.intent.action.VIEW" data="http://www.example.com" extras="" flags=""/>
+  </source>
+</root>
