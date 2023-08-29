@@ -154,47 +154,7 @@ class InputManager(object):
         try:
             if self.policy is not None:
                 self.policy.start(self)
-            # elif self.policy_name == POLICY_NONE:
-            #     self.device.start_app(self.app)
-            #     if self.event_count == 0:
-            #         return
-            #     while self.enabled:
-            #         time.sleep(1)
-            # elif self.policy_name == POLICY_MONKEY:
-            #     throttle = self.event_interval * 1000
-            #     monkey_cmd = (
-            #         "adb -s %s shell monkey %s --ignore-crashes --ignore-security-exceptions"
-            #         " --throttle %d -v %d"
-            #         % (
-            #             self.device.serial,
-            #             ""
-            #             if self.app.get_package_name() is None
-            #             else "-p " + self.app.get_package_name(),
-            #             throttle,
-            #             self.event_count,
-            #         )
-            #     )
-            #     self.monkey = subprocess.Popen(
-            #         monkey_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            #     )
-            #     for monkey_out_line in iter(self.monkey.stdout.readline, ''):
-            #         if not isinstance(monkey_out_line, str):
-            #             monkey_out_line = monkey_out_line.decode()
-            #         self.logger.info(monkey_out_line)
-            #     # may be disturbed from outside
-            #     if self.monkey is not None:
-            #         self.monkey.wait()
-            # elif self.policy_name == POLICY_MANUAL:
-            #     self.device.start_app(self.app)
-            #     while self.enabled:
-            #         keyboard_input = input(
-            #             "press ENTER to save current state, type q to exit..."
-            #         )
-            #         if keyboard_input.startswith('q'):
-            #             break
-            #         state = self.device.get_current_state()
-            #         if state is not None:
-            #             state.save2dir()
+
         except KeyboardInterrupt:
             pass
 

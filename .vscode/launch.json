@@ -5,7 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "markor",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                ".\\apk\\markor-2.10.9.apk",
+                "emulator-5554",
+                ".\\output\\markor-2.10.9\\test1",
+                ".\\xml_graph\\markor-2.10.9_CTG.xml",
+                "MainActivity",
+                "SettingsActivity",
+                "dfs_greedy"
+            ]
+        },
+        {
+            "name": "Ankidroid",
             "type": "python",
             "request": "launch",
             "program": "${file}",
@@ -18,11 +35,7 @@
                 ".\\xml_graph\\Anki_CTG.xml",
                 "DeckPicker",
                 "Preferences",
-                "dfs_greedy",
-                ".\\droidbot\\apk\\amaze_3.4.3.apk",
-                "-o",
-                ".\\droidbot\\output4\\",
-                "-is_emulator"
+                "dfs_greedy"
             ]
         }
     ]

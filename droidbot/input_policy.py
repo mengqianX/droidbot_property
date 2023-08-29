@@ -70,6 +70,18 @@ class InputPolicy(object):
         self.android_check = android_check
         self.input_manager = None
 
+    def run_initial_rules(self):
+        if len(self.android_check.initialize_rules()) == 0:
+            self.logger.info("No initialize rules")
+        else:
+            result = self.android_check.execute_rules(
+                self.android_check.initialize_rules()
+            )
+            if result == True:
+                self.logger.info("-------initialize successfully-----------")
+            else:
+                self.logger.info("-------initialize failed-----------")
+
     def check_rule_with_precondition(self):
         rules_to_check = self.android_check.check_rules_with_preconditions()
         if len(rules_to_check) == 0:
@@ -207,7 +219,9 @@ class UtgBasedInputPolicy(InputPolicy):
         generate an event
         @return:
         """
-
+        # 在app 启动后执行定义好的初始化事件
+        if self.action_count == 2:
+            self.run_initial_rules()
         # Get current device state
         self.current_state = self.device.get_current_state()
         if self.current_state is None:
@@ -218,46 +232,15 @@ class UtgBasedInputPolicy(InputPolicy):
 
         self.__update_utg()
 
-        # update last view trees for humanoid
-        if self.device.humanoid is not None:
-            self.humanoid_view_trees = self.humanoid_view_trees + [
-                self.current_state.view_tree
-            ]
-            if len(self.humanoid_view_trees) > 4:
-                self.humanoid_view_trees = self.humanoid_view_trees[1:]
-
         event = None
 
-        # if the previous operation is not finished, continue
-        if len(self.script_events) > self.script_event_idx:
-            event = self.script_events[self.script_event_idx].get_transformed_event(
-                self
-            )
-            self.script_event_idx += 1
-
-        # First try matching a state defined in the script
-        if event is None and self.script is not None:
-            operation = self.script.get_operation_based_on_state(self.current_state)
-            if operation is not None:
-                self.script_events = operation.events
-                # restart script
-                event = self.script_events[0].get_transformed_event(self)
-                self.script_event_idx = 1
-
-        if event is None:
-            # first explore the app, then test the properties
-            if self.action_count < self.input_manager.explore_event_count:
-                self.logger.info("Explore the app")
-                event = self.explore_app()
-            else:
-                self.logger.info("Test the app")
-                event = self.generate_event_based_on_utg()
-
-        # update last events for humanoid
-        if self.device.humanoid is not None:
-            self.humanoid_events = self.humanoid_events + [event]
-            if len(self.humanoid_events) > 3:
-                self.humanoid_events = self.humanoid_events[1:]
+        # first explore the app, then test the properties
+        if self.action_count < self.input_manager.explore_event_count:
+            self.logger.info("Explore the app")
+            event = self.explore_app()
+        else:
+            self.logger.info("Test the app")
+            event = self.generate_event_based_on_utg()
 
         self.last_state = self.current_state
         self.last_event = event
@@ -628,7 +611,8 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             # yiheng: if encounter target activity,
             # 1. set the target state
             # 2. back to the main activity and enter the diverse mode
-            raise InputInterruptedException("Target state reached.")
+            # raise InputInterruptedException("Target state reached.")
+            self.logger.info("Target state reached.")
             self.explore_mode = DIVERSE
             self.utg.set_target_state(self.current_state)
             stop_app_intent = self.app.get_stop_intent()
