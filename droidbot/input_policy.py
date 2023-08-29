@@ -627,9 +627,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             if self.utg.target_state is not None:
                 prefer_event = self.utg.get_G2_nav_action(self.current_state)
                 if prefer_event is not None:
-                    self.logger.info(
-                        "Select event based on guide: " + prefer_event.get_event_str()
-                    )
+                    self.logger.info("Select event based on guide ")
                     return prefer_event
 
             # yiheng: if current activity is not on the shortest path to the target activity, back
