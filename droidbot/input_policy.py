@@ -238,6 +238,8 @@ class UtgBasedInputPolicy(InputPolicy):
         if self.action_count < self.input_manager.explore_event_count:
             self.logger.info("Explore the app")
             event = self.explore_app()
+        elif self.action_count == self.input_manager.explore_event_count:
+            event = KillAppEvent(app=self.app)
         else:
             self.logger.info("Test the app")
             event = self.generate_event_based_on_utg()
