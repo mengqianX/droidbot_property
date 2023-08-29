@@ -608,11 +608,17 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.number_of_steps_outside_the_shortest_path = 0
         self.reached_state_on_the_shortest_path = []
 
+        self.reach_target_during_exploration = False
+
     def guide_the_exploration(self):
         if self.device.get_activity_short_name() == self.guide.target_activity:
             # yiheng: if encounter target activity,
             # 1. set the target state
             # 2. back to the main activity and enter the diverse mode
+            self.logger.info(
+                "reach target during exploration? "
+                + str(self.reach_target_during_exploration)
+            )
             self.logger.info("Target activity reached.")
             self.logger.info("event count " + str(self.action_count))
             raise InputInterruptedException("Target state reached.")
@@ -880,6 +886,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
 
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
         if self.device.get_activity_short_name() == self.guide.target_activity:
+            self.reach_target_during_exploration = True
             self.utg.set_target_state(self.current_state)
         # if self.guide:
         #     event = self.guide_the_exploration()
