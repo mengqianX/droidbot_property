@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+  <source name="org.totschnig.myexpenses.widget.AccountWidget">
+    <destination name="org.totschnig.myexpenses.activity.ExpenseEdit" type="NonAct2Act" method="&lt;org.totschnig.myexpenses.widget.AccountWidget: void a(android.content.Context,android.widget.RemoteViews,int,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.widget.AccountWidget" type="NonAct2NonAct" method="&lt;org.totschnig.myexpenses.widget.a: void a(android.content.Context,java.lang.Class)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyExpenses" type="NonAct2Act" method="&lt;org.totschnig.myexpenses.widget.AccountWidget: void a(android.content.Context,android.widget.RemoteViews,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.widget.TemplateWidget" type="NonAct2NonAct" method="&lt;org.totschnig.myexpenses.widget.a: void a(android.content.Context,java.lang.Class)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.ExpenseEdit">
+    <destination name="org.totschnig.myexpenses.activity.ManageCategories" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.ExpenseEdit: void B()&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.widget.AccountWidget" type="Act2NonAct" method="&lt;org.totschnig.myexpenses.widget.a: void a(android.content.Context,java.lang.Class)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.widget.TemplateWidget" type="Act2NonAct" method="&lt;org.totschnig.myexpenses.widget.a: void a(android.content.Context,java.lang.Class)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.CalculatorInput" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.c: void showCalculator(android.view.View)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ExpenseEdit" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.ExpenseEdit: void b(int)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.MyPreferenceActivity">
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.widget.AccountWidget" type="Act2NonAct" method="&lt;org.totschnig.myexpenses.activity.MyPreferenceActivity: void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.FolderBrowser" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.MyPreferenceActivity: boolean onPreferenceClick(android.preference.Preference)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.widget.TemplateWidget" type="Act2NonAct" method="&lt;org.totschnig.myexpenses.activity.MyPreferenceActivity: void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.service.PlanExecutor">
+    <destination name="org.totschnig.myexpenses.service.PlanExecutor" type="NonAct2NonAct" method="&lt;org.totschnig.myexpenses.service.PlanExecutor: void a(android.content.Context,long)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.BackupRestoreActivity">
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+  </source>
+  <source name="org.totschnig.myexpenses.service.MyBootReceiver"/>
+  <source name="org.totschnig.myexpenses.activity.ManageMethods">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.MethodEdit" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.ManageMethods: boolean a(int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;"/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.ManageParties">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.CalculatorInput">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.ManageCurrencies">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.MethodEdit">
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.GrisbiImport">
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.ManageCategories">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.Help">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.QifImport">
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.ManageStaleImages">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;"/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;"/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.FolderBrowser">
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.service.PlanNotificationClickHandler"/>
+  <source name="org.totschnig.myexpenses.activity.ManageTemplates">
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.ExpenseEdit" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.ManageTemplates: boolean a(int,java.lang.Object)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.widget.TemplateWidget">
+    <destination name="org.totschnig.myexpenses.widget.TemplateWidget" type="NonAct2NonAct" method="&lt;org.totschnig.myexpenses.widget.a: void a(android.content.Context,java.lang.Class)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="NonAct2Act" method="&lt;org.totschnig.myexpenses.widget.TemplateWidget: void a(android.content.Context,android.appwidget.AppWidgetManager,int[],java.lang.String)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.widget.AccountWidget" type="NonAct2NonAct" method="&lt;org.totschnig.myexpenses.widget.a: void a(android.content.Context,java.lang.Class)&gt;" action="android.appwidget.action.APPWIDGET_UPDATE" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ExpenseEdit" type="NonAct2Act" method="&lt;org.totschnig.myexpenses.widget.TemplateWidget: void a(android.content.Context,android.widget.RemoteViews,int,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ManageTemplates" type="NonAct2Act" method="&lt;org.totschnig.myexpenses.widget.TemplateWidget: void a(android.content.Context,android.widget.RemoteViews)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.AccountEdit">
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+  </source>
+  <source name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity"/>
+  <source name="org.totschnig.myexpenses.activity.MyExpenses">
+    <destination name="org.totschnig.myexpenses.activity.ManageCategories" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.MyExpenses: void a(org.totschnig.myexpenses.d.j,java.io.Serializable)&gt;" action="myexpenses.intent.distribution" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ContribInfoDialogActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: void a(android.support.v4.app.w,long)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ManageTemplates" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.MyExpenses: boolean a(int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.BackupRestoreActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.MyExpenses: boolean a(int,java.lang.Object)&gt;" action="myexpenses.intent.backup" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.AccountEdit" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.MyExpenses: void editAccount(android.view.View)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.ExpenseEdit" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.MyExpenses: void e(int)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.Help" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags=""/>
+    <destination name="org.totschnig.myexpenses.activity.MyExpenses" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.z: void onActivityResult(int,int,android.content.Intent)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+    <destination name="org.totschnig.myexpenses.activity.MyPreferenceActivity" type="Act2Act" method="&lt;org.totschnig.myexpenses.activity.i: boolean a(android.app.Activity,int,java.lang.Object)&gt;" extras="" flags="FLAG_ACTIVITY_CLEAR_TOP "/>
+  </source>
+</root>
