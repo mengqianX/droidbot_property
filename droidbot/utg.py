@@ -490,13 +490,15 @@ class UTG(object):
         nav_edges = self.get_G2_nav_edges(
             current_structure_str, self.target_state.structure_str
         )
+        if nav_edges is None:
+            self.logger.info("nav edges is none")
+            return None
         if nav_edges is not None:
             for start_structure_str, to_state_str, event in nav_edges:
                 if start_structure_str == current_structure_str:
                     return event
         self.logger.info("No next action found")
         return None
-
 
     # if current state is on the shortest path to the target state, return the next action
     def get_G2_nav_action_on_shoretest_path(self, current_state):
