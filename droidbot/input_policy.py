@@ -69,7 +69,6 @@ class InputPolicy(object):
         self.master = None
         self.android_check = android_check
         self.input_manager = None
-        self.reach_target_during_exploration = False
 
     def run_initial_rules(self):
         if len(self.android_check.initialize_rules()) == 0:
@@ -158,10 +157,6 @@ class InputPolicy(object):
                 traceback.print_exc()
                 continue
             self.action_count += 1
-        self.logger.info(
-            "reach target during exploration? "
-            + str(self.reach_target_during_exploration)
-        )
 
     @abstractmethod
     def generate_event(self):
