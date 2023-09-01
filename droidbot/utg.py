@@ -228,15 +228,15 @@ class UTG(object):
             }
             if self.highlight_shortest_path(from_state, to_state):
                 utg_edge["color"] = "red"
-            if self.highlight_path(
-                from_state,
-                to_state,
-                self.guide.get_shortest_path(
-                    self.guide.source_activity, self.guide.target_activity
-                ),
-            ):
-                utg_edge["color"] = "red"
-                self.logger.info("Highlight path: %s --> %s" % (from_state, to_state))
+            # if self.highlight_path(
+            #     from_state,
+            #     to_state,
+            #     self.guide.get_shortest_path(
+            #         self.guide.source_activity, self.guide.target_activity
+            #     ),
+            # ):
+            #     utg_edge["color"] = "red"
+            #     self.logger.info("Highlight path: %s --> %s" % (from_state, to_state))
 
             # # Highlight last transition
             # if state_transition == self.last_transition:
