@@ -30,7 +30,9 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
-        pass
+        # pass
+        self.device(description="Navigate up").click()
+        self.device.uiautomator.stop()
         # self.device(resourceId="net.gsantner.markor:id/next").click()
         # self.device(resourceId="net.gsantner.markor:id/next").click()
         # self.device(resourceId="net.gsantner.markor:id/next").click()
