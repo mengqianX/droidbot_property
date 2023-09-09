@@ -4,14 +4,19 @@ import re
 import subprocess
 import sys
 import time
+import uiautomator2
+
+from .adapter.uiautomator2_helper import Uiautomator2_Helper
 
 from .adapter.adb import ADB
+
 # from .adapter.droidbot_app import DroidBotAppConn
 from .adapter.logcat import Logcat
 from .adapter.minicap import Minicap
 from .adapter.process_monitor import ProcessMonitor
 from .adapter.telnet import TelnetConsole
 from .adapter.user_input_monitor import UserInputMonitor
+
 # from .adapter.droidbot_ime import DroidBotIme
 from .app import App
 from .intent import Intent
@@ -90,6 +95,7 @@ class Device(object):
         self.logcat = Logcat(device=self)
         self.user_input_monitor = UserInputMonitor(device=self)
         self.process_monitor = ProcessMonitor(device=self)
+        self.uiautomator_helper = Uiautomator2_Helper(device=self)
         # self.droidbot_ime = DroidBotIme(device=self)
 
         self.adapters = {
@@ -102,7 +108,7 @@ class Device(object):
             self.process_monitor: True,
             # self.droidbot_ime: True,
         }
-
+        self.u2 = uiautomator2.connect(self.serial)
         # minicap currently not working on emulators
         if self.is_emulator:
             self.logger.info("disable minicap on emulator")
@@ -926,7 +932,13 @@ class Device(object):
         #         return views
         #     else:
         #         self.logger.warning("Failed to get views using Accessibility.")
-
+        if self.uiautomator_helper:
+            views = self.uiautomator_helper.get_views()
+            if views:
+                return views
+            else:
+                self.logger.warning("Failed to get views using UiAutomator.")
+                
         self.logger.warning("failed to get current views!")
         return None
 
