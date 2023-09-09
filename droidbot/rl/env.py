@@ -103,7 +103,7 @@ class TestEnv(gym.Env):
         # start the current app on the device
         self.device.start_app(self.current_app)
         time.sleep(3)
-        self.device.droidbot_app.connect()
+        #self.device.droidbot_app.connect()
 
         # get current observation
         return self.observation.observe(self)

@@ -6,13 +6,13 @@ import sys
 import time
 
 from .adapter.adb import ADB
-from .adapter.droidbot_app import DroidBotAppConn
+# from .adapter.droidbot_app import DroidBotAppConn
 from .adapter.logcat import Logcat
 from .adapter.minicap import Minicap
 from .adapter.process_monitor import ProcessMonitor
 from .adapter.telnet import TelnetConsole
 from .adapter.user_input_monitor import UserInputMonitor
-from .adapter.droidbot_ime import DroidBotIme
+# from .adapter.droidbot_ime import DroidBotIme
 from .app import App
 from .intent import Intent
 
@@ -85,22 +85,22 @@ class Device(object):
         # adapters
         self.adb = ADB(device=self)
         self.telnet = TelnetConsole(device=self, auth_token=telnet_auth_token)
-        self.droidbot_app = DroidBotAppConn(device=self)
+        # self.droidbot_app = DroidBotAppConn(device=self)
         self.minicap = Minicap(device=self)
         self.logcat = Logcat(device=self)
         self.user_input_monitor = UserInputMonitor(device=self)
         self.process_monitor = ProcessMonitor(device=self)
-        self.droidbot_ime = DroidBotIme(device=self)
+        # self.droidbot_ime = DroidBotIme(device=self)
 
         self.adapters = {
             self.adb: True,
             self.telnet: False,
-            self.droidbot_app: True,
+            # self.droidbot_app: True,
             self.minicap: True,
             self.logcat: True,
             self.user_input_monitor: True,
             self.process_monitor: True,
-            self.droidbot_ime: True,
+            # self.droidbot_ime: True,
         }
 
         # minicap currently not working on emulators
@@ -920,12 +920,12 @@ class Device(object):
                 return views
             else:
                 self.logger.warning("Failed to get views using OpenCV.")
-        if self.droidbot_app and self.adapters[self.droidbot_app]:
-            views = self.droidbot_app.get_views()
-            if views:
-                return views
-            else:
-                self.logger.warning("Failed to get views using Accessibility.")
+        # if self.droidbot_app and self.adapters[self.droidbot_app]:
+        #     views = self.droidbot_app.get_views()
+        #     if views:
+        #         return views
+        #     else:
+        #         self.logger.warning("Failed to get views using Accessibility.")
 
         self.logger.warning("failed to get current views!")
         return None
