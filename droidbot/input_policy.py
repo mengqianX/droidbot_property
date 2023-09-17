@@ -70,6 +70,7 @@ class InputPolicy(object):
         self.master = None
         self.android_check = android_check
         self.input_manager = None
+        self.reach_target_during_exploration = False
 
     def run_initial_rules(self):
         if len(self.android_check.initialize_rules()) == 0:
@@ -158,6 +159,8 @@ class InputPolicy(object):
                 traceback.print_exc()
                 break
             self.action_count += 1
+        if self.reach_target_during_exploration:
+            self.logger.info("------------ reach the target state during exploration")
 
     @abstractmethod
     def generate_event(self):
@@ -685,7 +688,6 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         rules_satisfy_precondition = self.android_check.check_rules_with_preconditions()
         if len(rules_satisfy_precondition) > 0:
             self.logger.info("has rule that matches the precondition")
-            self.reach_target_during_exploration = True
             self.utg.set_target_state(self.current_state)
         else:
             self.logger.info("no rule matches the precondition")
