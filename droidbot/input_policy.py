@@ -34,6 +34,7 @@ EVENT_FLAG_NAVIGATE = "+navigate"
 EVENT_FLAG_TOUCH = "+touch"
 
 # Policy taxanomy
+POLICY_PBT = "pbt"
 POLICY_RANDOM = "random"
 POLICY_NAIVE_DFS = "dfs_naive"
 POLICY_GREEDY_DFS = "dfs_greedy"
@@ -122,9 +123,9 @@ class InputPolicy(object):
         self.action_count = 0
         self.input_manager = input_manager
         while (
-            input_manager.enabled
-            and self.action_count
-            < input_manager.event_count + input_manager.explore_event_count
+                input_manager.enabled
+                and self.action_count
+                < input_manager.diverse_event_count + input_manager.explore_event_count
         ):
             try:
                 # # make sure the first event is go to HOME screen
@@ -610,97 +611,90 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
 
         self.reach_target_during_exploration = False
 
-    def guide_the_exploration(self):
-        if self.device.get_activity_short_name() == self.guide.target_activity:
-            # yiheng: if encounter target activity,
-            # 1. set the target state
-            # 2. back to the main activity and enter the diverse mode
-            self.logger.info(
-                "reach target during exploration? "
-                + str(self.reach_target_during_exploration)
+        # used in diverse phase
+        self.path_index = -1  # currently explore path index
+        self.paths = []  # paths from start state to target state
+        # whether reach target state, if true, we start next paths.
+        self.reach_target_during_diverse = False
+        self.fail_path = []
+
+    def stop_app_events(self):
+        self.logger.info("reach the target state, restart the app")
+        stop_app_intent = self.app.get_stop_intent()
+        stop_event = IntentEvent(stop_app_intent)
+        self.logger.info("stop the app and go back to the main activity")
+        return stop_event
+
+    def guide_diverse_mode(self):
+        next_event = None
+        self.reach_target_during_diverse = (
+            True if self.current_state == self.utg.target_state else False
+        )
+        # 如果还没开始进行diverse phase,则选择最短的path先进行探索
+        if self.path_index == -1:
+            self.paths = self.utg.get_paths_to_state(
+                self.utg.first_state, self.utg.target_state
             )
-            self.logger.info("Target activity reached.")
-            self.logger.info("event count " + str(self.action_count))
-            raise InputInterruptedException("Target state reached.")
-            self.logger.info("Target state reached.")
-            self.explore_mode = DIVERSE
+            self.path_index = 0
+
+        # 如果已经到达target state，则重启app ，换下一条path
+        if self.reach_target_during_diverse:
+            self.path_index += 1
+            return self.stop_app_events()
+
+        # 还没有到达target state，则继续探索当前path
+        if self.path_index < len(self.paths):
+            for curren_state_structure, next_state_structure, event in self.paths[
+                self.path_index
+            ]:
+                if self.current_state.structure_str == curren_state_structure:
+                    next_event = event
+                    self.logger.info("find next event in the %d path" % self.path_index)
+                    return next_event
+            # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
+            self.logger.info("cannot find next event in the %d path" % self.path_index)
+            self.fail_path.append(self.path_index)
+            self.path_index += 1
+            return self.stop_app_events()
+        else:
+            self.logger.info("finish explore all paths: %d", len(self.paths))
+            self.logger.info("number of fail paths: %d", len(self.fail_path))
+        return None
+
+    def guide_explore_mode(self):
+        # 首先，判断是否到达target state
+        rules_satisfy_precondition = self.android_check.check_rules_with_preconditions()
+        if len(rules_satisfy_precondition) > 0:
+            self.logger.info("has rule that matches the precondition")
+            self.reach_target_during_exploration = True
             self.utg.set_target_state(self.current_state)
-            stop_app_intent = self.app.get_stop_intent()
-            go_back_event = IntentEvent(stop_app_intent)
-            self.logger.info("stop the app and go back to the main activity")
-            return go_back_event
+        else:
+            self.logger.info("no rule matches the precondition")
 
+        # 如果在之前已经到达过target state，则进入diverse mode
+        if self.utg.target_state is not None:
+            self.explore_mode = DIVERSE
+            return self.stop_app_events()
+
+        # yiheng: if current activity is not on the shortest path to the target activity, back
+        if self.device.get_activity_short_name() not in self.guide.get_shortest_path(
+            self.guide.source_activity, self.guide.target_activity
+        ):
+            self.logger.info(
+                "Not on the shortest path to target activity, try to go back"
+            )
+            self.__event_trace += EVENT_FLAG_EXPLORE
+            return KeyEvent(name="BACK")
+
+    def guide_the_exploration(self):
+        event = None
         if self.explore_mode == GUIDE:
-            # 如果在之前已经到达过target state，则按照模型引导探索
-            if self.utg.target_state is not None:
-                prefer_event = self.utg.get_G2_nav_action(self.current_state)
-                if prefer_event is not None:
-                    self.logger.info("Select event based on guide ")
-                    return prefer_event
-
-            # yiheng: if current activity is not on the shortest path to the target activity, back
-            if (
-                self.device.get_activity_short_name()
-                not in self.guide.get_shortest_path(
-                    self.guide.source_activity, self.guide.target_activity
-                )
-            ):
-                self.logger.info(
-                    "Not on the shortest path to target activity, try to go back"
-                )
-                self.__event_trace += EVENT_FLAG_EXPLORE
-                return KeyEvent(name="BACK")
-
+            event = self.guide_explore_mode()
+            return event
         elif self.explore_mode == DIVERSE:
-            if self.utg.is_on_shortest_path(self.current_state):
-                self.reached_state_on_the_shortest_path.append(self.current_state)
-                self.logger.info(
-                    "Current state is on the shortest path to target state"
-                )
-                self.number_of_steps_outside_the_shortest_path = 0
-            else:
-                # yiheng: if current state is not on the shortest path to the target state,
-                # allow the exploration outside the shortest path for most N events.
-                self.number_of_steps_outside_the_shortest_path += 1
-                if (
-                    self.number_of_steps_outside_the_shortest_path
-                    > MAX_NUM_STEPS_OUTSIDE_THE_SHORTEST_PATH
-                ):
-                    self.number_of_steps_outside_the_shortest_path = 0
-                    # find a way to the shortest path. tha target state is the next state on the shortest path.
-                    target_state = self.__get_nav_target_on_the_shortest_path(
-                        self.current_state
-                    )
-                    if target_state:
-                        navigation_steps = self.utg.get_navigation_steps(
-                            from_state=self.current_state, to_state=target_state
-                        )
-                        if navigation_steps and len(navigation_steps) > 0:
-                            self.logger.info(
-                                "Navigating to %s, %d steps left."
-                                % (target_state.state_str, len(navigation_steps))
-                            )
-                            self.__event_trace += EVENT_FLAG_NAVIGATE
-                            return navigation_steps[0][1]
-                    # TODO yiheng: if cannot find a way to the shortest path, what to do?
-                else:
-                    self.logger.info(
-                        "Allow the exploration outside the shortest path for most 10 events"
-                    )
-                    self.logger.info(
-                        str(self.number_of_steps_outside_the_shortest_path)
-                        + "steps has explored"
-                    )
+            event = self.guide_diverse_mode()
+            return event
 
-            # yiheng: if it has encountered the target activity and current state is on
-            # the path to the target state, select the next event based on the guide
-            # if self.utg.target_state is not None:
-            #     prefer_event = self.utg.get_G2_nav_action(current_state)
-            #     if prefer_event is not None:
-            #         self.logger.info(
-            #             "Select event based on guide: " + prefer_event.__str__()
-            #         )
-            #         return prefer_event
         else:
             self.logger.info("invalid explore mode")
 
@@ -773,6 +767,8 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             event = self.guide_the_exploration()
             if event is not None:
                 return event
+            else:
+                self.logger.info("didnot find event based on guide")
 
         # Get all possible input events
         possible_events = current_state.get_possible_input()
@@ -784,11 +780,6 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             possible_events.append(KeyEvent(name="BACK"))
         elif self.search_method == POLICY_GREEDY_BFS:
             possible_events.insert(0, KeyEvent(name="BACK"))
-
-        # get humanoid result, use the result to sort possible events
-        # including back events
-        # if self.device.humanoid is not None:
-        #     possible_events = self.__sort_inputs_by_humanoid(possible_events)
 
         # If there is an unexplored event, try the event first
         for input_event in possible_events:
@@ -885,13 +876,13 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             self.__num_steps_outside = 0
 
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
-        if self.device.get_activity_short_name() == self.guide.target_activity:
+        rules_satisfy_precondition = self.android_check.check_rules_with_preconditions()
+        if len(rules_satisfy_precondition) > 0:
+            self.logger.info("has rule that matches the precondition")
             self.reach_target_during_exploration = True
             self.utg.set_target_state(self.current_state)
-        # if self.guide:
-        #     event = self.guide_the_exploration()
-        #     if event is not None:
-        #         return event
+        else:
+            self.logger.info("no rule matches the precondition")
 
         # Get all possible input events
         possible_events = current_state.get_possible_input()

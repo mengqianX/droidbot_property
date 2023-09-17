@@ -114,7 +114,7 @@ class AndroidCheck(object):
         script_path=None,
         event_interval=input_manager.DEFAULT_EVENT_INTERVAL,
         timeout=input_manager.DEFAULT_TIMEOUT,
-        event_count=input_manager.DEFAULT_EVENT_COUNT,
+        diverse_event_count=input_manager.DEFAULT_EVENT_COUNT,
         explore_event_count=0,
         cv_mode=None,
         debug_mode=None,
@@ -146,7 +146,7 @@ class AndroidCheck(object):
             script_path=script_path,
             event_interval=event_interval,
             timeout=timeout,
-            event_count=event_count,
+            diverse_event_count=diverse_event_count,
             explore_event_count=explore_event_count,
             cv_mode=cv_mode,
             debug_mode=debug_mode,
@@ -262,7 +262,7 @@ class AndroidCheck(object):
 
         return result
 
-    def check_rules_with_preconditions(self):
+    def check_rules_with_preconditions(self) -> List:
         '''Check all rules and return the list of rules that meet the preconditions.'''
         rules_to_check = self.rules()
         rules_meeting_preconditions = []
@@ -270,6 +270,7 @@ class AndroidCheck(object):
             if len(rule_to_check.preconditions) > 0:
                 if all(precond(self) for precond in rule_to_check.preconditions):
                     rules_meeting_preconditions.append(rule_to_check)
+        # self.device.uiautomator.stop()
         return rules_meeting_preconditions
 
     def rules_without_preconditions(self):

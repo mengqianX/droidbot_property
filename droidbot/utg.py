@@ -540,3 +540,39 @@ class UTG(object):
                 if start_structure_str == current_structure_str:
                     return self.find_state_according_to_state_str(to_state_str)
         return None
+
+    def get_paths_to_state(self, current_state, target_state):
+        # get all paths from source to target, and sort them according to the length
+        if current_state is None or target_state is None:
+            return None
+        current_structure_str = current_state.structure_str
+        target_structure_str = target_state.structure_str
+        paths = []
+        paths = nx.all_simple_paths(
+            self.G2, source=current_structure_str, target=target_structure_str
+        )
+        paths = sorted(paths, key=lambda x: len(x))
+        nav_edges = []
+        for path in paths:
+            nav_edges.append(self.get_edges_from_path(path))
+        return nav_edges
+
+    def get_edges_from_path(self, path):
+        if path is None:
+            return None
+        nav_edges = []
+        state_strs = path
+        if not isinstance(state_strs, list) or len(state_strs) < 2:
+            return None
+        start_state_structure_str = state_strs[0]
+        for state_str in state_strs[1:]:
+            edge = self.G2[start_state_structure_str][state_str]
+            edge_event_strs = list(edge["events"].keys())
+            # start_state = random.choice(self.G.nodes[start_state_str]['states'])
+            event_str = random.choice(edge_event_strs)
+            event = edge["events"][event_str]["event"]
+            nav_edges.append((start_state_structure_str, state_str, event))
+            start_state_structure_str = state_str
+        if nav_edges is None:
+            return None
+        return nav_edges

@@ -74,6 +74,8 @@ class Device(object):
         self.humanoid = humanoid
         self.ignore_ad = ignore_ad
 
+        self.u2 = uiautomator2.connect(self.serial)
+
         # basic device information
         self.settings = {}
         self.display_info = None
@@ -108,7 +110,7 @@ class Device(object):
             self.process_monitor: True,
             # self.droidbot_ime: True,
         }
-        self.u2 = uiautomator2.connect(self.serial)
+
         # minicap currently not working on emulators
         if self.is_emulator:
             self.logger.info("disable minicap on emulator")
@@ -938,7 +940,7 @@ class Device(object):
                 return views
             else:
                 self.logger.warning("Failed to get views using UiAutomator.")
-                
+
         self.logger.warning("failed to get current views!")
         return None
 

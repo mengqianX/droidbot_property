@@ -1,3 +1,4 @@
+from typing import List, Dict
 import uiautomator2
 import xml.etree.ElementTree as ET
 
@@ -8,14 +9,16 @@ class Uiautomator2_Helper:
             from droidbot.device import Device
 
             device = Device()
-        self.device = device
-        self.ignore_ad = device.ignore_ad
-        self.u2 = device.u2
-        # self.u2 = uiautomator2.connect("emulator-5554")
-        import re
+        self.device: Device = device
 
-        self.__first_cap_re = re.compile("(.)([A-Z][a-z]+)")
-        self.__all_cap_re = re.compile("([a-z0-9])([A-Z])")
+        self.u2: uiautomator2.Device = device.u2
+        # self.u2 = uiautomator2.connect("emulator-5554")
+        self.ignore_ad: bool = device.ignore_ad
+        if self.ignore_ad:
+            import re
+
+            self.__first_cap_re = re.compile("(.)([A-Z][a-z]+)")
+            self.__all_cap_re = re.compile("([a-z0-9])([A-Z])")
 
     def __id_convert(self, name):
         name = name.replace(".", "_").replace(":", "_").replace("/", "_")
@@ -39,7 +42,7 @@ class Uiautomator2_Helper:
         view_list.append(view_tree)
         children_ids = []
         for child_tree in view_tree['children']:
-            if child_tree['resource_id'] is not None:
+            if self.ignore_ad and child_tree['resource_id'] is not None:
                 id_word_list = self.__id_convert(child_tree['resource_id']).split('_')
                 if "ad" in id_word_list or "banner" in id_word_list:
                     continue
@@ -48,7 +51,7 @@ class Uiautomator2_Helper:
             children_ids.append(child_tree['temp_id'])
         view_tree['children'] = children_ids
 
-    def xml_to_dict(self, element):
+    def xml_to_dict(self, element) -> Dict:
         # 解析xml文件，返回一个字典。目的是为了和droidbot app中的view tree保持一致
         result = {}
 
@@ -113,7 +116,7 @@ class Uiautomator2_Helper:
         :param xml: the xml
         :return: the selected root node
         """
-        # 除去那些我们不关心的系统的package
+        # 除去那些我们不关心的系统的package的node
         exlude_package = ["com.android.systemui"]
         # iterate all the root nodes from the xml node, and select the one we want
         root = ET.fromstring(xml)
@@ -124,7 +127,7 @@ class Uiautomator2_Helper:
 
         return None
 
-    def dump_view(self):
+    def dump_view(self) -> Dict:
         """
         dump the current view
         :return: the view tree
@@ -138,10 +141,10 @@ class Uiautomator2_Helper:
 
         return view_tree
 
-    def get_views(self):
+    def get_views(self) -> List:
         """
-        get the view tree of the current state
-        :return: the view tree
+        get the view list of the current state
+        :return: the view list
         """
         view_tree = self.dump_view()
         if not view_tree:

@@ -10,18 +10,18 @@ class Test(AndroidCheck):
         device_serial="emulator-5554",
         output_dir="output",
         explore_event_count=0,
-        event_count=100,
+        diverse_event_count=100,
         xml_path=None,
         source_activity=None,
         target_activity=None,
-        policy_name="dfs_greedy",
+        policy_name="pbt",
     ):
         super().__init__(
             apk_path,
             device_serial=device_serial,
             output_dir=output_dir,
             explore_event_count=explore_event_count,
-            event_count=event_count,
+            diverse_event_count=diverse_event_count,
             xml_path=xml_path,
             source_activity=source_activity,
             target_activity=target_activity,
@@ -30,9 +30,9 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
-        # pass
-        self.device(description="Navigate up").click()
-        self.device.uiautomator.stop()
+        pass
+        # self.device(description="Navigate up").click()
+        # self.device.uiautomator.stop()
         # self.device(resourceId="net.gsantner.markor:id/next").click()
         # self.device(resourceId="net.gsantner.markor:id/next").click()
         # self.device(resourceId="net.gsantner.markor:id/next").click()
@@ -40,20 +40,16 @@ class Test(AndroidCheck):
         # self.device(text="DONE").click()
         # self.device(text="OK").click()
 
-    @precondition(
-        lambda self: self.device.app_current()['activity'].split('.')[-1]
-        == "DeckPicker"
-    )
+    @precondition(lambda self: self.device(text="Appearance").exists())
     @rule()
     def rule2(self):
         print("reach rule 2")
-        print(
-            "current activity: " + self.device.app_current()['activity'].split('.')[-1]
-        )
+        self.device(text="Appearance").click()
+        assert self.device(text="Day theme").exists()
 
-    @rule()
-    def rule3(self):
-        print("reach rule 3")
+    # @rule()
+    # def rule3(self):
+    #     print("reach rule 3")
 
 
 start_time = time.time()
@@ -80,8 +76,8 @@ t = Test(
     apk_path=apk_path,
     device_serial=device_serial,
     output_dir=output_dir,
-    explore_event_count=600,
-    event_count=600,
+    explore_event_count=100,
+    diverse_event_count=200,
     xml_path=xml_path,
     source_activity=source_activity,
     target_activity=target_activity,

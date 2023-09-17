@@ -5,6 +5,7 @@ import time
 
 from .input_event import EventLog
 from .input_policy import (
+    POLICY_PBT,
     POLICY_RANDOM,
     UtgBasedInputPolicy,
     UtgNaiveSearchPolicy,
@@ -43,7 +44,7 @@ class InputManager(object):
         app,
         policy_name,
         random_input,
-        event_count,
+        diverse_event_count,
         event_interval,
         explore_event_count=0,  # the number of event generated in the explore phase.
         script_path=None,
@@ -70,7 +71,7 @@ class InputManager(object):
         self.events = []
         self.policy = None
         self.script = None
-        self.event_count = event_count
+        self.diverse_event_count = diverse_event_count
         self.event_interval = event_interval
         self.explore_event_count = explore_event_count
         self.replay_output = replay_output
@@ -98,7 +99,7 @@ class InputManager(object):
             input_policy = UtgNaiveSearchPolicy(
                 device, app, self.random_input, self.policy_name
             )
-        elif self.policy_name in [POLICY_GREEDY_DFS, POLICY_GREEDY_BFS]:
+        elif self.policy_name == POLICY_PBT:
             input_policy = PbtFuzzingPolicy(
                 device,
                 app,
