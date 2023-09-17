@@ -123,9 +123,9 @@ class InputPolicy(object):
         self.action_count = 0
         self.input_manager = input_manager
         while (
-                input_manager.enabled
-                and self.action_count
-                < input_manager.diverse_event_count + input_manager.explore_event_count
+            input_manager.enabled
+            and self.action_count
+            < input_manager.diverse_event_count + input_manager.explore_event_count
         ):
             try:
                 # # make sure the first event is go to HOME screen
@@ -156,7 +156,7 @@ class InputPolicy(object):
                 import traceback
 
                 traceback.print_exc()
-                continue
+                break
             self.action_count += 1
 
     @abstractmethod
@@ -617,6 +617,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         # whether reach target state, if true, we start next paths.
         self.reach_target_during_diverse = False
         self.fail_path = []
+        self.step_in_each_path = 0
 
     def stop_app_events(self):
         self.logger.info("reach the target state, restart the app")
@@ -628,7 +629,9 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
     def guide_diverse_mode(self):
         next_event = None
         self.reach_target_during_diverse = (
-            True if self.current_state == self.utg.target_state else False
+            True
+            if self.current_state.state_str == self.utg.target_state.state_str
+            else False
         )
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
@@ -636,18 +639,28 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
                 self.utg.first_state, self.utg.target_state
             )
             self.path_index = 0
+            self.step_in_each_path = 0
 
         # 如果已经到达target state，则重启app ，换下一条path
         if self.reach_target_during_diverse:
             self.path_index += 1
+            self.step_in_each_path = 0
             return self.stop_app_events()
 
         # 还没有到达target state，则继续探索当前path
         if self.path_index < len(self.paths):
+            # 为了防止走入一个死循环，如果在当前path中走的步数超过了当前path的长度的2倍，则放弃当前path
+            if self.step_in_each_path > len(self.paths[self.path_index]) * 2:
+                self.fail_path.append(self.path_index)
+                self.path_index += 1
+                self.step_in_each_path = 0
+                return self.stop_app_events()
+
             for curren_state_structure, next_state_structure, event in self.paths[
                 self.path_index
             ]:
                 if self.current_state.structure_str == curren_state_structure:
+                    self.step_in_each_path += 1
                     next_event = event
                     self.logger.info("find next event in the %d path" % self.path_index)
                     return next_event
@@ -657,8 +670,10 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             self.path_index += 1
             return self.stop_app_events()
         else:
+            self.step_in_each_path = 0
             self.logger.info("finish explore all paths: %d", len(self.paths))
             self.logger.info("number of fail paths: %d", len(self.fail_path))
+            raise Exception("finish all paths and stop")
         return None
 
     def guide_explore_mode(self):
