@@ -75,6 +75,8 @@ class Device(object):
         self.ignore_ad = ignore_ad
 
         self.u2 = uiautomator2.connect(self.serial)
+        # disable keyboard
+        self.u2.set_fastinput_ime(True)
 
         # basic device information
         self.settings = {}
