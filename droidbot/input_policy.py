@@ -161,6 +161,10 @@ class InputPolicy(object):
             self.action_count += 1
         if self.reach_target_during_exploration:
             self.logger.info("------------ reach the target state during exploration")
+        else:
+            self.logger.info(
+                "------------ not reach the target state during exploration"
+            )
 
     @abstractmethod
     def generate_event(self):
@@ -612,7 +616,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.number_of_steps_outside_the_shortest_path = 0
         self.reached_state_on_the_shortest_path = []
 
-        self.reach_target_during_exploration = False
+        # self.reach_target_during_exploration = False
 
         # used in diverse phase
         self.path_index = -1  # currently explore path index
