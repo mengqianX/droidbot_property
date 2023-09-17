@@ -654,6 +654,10 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
                 self.fail_path.append(self.path_index)
                 self.path_index += 1
                 self.step_in_each_path = 0
+                self.logger.info(
+                    "give up current path: %d, because it explore too many steps"
+                    % self.path_index
+                )
                 return self.stop_app_events()
 
             for curren_state_structure, next_state_structure, event in self.paths[
