@@ -70,7 +70,6 @@ class InputPolicy(object):
         self.master = None
         self.android_check = android_check
         self.input_manager = None
-        self.reach_target_during_exploration = False
 
     def run_initial_rules(self):
         if len(self.android_check.initialize_rules()) == 0:
@@ -165,6 +164,8 @@ class InputPolicy(object):
             self.logger.info(
                 "------------ not reach the target state during exploration"
             )
+        self.logger.info("finish explore all paths: %d", len(self.paths))
+        self.logger.info("number of fail paths: %d", len(self.fail_path))
 
     @abstractmethod
     def generate_event(self):
@@ -616,7 +617,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.number_of_steps_outside_the_shortest_path = 0
         self.reached_state_on_the_shortest_path = []
 
-        # self.reach_target_during_exploration = False
+        self.reach_target_during_exploration = False
 
         # used in diverse phase
         self.path_index = -1  # currently explore path index
