@@ -164,7 +164,7 @@ class InputPolicy(object):
             self.logger.info(
                 "------------ not reach the target state during exploration"
             )
-        self.logger.info("finish explore all paths: %d", len(self.paths))
+        self.logger.info("all path lengths: %d", len(self.paths))
         self.logger.info("number of fail paths: %d", len(self.fail_path))
 
     @abstractmethod
