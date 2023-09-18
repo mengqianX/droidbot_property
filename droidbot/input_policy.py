@@ -381,6 +381,9 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
                     self.step_in_each_path += 1
                     next_event = event
                     self.logger.info("find next event in the %d path" % self.path_index)
+                    self.logger.info(
+                        "next state structure in the path: %s" % next_state_structure
+                    )
                     return next_event
             # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
             self.logger.info("cannot find next event in the %d path" % self.path_index)
