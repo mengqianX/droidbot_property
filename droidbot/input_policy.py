@@ -165,6 +165,7 @@ class InputPolicy(object):
                 "------------ not reach the target state during exploration"
             )
         self.logger.info("all path lengths: %d", len(self.paths))
+        self.logger.info("number of success paths: %d", len(self.success_path))
         self.logger.info("number of fail paths: %d", len(self.fail_path))
 
     @abstractmethod
@@ -325,6 +326,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         # whether reach target state, if true, we start next paths.
         # self.reach_target_after_last_event = False
         self.fail_path = []
+        self.success_path = []
         self.step_in_each_path = 0
 
     def stop_app_events(self):
@@ -353,6 +355,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
 
         # 如果已经到达target state，则重启app ，换下一条path
         if reach_target_after_last_event:
+            self.success_path.append(self.path_index)
             self.path_index += 1
             self.step_in_each_path = 0
             return self.stop_app_events()
@@ -361,13 +364,14 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         if self.path_index < len(self.paths):
             # 为了防止走入一个死循环，如果在当前path中走的步数超过了当前path的长度的2倍，则放弃当前path
             if self.step_in_each_path > len(self.paths[self.path_index]) * 2:
-                self.fail_path.append(self.path_index)
-                self.path_index += 1
-                self.step_in_each_path = 0
                 self.logger.info(
                     "give up current path: %d, because it explore too many steps"
                     % self.path_index
                 )
+                self.fail_path.append(self.path_index)
+                self.path_index += 1
+                self.step_in_each_path = 0
+
                 return self.stop_app_events()
 
             for curren_state_structure, next_state_structure, event in self.paths[
