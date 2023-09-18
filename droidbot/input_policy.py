@@ -269,306 +269,6 @@ class UtgBasedInputPolicy(InputPolicy):
         pass
 
 
-class UtgRandomPolicy(UtgBasedInputPolicy):
-    """
-    random input policy based on UTG
-    """
-
-    def __init__(self, device, app, random_input=True, android_check=None, guide=None):
-        super(UtgRandomPolicy, self).__init__(
-            device, app, random_input, android_check, guide
-        )
-        self.logger = logging.getLogger(self.__class__.__name__)
-
-        self.preferred_buttons = [
-            "yes",
-            "ok",
-            "activate",
-            "detail",
-            "more",
-            "access",
-            "allow",
-            "check",
-            "agree",
-            "try",
-            "go",
-            "next",
-        ]
-
-        self.__nav_target = None
-        self.__nav_num_steps = -1
-        self.__num_restarts = 0
-        self.__num_steps_outside = 0
-        self.__event_trace = ""
-        self.__missed_states = set()
-        self.__random_explore = False
-
-        self.guide = guide
-        # yiheng: add a new variable to record the current explore mode
-        # if mode = GUIDE, it means we didn't encounter the target state,
-        #   so we choose to guide the exploration to the target state.
-        # if mode = DIVERSE, it means we have encountered the target state,
-        #   we choose to explore the app in order to generate more states to encounter the target state.
-        self.explore_mode = GUIDE
-        self.number_of_steps_outside_the_shortest_path = 0
-        self.reached_state_on_the_shortest_path = []
-
-    def generate_event_based_on_utg(self):
-        """
-        generate an event based on current UTG
-        @return: InputEvent
-        """
-        current_state = self.current_state
-        self.logger.info("Current state: %s" % current_state.state_str)
-        if current_state.state_str in self.__missed_states:
-            self.__missed_states.remove(current_state.state_str)
-
-        if current_state.get_app_activity_depth(self.app) < 0:
-            # If the app is not in the activity stack
-            start_app_intent = self.app.get_start_intent()
-
-            # It seems the app stucks at some state, has been
-            # 1) force stopped (START, STOP)
-            #    just start the app again by increasing self.__num_restarts
-            # 2) started at least once and cannot be started (START)
-            #    pass to let viewclient deal with this case
-            # 3) nothing
-            #    a normal start. clear self.__num_restarts.
-
-            if self.__event_trace.endswith(
-                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
-            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
-                self.__num_restarts += 1
-                self.logger.info(
-                    "The app had been restarted %d times.", self.__num_restarts
-                )
-            else:
-                self.__num_restarts = 0
-
-            # pass (START) through
-            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
-                if self.__num_restarts > MAX_NUM_RESTARTS:
-                    # If the app had been restarted too many times, enter random mode
-                    msg = "The app had been restarted too many times. Entering random mode."
-                    self.logger.info(msg)
-                    self.__random_explore = True
-                else:
-                    # Start the app
-                    self.__event_trace += EVENT_FLAG_START_APP
-                    self.logger.info("Trying to start the app...")
-                    return IntentEvent(intent=start_app_intent)
-
-        elif current_state.get_app_activity_depth(self.app) > 0:
-            # If the app is in activity stack but is not in foreground
-            self.__num_steps_outside += 1
-
-            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
-                # If the app has not been in foreground for too long, try to go back
-                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
-                    stop_app_intent = self.app.get_stop_intent()
-                    go_back_event = IntentEvent(stop_app_intent)
-                else:
-                    go_back_event = KeyEvent(name="BACK")
-                self.__event_trace += EVENT_FLAG_NAVIGATE
-                self.logger.info("Going back to the app...")
-                return go_back_event
-        else:
-            # If the app is in foreground
-            self.__num_steps_outside = 0
-
-        # if self.guide:
-        #     event = self.guide_the_exploration()
-        #     if event is not None:
-        #         return event
-        if self.guide:
-            if self.device.get_activity_short_name() == self.guide.target_activity:
-                raise InputInterruptedException("Target state reached.")
-        # Get all possible input events
-        possible_events = current_state.get_possible_input()
-
-        if self.random_input:
-            random.shuffle(possible_events)
-        possible_events.append(KeyEvent(name="BACK"))
-
-        self.__event_trace += EVENT_FLAG_EXPLORE
-        return random.choice(possible_events)
-
-
-class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
-    """
-    depth-first strategy to explore UFG (old)
-    """
-
-    def __init__(self, device, app, random_input, search_method):
-        super(UtgNaiveSearchPolicy, self).__init__(device, app, random_input)
-        self.logger = logging.getLogger(self.__class__.__name__)
-
-        self.explored_views = set()
-        self.state_transitions = set()
-        self.search_method = search_method
-
-        self.last_event_flag = ""
-        self.last_event_str = None
-        self.last_state = None
-
-        self.preferred_buttons = [
-            "yes",
-            "ok",
-            "activate",
-            "detail",
-            "more",
-            "access",
-            "allow",
-            "check",
-            "agree",
-            "try",
-            "go",
-            "next",
-        ]
-
-    def generate_event_based_on_utg(self):
-        """
-        generate an event based on current device state
-        note: ensure these fields are properly maintained in each transaction:
-          last_event_flag, last_touched_view, last_state, exploited_views, state_transitions
-        @return: InputEvent
-        """
-        self.save_state_transition(
-            self.last_event_str, self.last_state, self.current_state
-        )
-
-        if self.device.is_foreground(self.app):
-            # the app is in foreground, clear last_event_flag
-            self.last_event_flag = EVENT_FLAG_STARTED
-        else:
-            number_of_starts = self.last_event_flag.count(EVENT_FLAG_START_APP)
-            # If we have tried too many times but the app is still not started, stop DroidBot
-            if number_of_starts > MAX_NUM_RESTARTS:
-                raise InputInterruptedException("The app cannot be started.")
-
-            # if app is not started, try start it
-            if self.last_event_flag.endswith(EVENT_FLAG_START_APP):
-                # It seems the app stuck at some state, and cannot be started
-                # just pass to let viewclient deal with this case
-                self.logger.info(
-                    "The app had been restarted %d times.", number_of_starts
-                )
-                self.logger.info("Trying to restart app...")
-                pass
-            else:
-                start_app_intent = self.app.get_start_intent()
-
-                self.last_event_flag += EVENT_FLAG_START_APP
-                self.last_event_str = EVENT_FLAG_START_APP
-                return IntentEvent(start_app_intent)
-
-        # select a view to click
-        view_to_touch = self.select_a_view(self.current_state)
-
-        # if no view can be selected, restart the app
-        if view_to_touch is None:
-            stop_app_intent = self.app.get_stop_intent()
-            self.last_event_flag += EVENT_FLAG_STOP_APP
-            self.last_event_str = EVENT_FLAG_STOP_APP
-            return IntentEvent(stop_app_intent)
-
-        view_to_touch_str = view_to_touch['view_str']
-        if view_to_touch_str.startswith('BACK'):
-            result = KeyEvent('BACK')
-        else:
-            result = TouchEvent(view=view_to_touch)
-
-        self.last_event_flag += EVENT_FLAG_TOUCH
-        self.last_event_str = view_to_touch_str
-        self.save_explored_view(self.current_state, self.last_event_str)
-        return result
-
-    def select_a_view(self, state):
-        """
-        select a view in the view list of given state, let droidbot touch it
-        @param state: DeviceState
-        @return:
-        """
-        views = []
-        for view in state.views:
-            if view['enabled'] and len(view['children']) == 0:
-                views.append(view)
-
-        if self.random_input:
-            random.shuffle(views)
-
-        # add a "BACK" view, consider go back first/last according to search policy
-        mock_view_back = {
-            'view_str': 'BACK_%s' % state.foreground_activity,
-            'text': 'BACK_%s' % state.foreground_activity,
-        }
-        if self.search_method == POLICY_NAIVE_DFS:
-            views.append(mock_view_back)
-        elif self.search_method == POLICY_NAIVE_BFS:
-            views.insert(0, mock_view_back)
-
-        # first try to find a preferable view
-        for view in views:
-            view_text = view['text'] if view['text'] is not None else ''
-            view_text = view_text.lower().strip()
-            if (
-                view_text in self.preferred_buttons
-                and (state.foreground_activity, view['view_str'])
-                not in self.explored_views
-            ):
-                self.logger.info("selected an preferred view: %s" % view['view_str'])
-                return view
-
-        # try to find a un-clicked view
-        for view in views:
-            if (state.foreground_activity, view['view_str']) not in self.explored_views:
-                self.logger.info("selected an un-clicked view: %s" % view['view_str'])
-                return view
-
-        # if all enabled views have been clicked, try jump to another activity by clicking one of state transitions
-        if self.random_input:
-            random.shuffle(views)
-        transition_views = {transition[0] for transition in self.state_transitions}
-        for view in views:
-            if view['view_str'] in transition_views:
-                self.logger.info("selected a transition view: %s" % view['view_str'])
-                return view
-
-        # no window transition found, just return a random view
-        # view = views[0]
-        # self.logger.info("selected a random view: %s" % view['view_str'])
-        # return view
-
-        # DroidBot stuck on current state, return None
-        self.logger.info("no view could be selected in state: %s" % state.tag)
-        return None
-
-    def save_state_transition(self, event_str, old_state, new_state):
-        """
-        save the state transition
-        @param event_str: str, representing the event cause the transition
-        @param old_state: DeviceState
-        @param new_state: DeviceState
-        @return:
-        """
-        if event_str is None or old_state is None or new_state is None:
-            return
-        if new_state.is_different_from(old_state):
-            self.state_transitions.add((event_str, old_state.tag, new_state.tag))
-
-    def save_explored_view(self, state, view_str):
-        """
-        save the explored view
-        @param state: DeviceState, where the view located
-        @param view_str: str, representing a view
-        @return:
-        """
-        if not state:
-            return
-        state_activity = state.foreground_activity
-        self.explored_views.add((state_activity, view_str))
-
-
 class PbtFuzzingPolicy(UtgBasedInputPolicy):
     """
     DFS/BFS (according to search_method) strategy to explore UFG (new)
@@ -623,7 +323,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.path_index = -1  # currently explore path index
         self.paths = []  # paths from start state to target state
         # whether reach target state, if true, we start next paths.
-        self.reach_target_during_diverse = False
+        # self.reach_target_after_last_event = False
         self.fail_path = []
         self.step_in_each_path = 0
 
@@ -636,11 +336,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
 
     def guide_diverse_mode(self):
         next_event = None
-        self.reach_target_during_diverse = (
-            True
-            if self.current_state.state_str == self.utg.target_state.state_str
-            else False
-        )
+
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
             self.paths = self.utg.get_paths_to_state(
@@ -649,8 +345,14 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             self.path_index = 0
             self.step_in_each_path = 0
 
+        reach_target_after_last_event = (
+            True
+            if self.current_state.state_str == self.utg.target_state.state_str
+            else False
+        )
+
         # 如果已经到达target state，则重启app ，换下一条path
-        if self.reach_target_during_diverse:
+        if reach_target_after_last_event:
             self.path_index += 1
             self.step_in_each_path = 0
             return self.stop_app_events()
@@ -1064,3 +766,303 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.__nav_target = None
         self.__nav_num_steps = -1
         return None
+
+
+class UtgRandomPolicy(UtgBasedInputPolicy):
+    """
+    random input policy based on UTG
+    """
+
+    def __init__(self, device, app, random_input=True, android_check=None, guide=None):
+        super(UtgRandomPolicy, self).__init__(
+            device, app, random_input, android_check, guide
+        )
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        self.preferred_buttons = [
+            "yes",
+            "ok",
+            "activate",
+            "detail",
+            "more",
+            "access",
+            "allow",
+            "check",
+            "agree",
+            "try",
+            "go",
+            "next",
+        ]
+
+        self.__nav_target = None
+        self.__nav_num_steps = -1
+        self.__num_restarts = 0
+        self.__num_steps_outside = 0
+        self.__event_trace = ""
+        self.__missed_states = set()
+        self.__random_explore = False
+
+        self.guide = guide
+        # yiheng: add a new variable to record the current explore mode
+        # if mode = GUIDE, it means we didn't encounter the target state,
+        #   so we choose to guide the exploration to the target state.
+        # if mode = DIVERSE, it means we have encountered the target state,
+        #   we choose to explore the app in order to generate more states to encounter the target state.
+        self.explore_mode = GUIDE
+        self.number_of_steps_outside_the_shortest_path = 0
+        self.reached_state_on_the_shortest_path = []
+
+    def generate_event_based_on_utg(self):
+        """
+        generate an event based on current UTG
+        @return: InputEvent
+        """
+        current_state = self.current_state
+        self.logger.info("Current state: %s" % current_state.state_str)
+        if current_state.state_str in self.__missed_states:
+            self.__missed_states.remove(current_state.state_str)
+
+        if current_state.get_app_activity_depth(self.app) < 0:
+            # If the app is not in the activity stack
+            start_app_intent = self.app.get_start_intent()
+
+            # It seems the app stucks at some state, has been
+            # 1) force stopped (START, STOP)
+            #    just start the app again by increasing self.__num_restarts
+            # 2) started at least once and cannot be started (START)
+            #    pass to let viewclient deal with this case
+            # 3) nothing
+            #    a normal start. clear self.__num_restarts.
+
+            if self.__event_trace.endswith(
+                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                self.__num_restarts += 1
+                self.logger.info(
+                    "The app had been restarted %d times.", self.__num_restarts
+                )
+            else:
+                self.__num_restarts = 0
+
+            # pass (START) through
+            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                if self.__num_restarts > MAX_NUM_RESTARTS:
+                    # If the app had been restarted too many times, enter random mode
+                    msg = "The app had been restarted too many times. Entering random mode."
+                    self.logger.info(msg)
+                    self.__random_explore = True
+                else:
+                    # Start the app
+                    self.__event_trace += EVENT_FLAG_START_APP
+                    self.logger.info("Trying to start the app...")
+                    return IntentEvent(intent=start_app_intent)
+
+        elif current_state.get_app_activity_depth(self.app) > 0:
+            # If the app is in activity stack but is not in foreground
+            self.__num_steps_outside += 1
+
+            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
+                # If the app has not been in foreground for too long, try to go back
+                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
+                    stop_app_intent = self.app.get_stop_intent()
+                    go_back_event = IntentEvent(stop_app_intent)
+                else:
+                    go_back_event = KeyEvent(name="BACK")
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                self.logger.info("Going back to the app...")
+                return go_back_event
+        else:
+            # If the app is in foreground
+            self.__num_steps_outside = 0
+
+        # if self.guide:
+        #     event = self.guide_the_exploration()
+        #     if event is not None:
+        #         return event
+        if self.guide:
+            if self.device.get_activity_short_name() == self.guide.target_activity:
+                raise InputInterruptedException("Target state reached.")
+        # Get all possible input events
+        possible_events = current_state.get_possible_input()
+
+        if self.random_input:
+            random.shuffle(possible_events)
+        possible_events.append(KeyEvent(name="BACK"))
+
+        self.__event_trace += EVENT_FLAG_EXPLORE
+        return random.choice(possible_events)
+
+
+class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
+    """
+    depth-first strategy to explore UFG (old)
+    """
+
+    def __init__(self, device, app, random_input, search_method):
+        super(UtgNaiveSearchPolicy, self).__init__(device, app, random_input)
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        self.explored_views = set()
+        self.state_transitions = set()
+        self.search_method = search_method
+
+        self.last_event_flag = ""
+        self.last_event_str = None
+        self.last_state = None
+
+        self.preferred_buttons = [
+            "yes",
+            "ok",
+            "activate",
+            "detail",
+            "more",
+            "access",
+            "allow",
+            "check",
+            "agree",
+            "try",
+            "go",
+            "next",
+        ]
+
+    def generate_event_based_on_utg(self):
+        """
+        generate an event based on current device state
+        note: ensure these fields are properly maintained in each transaction:
+          last_event_flag, last_touched_view, last_state, exploited_views, state_transitions
+        @return: InputEvent
+        """
+        self.save_state_transition(
+            self.last_event_str, self.last_state, self.current_state
+        )
+
+        if self.device.is_foreground(self.app):
+            # the app is in foreground, clear last_event_flag
+            self.last_event_flag = EVENT_FLAG_STARTED
+        else:
+            number_of_starts = self.last_event_flag.count(EVENT_FLAG_START_APP)
+            # If we have tried too many times but the app is still not started, stop DroidBot
+            if number_of_starts > MAX_NUM_RESTARTS:
+                raise InputInterruptedException("The app cannot be started.")
+
+            # if app is not started, try start it
+            if self.last_event_flag.endswith(EVENT_FLAG_START_APP):
+                # It seems the app stuck at some state, and cannot be started
+                # just pass to let viewclient deal with this case
+                self.logger.info(
+                    "The app had been restarted %d times.", number_of_starts
+                )
+                self.logger.info("Trying to restart app...")
+                pass
+            else:
+                start_app_intent = self.app.get_start_intent()
+
+                self.last_event_flag += EVENT_FLAG_START_APP
+                self.last_event_str = EVENT_FLAG_START_APP
+                return IntentEvent(start_app_intent)
+
+        # select a view to click
+        view_to_touch = self.select_a_view(self.current_state)
+
+        # if no view can be selected, restart the app
+        if view_to_touch is None:
+            stop_app_intent = self.app.get_stop_intent()
+            self.last_event_flag += EVENT_FLAG_STOP_APP
+            self.last_event_str = EVENT_FLAG_STOP_APP
+            return IntentEvent(stop_app_intent)
+
+        view_to_touch_str = view_to_touch['view_str']
+        if view_to_touch_str.startswith('BACK'):
+            result = KeyEvent('BACK')
+        else:
+            result = TouchEvent(view=view_to_touch)
+
+        self.last_event_flag += EVENT_FLAG_TOUCH
+        self.last_event_str = view_to_touch_str
+        self.save_explored_view(self.current_state, self.last_event_str)
+        return result
+
+    def select_a_view(self, state):
+        """
+        select a view in the view list of given state, let droidbot touch it
+        @param state: DeviceState
+        @return:
+        """
+        views = []
+        for view in state.views:
+            if view['enabled'] and len(view['children']) == 0:
+                views.append(view)
+
+        if self.random_input:
+            random.shuffle(views)
+
+        # add a "BACK" view, consider go back first/last according to search policy
+        mock_view_back = {
+            'view_str': 'BACK_%s' % state.foreground_activity,
+            'text': 'BACK_%s' % state.foreground_activity,
+        }
+        if self.search_method == POLICY_NAIVE_DFS:
+            views.append(mock_view_back)
+        elif self.search_method == POLICY_NAIVE_BFS:
+            views.insert(0, mock_view_back)
+
+        # first try to find a preferable view
+        for view in views:
+            view_text = view['text'] if view['text'] is not None else ''
+            view_text = view_text.lower().strip()
+            if (
+                view_text in self.preferred_buttons
+                and (state.foreground_activity, view['view_str'])
+                not in self.explored_views
+            ):
+                self.logger.info("selected an preferred view: %s" % view['view_str'])
+                return view
+
+        # try to find a un-clicked view
+        for view in views:
+            if (state.foreground_activity, view['view_str']) not in self.explored_views:
+                self.logger.info("selected an un-clicked view: %s" % view['view_str'])
+                return view
+
+        # if all enabled views have been clicked, try jump to another activity by clicking one of state transitions
+        if self.random_input:
+            random.shuffle(views)
+        transition_views = {transition[0] for transition in self.state_transitions}
+        for view in views:
+            if view['view_str'] in transition_views:
+                self.logger.info("selected a transition view: %s" % view['view_str'])
+                return view
+
+        # no window transition found, just return a random view
+        # view = views[0]
+        # self.logger.info("selected a random view: %s" % view['view_str'])
+        # return view
+
+        # DroidBot stuck on current state, return None
+        self.logger.info("no view could be selected in state: %s" % state.tag)
+        return None
+
+    def save_state_transition(self, event_str, old_state, new_state):
+        """
+        save the state transition
+        @param event_str: str, representing the event cause the transition
+        @param old_state: DeviceState
+        @param new_state: DeviceState
+        @return:
+        """
+        if event_str is None or old_state is None or new_state is None:
+            return
+        if new_state.is_different_from(old_state):
+            self.state_transitions.add((event_str, old_state.tag, new_state.tag))
+
+    def save_explored_view(self, state, view_str):
+        """
+        save the explored view
+        @param state: DeviceState, where the view located
+        @param view_str: str, representing a view
+        @return:
+        """
+        if not state:
+            return
+        state_activity = state.foreground_activity
+        self.explored_views.add((state_activity, view_str))
