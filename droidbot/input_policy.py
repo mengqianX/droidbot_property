@@ -84,7 +84,7 @@ class InputPolicy(object):
                 self.logger.info("-------initialize failed-----------")
 
     def check_rule_with_precondition(self):
-        rules_to_check = self.android_check.check_rules_with_preconditions()
+        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         if len(rules_to_check) == 0:
             print("No rules match the precondition")
             # execute event from policy
@@ -103,10 +103,10 @@ class InputPolicy(object):
             print("-------rule execute failed-----------")
 
     def check_rule_without_precondition(self):
-        rules_to_check = self.android_check.rules_without_preconditions()
+        rules_to_check = self.android_check.get_rules_without_preconditions()
         if len(rules_to_check) > 0:
             result = self.android_check.execute_rules(
-                self.android_check.rules_without_preconditions()
+                self.android_check.get_rules_without_preconditions()
             )
             if result:
                 print("-------rule_without_precondition execute success-----------")
@@ -399,7 +399,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
 
     def guide_explore_mode(self):
         # 首先，判断是否到达target state
-        rules_satisfy_precondition = self.android_check.check_rules_with_preconditions()
+        rules_satisfy_precondition = self.android_check.get_rules_that_pass_the_preconditions()
         if len(rules_satisfy_precondition) > 0:
             self.logger.info("has rule that matches the precondition")
             self.utg.set_target_state(self.current_state)
@@ -611,7 +611,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             self.__num_steps_outside = 0
 
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
-        rules_satisfy_precondition = self.android_check.check_rules_with_preconditions()
+        rules_satisfy_precondition = self.android_check.get_rules_that_pass_the_preconditions()
         if len(rules_satisfy_precondition) > 0:
             self.logger.info("has rule that matches the precondition")
             self.reach_target_during_exploration = True

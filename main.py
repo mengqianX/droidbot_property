@@ -232,37 +232,37 @@ class AndroidCheck(object):
             return False
         except AssertionError:
             print("Assertion error.")
-            write_rule_result(
-                f"Assertion error::{rule.function.__name__} failed",
-                self.fuzzing.current_event,
-                self.fuzzing.current_rule_event,
-                self.execute_event,
-                self.fuzzing.read_trace,
-            )
-            write_bug_record(
-                self.fuzzing.current_testcase,
-                self.fuzzing.current_event,
-                self.fuzzing.current_rule_event,
-                self.execute_event,
-                self.fuzzing.bug_record_path,
-                self.fuzzing.bug_num,
-            )
-            self.fuzzing.device.save_rule_state(
-                self.fuzzing.result_path,
-                self.fuzzing.current_testcase,
-                self.fuzzing.current_event,
-                self.fuzzing.current_rule_event,
-            )
-            self.fuzzing.current_rule_event = 0
-            self.fuzzing.find_bug = True
-            # self.fuzzing.current_event = self.fuzzing.current_event + 1
+            # write_rule_result(
+            #     f"Assertion error::{rule.function.__name__} failed",
+            #     self.fuzzing.current_event,
+            #     self.fuzzing.current_rule_event,
+            #     self.execute_event,
+            #     self.fuzzing.read_trace,
+            # )
+            # write_bug_record(
+            #     self.fuzzing.current_testcase,
+            #     self.fuzzing.current_event,
+            #     self.fuzzing.current_rule_event,
+            #     self.execute_event,
+            #     self.fuzzing.bug_record_path,
+            #     self.fuzzing.bug_num,
+            # )
+            # self.fuzzing.device.save_rule_state(
+            #     self.fuzzing.result_path,
+            #     self.fuzzing.current_testcase,
+            #     self.fuzzing.current_event,
+            #     self.fuzzing.current_rule_event,
+            # )
+            # self.fuzzing.current_rule_event = 0
+            # self.fuzzing.find_bug = True
+            # # self.fuzzing.current_event = self.fuzzing.current_event + 1
             return False
         finally:
             result = True
 
         return result
 
-    def check_rules_with_preconditions(self) -> List:
+    def get_rules_that_pass_the_preconditions(self) -> List:
         '''Check all rules and return the list of rules that meet the preconditions.'''
         rules_to_check = self.rules()
         rules_meeting_preconditions = []
@@ -270,10 +270,9 @@ class AndroidCheck(object):
             if len(rule_to_check.preconditions) > 0:
                 if all(precond(self) for precond in rule_to_check.preconditions):
                     rules_meeting_preconditions.append(rule_to_check)
-        # self.device.uiautomator.stop()
         return rules_meeting_preconditions
 
-    def rules_without_preconditions(self):
+    def get_rules_without_preconditions(self):
         '''Return the list of rules that do not have preconditions.'''
         rules_to_check = self.rules()
         rules_without_preconditions = []
