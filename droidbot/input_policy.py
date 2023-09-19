@@ -360,12 +360,10 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             )
             self.path_index = 0
             self.step_in_each_path = 0
-
-        reach_target_after_last_event = (
-            True
-            if self.current_state.state_str == self.utg.target_state.state_str
-            else False
-        )
+        reach_target_after_last_event = False
+        if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
+            self.logger.info("has rule that matches the precondition during diverse")
+            reach_target_after_last_event = True
 
         # 如果已经到达target state，则重启app ，换下一条path
         if reach_target_after_last_event:
