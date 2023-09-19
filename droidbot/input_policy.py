@@ -138,7 +138,7 @@ class InputPolicy(object):
             len(self.reach_precondition_path_number),
         )
         self.logger.info(
-            "number of reach precondition paths: %d",
+            "number of not reach precondition paths: %d",
             len(self.not_reach_precondition_path_number),
         )
         self.logger.info(
