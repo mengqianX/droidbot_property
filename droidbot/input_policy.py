@@ -355,9 +355,13 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
 
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
+            # 获取从first state 到 target state的path
             self.paths = self.utg.get_paths_to_state(
                 self.utg.first_state, self.utg.target_state
             )
+            # 重新安装app，防止之前的状态影响当前的探索
+            self.device.uninstall_app(self.app)
+            self.device.install_app(self.app)
             self.path_index = 0
             self.step_in_each_path = 0
 
