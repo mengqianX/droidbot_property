@@ -78,42 +78,10 @@ class InputPolicy(object):
             result = self.android_check.execute_rules(
                 self.android_check.initialize_rules()
             )
-            if result == True:
+            if result:
                 self.logger.info("-------initialize successfully-----------")
             else:
                 self.logger.info("-------initialize failed-----------")
-
-    def check_rule_with_precondition(self):
-        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
-        if len(rules_to_check) == 0:
-            print("No rules match the precondition")
-            # execute event from policy
-            # self.execute_policy_event()
-            return
-            # continue
-        rule_to_check = random.choice(rules_to_check)
-
-        result = True
-        if rule_to_check is not None:
-            result = self.android_check.execute_rule(rule_to_check)
-        if result:
-            print("-------check rule : pass------")
-        else:
-            # write_rule_result(f"{rule_to_check.function.__name__} rule failed", self.current_event, self.current_rule_event, None, self.read_trace)
-            print("-------rule execute failed-----------")
-
-    def check_rule_without_precondition(self):
-        rules_to_check = self.android_check.get_rules_without_preconditions()
-        if len(rules_to_check) > 0:
-            result = self.android_check.execute_rules(
-                self.android_check.get_rules_without_preconditions()
-            )
-            if result:
-                print("-------rule_without_precondition execute success-----------")
-            else:
-                print("-------rule_without_precondition execute failed-----------")
-        else:
-            print("-------no rule_without_precondition to execute-----------")
 
     def start(self, input_manager):
         """
@@ -165,8 +133,20 @@ class InputPolicy(object):
                 "------------ not reach the target state during exploration"
             )
         self.logger.info("all path lengths: %d", len(self.paths))
-        self.logger.info("number of success paths: %d", len(self.success_path))
-        self.logger.info("number of fail paths: %d", len(self.fail_path))
+        self.logger.info(
+            "number of reach precondition paths: %d",
+            len(self.reach_precondition_path_number),
+        )
+        self.logger.info(
+            "number of reach precondition paths: %d",
+            len(self.not_reach_precondition_path_number),
+        )
+        self.logger.info(
+            "number of pass rule paths: %d", len(self.pass_rule_path_number)
+        )
+        self.logger.info(
+            "number of fail rule paths: %d", len(self.fail_rule_path_number)
+        )
 
     @abstractmethod
     def generate_event(self):
@@ -325,9 +305,43 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.paths = []  # paths from start state to target state
         # whether reach target state, if true, we start next paths.
         # self.reach_target_after_last_event = False
-        self.fail_path = []
-        self.success_path = []
+        self.not_reach_precondition_path_number = []
+        self.reach_precondition_path_number = []
+        self.pass_rule_path_number = []
+        self.fail_rule_path_number = []
         self.step_in_each_path = 0
+
+    def check_rule_with_precondition(self):
+        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+        if len(rules_to_check) == 0:
+            print("No rules match the precondition")
+            # execute event from policy
+            # self.execute_policy_event()
+            return
+            # continue
+        rule_to_check = random.choice(rules_to_check)
+
+        if rule_to_check is not None:
+            result = self.android_check.execute_rule(rule_to_check)
+            if result:
+                print("-------check rule : pass------")
+                self.pass_rule_path_number.append(self.path_index)
+            else:
+                print("-------rule execute failed-----------")
+                self.fail_rule_path_number.append(self.path_index)
+
+    def check_rule_without_precondition(self):
+        rules_to_check = self.android_check.get_rules_without_preconditions()
+        if len(rules_to_check) > 0:
+            result = self.android_check.execute_rules(
+                self.android_check.get_rules_without_preconditions()
+            )
+            if result:
+                print("-------rule_without_precondition execute success-----------")
+            else:
+                print("-------rule_without_precondition execute failed-----------")
+        else:
+            print("-------no rule_without_precondition to execute-----------")
 
     def stop_app_events(self):
         self.logger.info("reach the target state, restart the app")
@@ -355,7 +369,9 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
 
         # 如果已经到达target state，则重启app ，换下一条path
         if reach_target_after_last_event:
-            self.success_path.append(self.path_index)
+            # 检查rule是否被满足
+            self.check_rule_with_precondition()
+            self.reach_precondition_path_number.append(self.path_index)
             self.path_index += 1
             self.step_in_each_path = 0
             return self.stop_app_events()
@@ -368,7 +384,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
                     "give up current path: %d, because it explore too many steps"
                     % self.path_index
                 )
-                self.fail_path.append(self.path_index)
+                self.not_reach_precondition_path_number.append(self.path_index)
                 self.path_index += 1
                 self.step_in_each_path = 0
 
@@ -387,19 +403,23 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
                     return next_event
             # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
             self.logger.info("cannot find next event in the %d path" % self.path_index)
-            self.fail_path.append(self.path_index)
+            self.not_reach_precondition_path_number.append(self.path_index)
             self.path_index += 1
             return self.stop_app_events()
         else:
             self.step_in_each_path = 0
             self.logger.info("finish explore all paths: %d", len(self.paths))
-            self.logger.info("number of fail paths: %d", len(self.fail_path))
+            self.logger.info(
+                "number of fail paths: %d", len(self.not_reach_precondition_path_number)
+            )
             raise Exception("finish all paths and stop")
         return None
 
     def guide_explore_mode(self):
         # 首先，判断是否到达target state
-        rules_satisfy_precondition = self.android_check.get_rules_that_pass_the_preconditions()
+        rules_satisfy_precondition = (
+            self.android_check.get_rules_that_pass_the_preconditions()
+        )
         if len(rules_satisfy_precondition) > 0:
             self.logger.info("has rule that matches the precondition")
             self.utg.set_target_state(self.current_state)
@@ -611,7 +631,9 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             self.__num_steps_outside = 0
 
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
-        rules_satisfy_precondition = self.android_check.get_rules_that_pass_the_preconditions()
+        rules_satisfy_precondition = (
+            self.android_check.get_rules_that_pass_the_preconditions()
+        )
         if len(rules_satisfy_precondition) > 0:
             self.logger.info("has rule that matches the precondition")
             self.reach_target_during_exploration = True
