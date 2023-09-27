@@ -541,3 +541,39 @@ class DeviceState(object):
 
         self.possible_events = possible_events
         return [] + possible_events
+
+    def get_view_by_attribute(self, attribute_dict):
+        """
+        get the veiw that matches the attribute dict
+        :param attribute_dict: the attribute dict
+
+        """
+        view_list = self.views
+
+        for attribute_name, attribute_value in attribute_dict.items():
+            view_list = self.get_view_list_by_atrribute(
+                attribute_name, attribute_value, view_list
+            )
+        if len(view_list) == 0:
+            self.logger.info("No view found for the attribute_dict %s" % attribute_dict)
+
+        return view_list[0]
+
+    def get_view_list_by_atrribute(
+        self, attribute_key, attribute_value, origin_list=None
+    ):
+        """
+        Get the view list by atrribute_name
+        :param attribute_name: the name of the attribute
+        :return: the view list that match the attribute
+        """
+
+        if origin_list is None:
+            origin_list = self.views
+        view_list = []
+        for view in origin_list:
+            if view[attribute_key] == attribute_value:
+                view_list.append(view)
+        if len(view_list) == 0:
+            self.logger.info("No view found for %s" % attribute_value)
+        return view_list

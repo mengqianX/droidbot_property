@@ -2,7 +2,7 @@ import sys
 import json
 import logging
 import random
-
+import copy
 from .utils import safe_get_dict
 from abc import abstractmethod
 
@@ -34,6 +34,7 @@ EVENT_FLAG_NAVIGATE = "+navigate"
 EVENT_FLAG_TOUCH = "+touch"
 
 # Policy taxanomy
+POLICY_MUTATE = "mutate"
 POLICY_PBT = "pbt"
 POLICY_RANDOM = "random"
 POLICY_NAIVE_DFS = "dfs_naive"
@@ -104,6 +105,8 @@ class InputPolicy(object):
                 #     event = IntentEvent(self.app.get_start_intent())
                 if self.action_count == 0 and self.master is None:
                     event = KillAppEvent(app=self.app)
+                elif self.action_count == 1 and self.master is None:
+                    event = IntentEvent(self.app.get_start_intent())
                 else:
                     event = self.generate_event()
                 input_manager.add_event(event)
@@ -250,6 +253,109 @@ class UtgBasedInputPolicy(InputPolicy):
         pass
 
 
+class MutatePolicy(UtgBasedInputPolicy):
+    """
+    测试人员提供一条main path, 然后在main path上进行变异
+    """
+
+    def __init__(self, device, app, random_input, android_check=None, guide=None):
+        super(MutatePolicy, self).__init__(device, app, random_input)
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.main_path = self.get_main_path()
+        self.main_path_list = copy.deepcopy(self.main_path)
+
+    def get_main_path(self):
+        event_list = []
+
+        view1 = {"content_description": "Navigate up"}
+        view1 = self.current_state.get_view_by_attribute(view1)
+        event1 = TouchEvent(view=view1)
+        event_list.append(event1)
+
+        view2 = {"text": "Settings"}
+        view2 = self.current_state.get_view_by_attribute(view2)
+        event2 = TouchEvent(view=view2)
+        event_list.append(event2)
+        return event_list
+
+    def generate_event(self):
+        """
+        首先按照用户指定的path走一遍,然后在path上进行变异
+        """
+        self.current_state = self.device.get_current_state()
+        event = self.get_main_path_event()
+        if event is None:
+            event = self.mutate_the_main_path()
+
+        self.last_state = self.current_state
+        self.last_event = event
+        return event
+
+    def get_main_path_event(self):
+        """ """
+        if len(self.main_path_list) == 0:
+            return None
+        event = self.main_path_list.pop(0)
+        return event
+
+    def mutate_the_main_path(self):
+        event = None
+        if self.mutate_node_index_on_main_path == -1:
+            self.mutate_node_index_on_main_path = len(self.shortest_path_states) - 1
+        # 第1个state 一般是手机home界面，不需要变异,意味着停止变异
+        if self.mutate_node_index_on_main_path == 0:
+            self.logger.info("finish mutate the main path")
+            self.start_mutate_on_the_node = False
+            self.current_number_of_mutate_steps_on_single_node = 0
+            self.stop_mutate = True
+            return self.stop_app_events()
+        # 首先判断是否开始在主路径上进行变异，如果还没开始，则首先要将app引导到开始变异的那个节点
+        if not self.start_mutate_on_the_node:
+            # 如果已经到达目标node，则开始变异
+            if (
+                self.current_state.structure_str
+                == self.shortest_path_states[self.mutate_node_index_on_main_path]
+            ):
+                self.start_mutate_on_the_node = True
+                self.logger.info(
+                    "reach the node and start mutate on the node: %d"
+                    % self.mutate_node_index_on_main_path
+                )
+            # 如果还没到达目标node，则继续引导app到目标node
+            elif self.utg.is_on_shortest_path(self.current_state):
+                event = self.utg.get_G2_nav_action_on_shoretest_path(self.current_state)
+                self.logger.info("select event to next state on the shortest path")
+                return event
+            # 如果当前state不在shortest path上, 则重新启动吧
+            else:
+                event = self.stop_app_events()
+                self.logger.info(
+                    "current state is not on the shortest path, restart the app"
+                )
+                return event
+
+        # 如果已经开始在主路径上进行变异，则继续变异
+        # 只允许最多变异N步，如果超过N步，则重新启动app,选择下一个变异的Node
+        if (
+            self.current_number_of_mutate_steps_on_single_node
+            > self.max_number_of_mutate_steps_on_single_node
+        ):
+            self.logger.info(
+                "reach the max number of mutate steps on single node, restart the app"
+            )
+            self.start_mutate_on_the_node = False
+            self.mutate_node_index_on_main_path -= 1
+            self.current_number_of_mutate_steps_on_single_node = 0
+            return self.stop_app_events()
+        else:
+            self.logger.info(
+                "mutate on the node: %d" % self.mutate_node_index_on_main_path
+            )
+            self.current_number_of_mutate_steps_on_single_node += 1
+            event = self.explore_app()
+            return event
+
+
 class PbtFuzzingPolicy(UtgBasedInputPolicy):
     """
     DFS/BFS (according to search_method) strategy to explore UFG (new)
@@ -311,6 +417,14 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.fail_rule_path_number = []
         self.step_in_each_path = 0
 
+        # used in mutate phase
+        self.mutate_node_index_on_main_path = -1
+        self.start_mutate_on_the_node = False
+        self.shortest_path_states = []
+        self.max_number_of_mutate_steps_on_single_node = 10
+        self.current_number_of_mutate_steps_on_single_node = 0
+        self.stop_mutate = False
+
     def check_rule_with_precondition(self):
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         if len(rules_to_check) == 0:
@@ -344,7 +458,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
             print("-------no rule_without_precondition to execute-----------")
 
     def stop_app_events(self):
-        self.logger.info("reach the target state, restart the app")
+        # self.logger.info("reach the target state, restart the app")
         stop_app_intent = self.app.get_stop_intent()
         stop_event = IntentEvent(stop_app_intent)
         self.logger.info("stop the app and go back to the main activity")
