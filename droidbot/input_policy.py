@@ -502,7 +502,8 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
                 self.step_in_each_path = 0
 
                 return self.stop_app_events()
-
+            
+            self.logger.info("current path length %d " % len(self.paths[self.path_index]))
             for curren_state_structure, next_state_structure, event in self.paths[
                 self.path_index
             ]:
