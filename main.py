@@ -20,13 +20,15 @@ import inspect
 from copy import copy
 from uiautomator2.exceptions import UiObjectNotFoundError
 
-# from event import Event
-# from view import View
-# from util import *
 import time
 
 from droidbot.guide import Guide
 
+from hypothesis import given, strategies as st
+from hypothesis.errors import NonInteractiveExampleWarning
+import warnings
+
+warnings.filterwarnings("ignore", category=NonInteractiveExampleWarning)
 # from uiobject import MyUiObject
 
 
