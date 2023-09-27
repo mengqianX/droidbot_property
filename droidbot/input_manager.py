@@ -111,7 +111,13 @@ class InputManager(object):
                 self.guide,
             )
         elif self.policy_name == POLICY_MUTATE:
-            input_policy = MutatePolicy(device, app, self.random_input)
+            input_policy = MutatePolicy(
+                device,
+                app,
+                self.random_input,
+                self.android_check,
+                self.guide,
+            )
         elif self.policy_name == POLICY_MEMORY_GUIDED:
             from .input_policy2 import MemoryGuidedPolicy
 

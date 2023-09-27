@@ -129,27 +129,27 @@ class InputPolicy(object):
                 traceback.print_exc()
                 break
             self.action_count += 1
-        if self.reach_target_during_exploration:
-            self.logger.info("------------ reach the target state during exploration")
-        else:
-            self.logger.info(
-                "------------ not reach the target state during exploration"
-            )
-        self.logger.info("all path lengths: %d", len(self.paths))
-        self.logger.info(
-            "number of reach precondition paths: %d",
-            len(self.reach_precondition_path_number),
-        )
-        self.logger.info(
-            "number of not reach precondition paths: %d",
-            len(self.not_reach_precondition_path_number),
-        )
-        self.logger.info(
-            "number of pass rule paths: %d", len(self.pass_rule_path_number)
-        )
-        self.logger.info(
-            "number of fail rule paths: %d", len(self.fail_rule_path_number)
-        )
+        # if self.reach_target_during_exploration:
+        #     self.logger.info("------------ reach the target state during exploration")
+        # else:
+        #     self.logger.info(
+        #         "------------ not reach the target state during exploration"
+        #     )
+        # self.logger.info("all path lengths: %d", len(self.paths))
+        # self.logger.info(
+        #     "number of reach precondition paths: %d",
+        #     len(self.reach_precondition_path_number),
+        # )
+        # self.logger.info(
+        #     "number of not reach precondition paths: %d",
+        #     len(self.not_reach_precondition_path_number),
+        # )
+        # self.logger.info(
+        #     "number of pass rule paths: %d", len(self.pass_rule_path_number)
+        # )
+        # self.logger.info(
+        #     "number of fail rule paths: %d", len(self.fail_rule_path_number)
+        # )
 
     @abstractmethod
     def generate_event(self):
@@ -207,6 +207,45 @@ class UtgBasedInputPolicy(InputPolicy):
             self.humanoid_view_trees = []
             self.humanoid_events = []
 
+    def check_rule_with_precondition(self):
+        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+        if len(rules_to_check) == 0:
+            print("No rules match the precondition")
+            # execute event from policy
+            # self.execute_policy_event()
+            return
+            # continue
+        rule_to_check = random.choice(rules_to_check)
+
+        if rule_to_check is not None:
+            result = self.android_check.execute_rule(rule_to_check)
+            if result:
+                print("-------check rule : pass------")
+                self.pass_rule_path_number.append(self.path_index)
+            else:
+                print("-------rule execute failed-----------")
+                self.fail_rule_path_number.append(self.path_index)
+
+    def check_rule_without_precondition(self):
+        rules_to_check = self.android_check.get_rules_without_preconditions()
+        if len(rules_to_check) > 0:
+            result = self.android_check.execute_rules(
+                self.android_check.get_rules_without_preconditions()
+            )
+            if result:
+                print("-------rule_without_precondition execute success-----------")
+            else:
+                print("-------rule_without_precondition execute failed-----------")
+        else:
+            print("-------no rule_without_precondition to execute-----------")
+
+    def stop_app_events(self):
+        # self.logger.info("reach the target state, restart the app")
+        stop_app_intent = self.app.get_stop_intent()
+        stop_event = IntentEvent(stop_app_intent)
+        self.logger.info("stop the app and go back to the main activity")
+        return stop_event
+
     def generate_event(self):
         """
         generate an event
@@ -259,23 +298,51 @@ class MutatePolicy(UtgBasedInputPolicy):
     """
 
     def __init__(self, device, app, random_input, android_check=None, guide=None):
-        super(MutatePolicy, self).__init__(device, app, random_input)
+        super(MutatePolicy, self).__init__(
+            device, app, random_input, android_check, guide
+        )
         self.logger = logging.getLogger(self.__class__.__name__)
+
+        self.__nav_target = None
+        self.__nav_num_steps = -1
+        self.__num_restarts = 0
+        self.__num_steps_outside = 0
+        self.__event_trace = ""
+        self.__missed_states = set()
+        self.__random_explore = False
+
         self.main_path = self.get_main_path()
         self.main_path_list = copy.deepcopy(self.main_path)
+
+        # used in mutate phase
+        self.mutate_node_index_on_main_path = -1
+        self.start_mutate_on_the_node = False
+        self.shortest_path_states = None
+        self.max_number_of_mutate_steps_on_single_node = 10
+        self.current_number_of_mutate_steps_on_single_node = 0
+        self.stop_mutate = False
+
+        # used in diverse phase
+        self.path_index = -1  # currently explore path index
+        self.paths = []  # paths from start state to target state
+        self.not_reach_precondition_path_number = []
+        self.reach_precondition_path_number = []
+        self.pass_rule_path_number = []
+        self.fail_rule_path_number = []
+        self.step_in_each_path = 0
 
     def get_main_path(self):
         event_list = []
 
         view1 = {"content_description": "Navigate up"}
-        view1 = self.current_state.get_view_by_attribute(view1)
-        event1 = TouchEvent(view=view1)
-        event_list.append(event1)
+        # view1 = self.current_state.get_view_by_attribute(view1)
+        # event1 = TouchEvent(view=view1)
+        event_list.append(view1)
 
         view2 = {"text": "Settings"}
-        view2 = self.current_state.get_view_by_attribute(view2)
-        event2 = TouchEvent(view=view2)
-        event_list.append(event2)
+        # view2 = self.current_state.get_view_by_attribute(view2)
+        # event2 = TouchEvent(view=view2)
+        event_list.append(view2)
         return event_list
 
     def generate_event(self):
@@ -283,19 +350,46 @@ class MutatePolicy(UtgBasedInputPolicy):
         首先按照用户指定的path走一遍,然后在path上进行变异
         """
         self.current_state = self.device.get_current_state()
-        event = self.get_main_path_event()
-        if event is None:
-            event = self.mutate_the_main_path()
+
+        self.__update_utg()
+
+        # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
+        rules_satisfy_precondition = (
+            self.android_check.get_rules_that_pass_the_preconditions()
+        )
+        if len(rules_satisfy_precondition) > 0:
+            self.logger.info("has rule that matches the precondition")
+            self.reach_target_during_exploration = True
+            self.utg.set_target_state(self.current_state)
+            if self.shortest_path_states is None:
+                self.shortest_path_states = self.utg.get_states_on_shortest_path()
+
+        else:
+            self.logger.info("no rule matches the precondition")
+
+        # 如果变异停止了，则根据model开始生成diverse path 来测property
+        if self.stop_mutate:
+            event = self.generate_events_from_diverse_paths()
+        else:
+            # 首先，根据用户指定的path，生成一条路径到达Precondition
+            event = self.get_main_path_event()
+            # 如果用户指定的path已经走完了，就开始对这条路径进行变异
+            if event is None:
+                event = self.mutate_the_main_path()
 
         self.last_state = self.current_state
         self.last_event = event
         return event
 
     def get_main_path_event(self):
-        """ """
+        """
+        依次返回main path上的event
+        """
         if len(self.main_path_list) == 0:
             return None
-        event = self.main_path_list.pop(0)
+        view = self.main_path_list.pop(0)
+        view = self.current_state.get_view_by_attribute(view)
+        event = TouchEvent(view=view)
         return event
 
     def mutate_the_main_path(self):
@@ -354,6 +448,190 @@ class MutatePolicy(UtgBasedInputPolicy):
             self.current_number_of_mutate_steps_on_single_node += 1
             event = self.explore_app()
             return event
+
+    def explore_app(self) -> InputEvent:
+        """
+        generate an event based on current UTG
+        @return: InputEvent
+        """
+        current_state = self.current_state
+        self.logger.info("Current state: %s" % current_state.state_str)
+        if current_state.state_str in self.__missed_states:
+            self.__missed_states.remove(current_state.state_str)
+
+        if current_state.get_app_activity_depth(self.app) < 0:
+            # If the app is not in the activity stack
+            start_app_intent = self.app.get_start_intent()
+
+            # It seems the app stucks at some state, has been
+            # 1) force stopped (START, STOP)
+            #    just start the app again by increasing self.__num_restarts
+            # 2) started at least once and cannot be started (START)
+            #    pass to let viewclient deal with this case
+            # 3) nothing
+            #    a normal start. clear self.__num_restarts.
+
+            if self.__event_trace.endswith(
+                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                self.__num_restarts += 1
+                self.logger.info(
+                    "The app had been restarted %d times.", self.__num_restarts
+                )
+            else:
+                self.__num_restarts = 0
+
+            # pass (START) through
+            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                if self.__num_restarts > MAX_NUM_RESTARTS:
+                    # If the app had been restarted too many times, enter random mode
+                    msg = "The app had been restarted too many times. Entering random mode."
+                    self.logger.info(msg)
+                    self.__random_explore = True
+                else:
+                    # Start the app
+                    self.__event_trace += EVENT_FLAG_START_APP
+                    self.logger.info("Trying to start the app...")
+                    return IntentEvent(intent=start_app_intent)
+
+        elif current_state.get_app_activity_depth(self.app) > 0:
+            # If the app is in activity stack but is not in foreground
+            self.__num_steps_outside += 1
+
+            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
+                # If the app has not been in foreground for too long, try to go back
+                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
+                    stop_app_intent = self.app.get_stop_intent()
+                    go_back_event = IntentEvent(stop_app_intent)
+                else:
+                    go_back_event = KeyEvent(name="BACK")
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                self.logger.info("Going back to the app...")
+                return go_back_event
+        else:
+            # If the app is in foreground
+            self.__num_steps_outside = 0
+
+        # Get all possible input events
+        possible_events = current_state.get_possible_input()
+
+        if self.random_input:
+            random.shuffle(possible_events)
+
+        possible_events.append(KeyEvent(name="BACK"))
+        # if self.search_method == POLICY_GREEDY_DFS:
+        #     possible_events.append(KeyEvent(name="BACK"))
+        # elif self.search_method == POLICY_GREEDY_BFS:
+        #     possible_events.insert(0, KeyEvent(name="BACK"))
+
+        # first try to select the actions that lead to activity transition. e.g., open drawer and click item on it.
+        # for input_event in possible_events:
+        #     if not self.utg.is_event_explored(
+        #         event=input_event, state=current_state
+        #     ) and self.is_event_contains_drawer(input_event):
+        #         self.logger.info("find the drawer event ")
+        #         return input_event
+
+        # If there is an unexplored event, try the event first
+        for input_event in possible_events:
+            if not self.utg.is_event_explored(event=input_event, state=current_state):
+                self.logger.info("Trying an unexplored event.")
+                self.__event_trace += EVENT_FLAG_EXPLORE
+                return input_event
+
+        target_state = self.__get_nav_target(current_state)
+        if target_state:
+            navigation_steps = self.utg.get_navigation_steps(
+                from_state=current_state, to_state=target_state
+            )
+            if navigation_steps and len(navigation_steps) > 0:
+                self.logger.info(
+                    "Navigating to %s, %d steps left."
+                    % (target_state.state_str, len(navigation_steps))
+                )
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                return navigation_steps[0][1]
+
+        if self.__random_explore:
+            self.logger.info("Trying random event.")
+            random.shuffle(possible_events)
+            return possible_events[0]
+
+        # If couldn't find a exploration target, stop the app
+        stop_app_intent = self.app.get_stop_intent()
+        self.logger.info("Cannot find an exploration target. Trying to restart app...")
+        self.__event_trace += EVENT_FLAG_STOP_APP
+        return IntentEvent(intent=stop_app_intent)
+
+    def generate_events_from_diverse_paths(self):
+        next_event = None
+
+        # 如果还没开始进行diverse phase,则选择最短的path先进行探索
+        if self.path_index == -1:
+            # 获取从first state 到 target state的path
+            self.paths = self.utg.get_paths_to_state(
+                self.utg.first_state, self.utg.target_state
+            )
+            # 重新安装app，防止之前的状态影响当前的探索
+            self.device.uninstall_app(self.app)
+            self.device.install_app(self.app)
+            self.path_index = 0
+            self.step_in_each_path = 0
+
+        # 如果已经到达target state，则重启app ，换下一条path
+        if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
+            self.logger.info("has rule that matches the precondition during diverse")
+            # 检查rule是否被满足
+            self.check_rule_with_precondition()
+            self.reach_precondition_path_number.append(self.path_index)
+            self.path_index += 1
+            self.step_in_each_path = 0
+            return self.stop_app_events()
+
+        # 还没有到达target state，则继续探索当前path
+        if self.path_index < len(self.paths):
+            # 为了防止走入一个死循环，如果在当前path中走的步数超过了当前path的长度的2倍，则放弃当前path
+            if self.step_in_each_path > len(self.paths[self.path_index]) * 2:
+                self.logger.info(
+                    "give up current path: %d, because it explore too many steps"
+                    % self.path_index
+                )
+                self.not_reach_precondition_path_number.append(self.path_index)
+                self.path_index += 1
+                self.step_in_each_path = 0
+
+                return self.stop_app_events()
+
+            self.logger.info(
+                "current path length %d " % len(self.paths[self.path_index])
+            )
+            for curren_state_structure, next_state_structure, event in self.paths[
+                self.path_index
+            ]:
+                if self.current_state.structure_str == curren_state_structure:
+                    self.step_in_each_path += 1
+                    next_event = event
+                    self.logger.info("find next event in the %d path" % self.path_index)
+                    self.logger.info(
+                        "next state structure in the path: %s" % next_state_structure
+                    )
+                    return next_event
+            # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
+            self.logger.info("cannot find next event in the %d path" % self.path_index)
+            self.not_reach_precondition_path_number.append(self.path_index)
+            self.path_index += 1
+            return self.stop_app_events()
+        else:
+            self.step_in_each_path = 0
+            self.logger.info("finish explore all paths: %d", len(self.paths))
+            self.logger.info(
+                "number of fail paths: %d", len(self.not_reach_precondition_path_number)
+            )
+            raise Exception("finish all paths and stop")
+        return None
+
+    def __update_utg(self):
+        self.utg.add_transition(self.last_event, self.last_state, self.current_state)
 
 
 class PbtFuzzingPolicy(UtgBasedInputPolicy):
@@ -417,53 +695,6 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
         self.fail_rule_path_number = []
         self.step_in_each_path = 0
 
-        # used in mutate phase
-        self.mutate_node_index_on_main_path = -1
-        self.start_mutate_on_the_node = False
-        self.shortest_path_states = []
-        self.max_number_of_mutate_steps_on_single_node = 10
-        self.current_number_of_mutate_steps_on_single_node = 0
-        self.stop_mutate = False
-
-    def check_rule_with_precondition(self):
-        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
-        if len(rules_to_check) == 0:
-            print("No rules match the precondition")
-            # execute event from policy
-            # self.execute_policy_event()
-            return
-            # continue
-        rule_to_check = random.choice(rules_to_check)
-
-        if rule_to_check is not None:
-            result = self.android_check.execute_rule(rule_to_check)
-            if result:
-                print("-------check rule : pass------")
-                self.pass_rule_path_number.append(self.path_index)
-            else:
-                print("-------rule execute failed-----------")
-                self.fail_rule_path_number.append(self.path_index)
-
-    def check_rule_without_precondition(self):
-        rules_to_check = self.android_check.get_rules_without_preconditions()
-        if len(rules_to_check) > 0:
-            result = self.android_check.execute_rules(
-                self.android_check.get_rules_without_preconditions()
-            )
-            if result:
-                print("-------rule_without_precondition execute success-----------")
-            else:
-                print("-------rule_without_precondition execute failed-----------")
-        else:
-            print("-------no rule_without_precondition to execute-----------")
-
-    def stop_app_events(self):
-        # self.logger.info("reach the target state, restart the app")
-        stop_app_intent = self.app.get_stop_intent()
-        stop_event = IntentEvent(stop_app_intent)
-        self.logger.info("stop the app and go back to the main activity")
-        return stop_event
-
     def guide_diverse_mode(self):
         next_event = None
 
@@ -502,8 +733,10 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
                 self.step_in_each_path = 0
 
                 return self.stop_app_events()
-            
-            self.logger.info("current path length %d " % len(self.paths[self.path_index]))
+
+            self.logger.info(
+                "current path length %d " % len(self.paths[self.path_index])
+            )
             for curren_state_structure, next_state_structure, event in self.paths[
                 self.path_index
             ]:

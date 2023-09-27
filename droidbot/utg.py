@@ -549,7 +549,10 @@ class UTG(object):
         target_structure_str = target_state.structure_str
         paths = []
         paths = nx.all_simple_paths(
-            self.G2, source=current_structure_str, target=target_structure_str,cutoff=30
+            self.G2,
+            source=current_structure_str,
+            target=target_structure_str,
+            cutoff=20,
         )
         paths = sorted(paths, key=lambda x: len(x))
         nav_edges = []
