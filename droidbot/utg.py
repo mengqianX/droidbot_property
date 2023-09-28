@@ -566,22 +566,42 @@ class UTG(object):
             nav_edges.append(self.get_edges_from_path(path))
         return nav_edges
 
+    # 使用了dfs的算法，找到从first state 到 target state的所有的路径，每条路径可能包含相同的节点，但不包含相同的边，
+    # 目的是为了将一些环路也计算进去
     def get_paths_mutate_on_the_main_path(self):
         paths = []
         target = self.target_state.structure_str
 
-        def dfs(node, path, edges):
+        # number_of_meet_target: 目的是允许在最后一个state再走一个环路回到最后一个state,有利于找到更多bug
+        def dfs(node, path, edges, number_of_meet_target):
             if node == target:
+                number_of_meet_target += 1
                 paths.append(path)
+                if number_of_meet_target == 1:
+                    for neighbor in self.G2.successors(node):
+                        if (node, neighbor) in edges:
+                            edges.remove((node, neighbor))
+                            dfs(
+                                neighbor,
+                                path + [neighbor],
+                                edges,
+                                number_of_meet_target,
+                            )
+                            edges.append((node, neighbor))
                 return
             for neighbor in self.G2.successors(node):
                 if (node, neighbor) in edges:
                     edges.remove((node, neighbor))
-                    dfs(neighbor, path + [neighbor], edges)
+                    dfs(neighbor, path + [neighbor], edges, number_of_meet_target)
                     edges.append((node, neighbor))
 
         edges = list(nx.edges(self.G2))
-        dfs(self.first_state.structure_str, [self.first_state.structure_str], edges)
+        dfs(
+            self.first_state.structure_str,
+            [self.first_state.structure_str],
+            edges,
+            number_of_meet_target=0,
+        )
         paths = sorted(paths, key=lambda x: len(x))
         nav_edges = []
         for path in paths:

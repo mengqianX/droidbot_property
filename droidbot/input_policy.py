@@ -316,7 +316,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.main_path_list = copy.deepcopy(self.main_path)
 
         # used in mutate phase
-        self.mutate_node_index_on_main_path = -1
+        self.mutate_node_index_on_main_path = -2
         self.start_mutate_on_the_node = False
         self.shortest_path_states = None
         self.max_number_of_mutate_steps_on_single_node = 10
@@ -400,10 +400,10 @@ class MutatePolicy(UtgBasedInputPolicy):
 
     def mutate_the_main_path(self):
         event = None
-        if self.mutate_node_index_on_main_path == -1:
+        if self.mutate_node_index_on_main_path == -2:
             self.mutate_node_index_on_main_path = len(self.shortest_path_states) - 1
-        # 第1个state 一般是手机home界面，不需要变异,意味着停止变异
-        if self.mutate_node_index_on_main_path == 0:
+        # 意味着停止变异
+        if self.mutate_node_index_on_main_path == -1:
             self.logger.info("finish mutate the main path")
             self.start_mutate_on_the_node = False
             self.current_number_of_mutate_steps_on_single_node = 0
