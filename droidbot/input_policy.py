@@ -345,6 +345,60 @@ class MutatePolicy(UtgBasedInputPolicy):
         event_list.append(view2)
         return event_list
 
+    def check_the_app_on_foreground(self):
+        if self.current_state.get_app_activity_depth(self.app) < 0:
+            # If the app is not in the activity stack
+            start_app_intent = self.app.get_start_intent()
+
+            # It seems the app stucks at some state, has been
+            # 1) force stopped (START, STOP)
+            #    just start the app again by increasing self.__num_restarts
+            # 2) started at least once and cannot be started (START)
+            #    pass to let viewclient deal with this case
+            # 3) nothing
+            #    a normal start. clear self.__num_restarts.
+
+            if self.__event_trace.endswith(
+                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                self.__num_restarts += 1
+                self.logger.info(
+                    "The app had been restarted %d times.", self.__num_restarts
+                )
+            else:
+                self.__num_restarts = 0
+
+            # pass (START) through
+            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                if self.__num_restarts > MAX_NUM_RESTARTS:
+                    # If the app had been restarted too many times, enter random mode
+                    msg = "The app had been restarted too many times. Entering random mode."
+                    self.logger.info(msg)
+                    self.__random_explore = True
+                else:
+                    # Start the app
+                    self.__event_trace += EVENT_FLAG_START_APP
+                    self.logger.info("Trying to start the app...")
+                    return IntentEvent(intent=start_app_intent)
+
+        elif self.current_state.get_app_activity_depth(self.app) > 0:
+            # If the app is in activity stack but is not in foreground
+            self.__num_steps_outside += 1
+
+            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
+                # If the app has not been in foreground for too long, try to go back
+                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
+                    stop_app_intent = self.app.get_stop_intent()
+                    go_back_event = IntentEvent(stop_app_intent)
+                else:
+                    go_back_event = KeyEvent(name="BACK")
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                self.logger.info("Going back to the app...")
+                return go_back_event
+        else:
+            # If the app is in foreground
+            self.__num_steps_outside = 0
+
     def generate_event(self):
         """
         首先按照用户指定的path走一遍,然后在path上进行变异
@@ -352,6 +406,10 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.current_state = self.device.get_current_state()
 
         self.__update_utg()
+
+        event = self.check_the_app_on_foreground()
+        if event is not None:
+            return event
 
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
         rules_satisfy_precondition = (
@@ -569,14 +627,16 @@ class MutatePolicy(UtgBasedInputPolicy):
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
             # 获取从first state 到 target state的path
-            self.paths = self.utg.get_paths_to_state(
-                self.utg.first_state, self.utg.target_state
-            )
+            self.paths = self.utg.get_paths_mutate_on_the_main_path()
+            # augument_path = self.utg.get_paths_with_loop_mutate_on_base_path()
+            # self.paths.extend(augument_path)
             # 重新安装app，防止之前的状态影响当前的探索
             self.device.uninstall_app(self.app)
             self.device.install_app(self.app)
             self.path_index = 0
             self.step_in_each_path = 0
+            start_app_intent = self.app.get_start_intent()
+            return IntentEvent(intent=start_app_intent)
 
         # 如果已经到达target state，则重启app ，换下一条path
         if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
@@ -605,21 +665,26 @@ class MutatePolicy(UtgBasedInputPolicy):
             self.logger.info(
                 "current path length %d " % len(self.paths[self.path_index])
             )
-            for curren_state_structure, next_state_structure, event in self.paths[
-                self.path_index
-            ]:
-                if self.current_state.structure_str == curren_state_structure:
-                    self.step_in_each_path += 1
-                    next_event = event
-                    self.logger.info("find next event in the %d path" % self.path_index)
-                    self.logger.info(
-                        "next state structure in the path: %s" % next_state_structure
-                    )
-                    return next_event
+            current_state_on_path = self.paths[self.path_index][self.step_in_each_path][
+                0
+            ]
+            if self.current_state.structure_str == current_state_on_path:
+                next_event = self.paths[self.path_index][self.step_in_each_path][2]
+                next_state_structure = self.paths[self.path_index][
+                    self.step_in_each_path
+                ][1]
+                self.logger.info("find next event in the %d path" % self.path_index)
+                self.logger.info(
+                    "next state structure in the path: %s" % next_state_structure
+                )
+                self.step_in_each_path += 1
+                return next_event
+
             # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
             self.logger.info("cannot find next event in the %d path" % self.path_index)
             self.not_reach_precondition_path_number.append(self.path_index)
             self.path_index += 1
+            self.step_in_each_path = 0
             return self.stop_app_events()
         else:
             self.step_in_each_path = 0
@@ -629,6 +694,55 @@ class MutatePolicy(UtgBasedInputPolicy):
             )
             raise Exception("finish all paths and stop")
         return None
+
+    def __get_nav_target(self, current_state):
+        # If last event is a navigation event
+        if self.__nav_target and self.__event_trace.endswith(EVENT_FLAG_NAVIGATE):
+            navigation_steps = self.utg.get_navigation_steps(
+                from_state=current_state, to_state=self.__nav_target
+            )
+            if navigation_steps and 0 < len(navigation_steps) <= self.__nav_num_steps:
+                # If last navigation was successful, use current nav target
+                self.__nav_num_steps = len(navigation_steps)
+                return self.__nav_target
+            else:
+                # If last navigation was failed, add nav target to missing states
+                self.__missed_states.add(self.__nav_target.state_str)
+
+        reachable_states = self.utg.get_reachable_states(current_state)
+        if self.random_input:
+            random.shuffle(reachable_states)
+
+        for state in reachable_states:
+            # Only consider foreground states
+            if state.get_app_activity_depth(self.app) != 0:
+                continue
+            # Do not consider missed states
+            if state.state_str in self.__missed_states:
+                continue
+            # Do not consider explored states
+            if self.utg.is_state_explored(state):
+                continue
+            self.__nav_target = state
+            navigation_steps = self.utg.get_navigation_steps(
+                from_state=current_state, to_state=self.__nav_target
+            )
+            if navigation_steps is not None and len(navigation_steps) > 0:
+                self.__nav_num_steps = len(navigation_steps)
+                return state
+
+        self.__nav_target = None
+        self.__nav_num_steps = -1
+        return None
+
+    def stop_app_events(self):
+        # self.logger.info("reach the target state, restart the app")
+        stop_app_intent = self.app.get_stop_intent()
+        stop_event = IntentEvent(stop_app_intent)
+
+        self.__event_trace += EVENT_FLAG_STOP_APP
+        self.logger.info("stop the app and go back to the main activity")
+        return stop_event
 
     def __update_utg(self):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)

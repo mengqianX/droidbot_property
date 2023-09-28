@@ -560,6 +560,28 @@ class UTG(object):
             nav_edges.append(self.get_edges_from_path(path))
         return nav_edges
 
+    def get_paths_mutate_on_the_main_path(self):
+        paths = []
+        target = self.target_state.structure_str
+
+        def dfs(node, path, edges):
+            if node == target:
+                paths.append(path)
+                return
+            for neighbor in self.G2.successors(node):
+                if (node, neighbor) in edges:
+                    edges.remove((node, neighbor))
+                    dfs(neighbor, path + [neighbor], edges)
+                    edges.append((node, neighbor))
+
+        edges = list(nx.edges(self.G2))
+        dfs(self.first_state.structure_str, [self.first_state.structure_str], edges)
+        paths = sorted(paths, key=lambda x: len(x))
+        nav_edges = []
+        for path in paths:
+            nav_edges.append(self.get_edges_from_path(path))
+        return nav_edges
+
     def get_edges_from_path(self, path):
         if path is None:
             return None
