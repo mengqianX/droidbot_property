@@ -5,6 +5,8 @@ import random
 import datetime
 import networkx as nx
 
+from droidbot import utils
+
 
 class UTG(object):
     """
@@ -116,6 +118,10 @@ class UTG(object):
     def add_node(self, state):
         if not state:
             return
+        # 将state保存到一个单独的文件夹中
+        output_dir = os.path.join(self.device.output_dir, "every_states")
+        state.save2dir(output_dir)
+        utils.generate_report(img_path=output_dir, html_path=output_dir, run_count=0)
         if state.state_str not in self.G.nodes():
             state.save2dir()
             self.G.add_node(state.state_str, state=state)

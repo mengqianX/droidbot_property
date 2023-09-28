@@ -351,7 +351,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         """
         首先按照用户指定的path走一遍,然后在path上进行变异
         """
-        self.current_state = self.device.get_current_state()
+        self.current_state = self.device.get_current_state(self.action_count)
 
         self.__update_utg()
 
