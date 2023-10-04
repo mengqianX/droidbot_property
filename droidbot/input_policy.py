@@ -1,3 +1,4 @@
+import string
 import sys
 import json
 import logging
@@ -15,6 +16,7 @@ from .input_event import (
     SetTextEvent,
     KillAppEvent,
 )
+from hypothesis import given, strategies as st
 from .utg import UTG
 
 # Max number of restarts
@@ -128,7 +130,7 @@ class InputPolicy(object):
                 import traceback
 
                 traceback.print_exc()
-                break
+                continue
             self.action_count += 1
         # if self.reach_target_during_exploration:
         #     self.logger.info("------------ reach the target state during exploration")
@@ -322,6 +324,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.max_number_of_mutate_steps_on_single_node = 10
         self.current_number_of_mutate_steps_on_single_node = 0
         self.stop_mutate = False
+        self.step_on_the_path = 0  # 用于记录在main path 上执行了几个event,方便引导app到达目标base node
 
         # used in diverse phase
         self.path_index = -1  # currently explore path index
@@ -334,24 +337,65 @@ class MutatePolicy(UtgBasedInputPolicy):
 
     def get_main_path(self):
         # 指定好要点击的view
-        event_list = []
+        view_list = []
 
-        view1 = {"content_description": "Navigate up"}
-        # view1 = self.current_state.get_view_by_attribute(view1)
-        # event1 = TouchEvent(view=view1)
-        event_list.append(view1)
+        # anki 5554
+        # view1 = {"content_description": "Navigate up"}
+        # event_list.append(view1)
 
-        view2 = {"text": "Help"}
-        # view2 = self.current_state.get_view_by_attribute(view2)
-        # event2 = TouchEvent(view=view2)
-        event_list.append(view2)
+        # view2 = {"text": "Help"}
+        # event_list.append(view2)
 
-        view3 = {"text": "Get Help"}
-        event_list.append(view3)
+        # view3 = {"text": "Get Help"}
+        # event_list.append(view3)
 
-        # view4 = {"text": "Send troubleshooting report"}
-        # event_list.append(view4)
-        return event_list
+        # anki 6119
+        # view1 = {"resource_id": "com.ichi2.anki:id/fab_expand_menu_button"}
+        # view_list.append(view1)
+
+        # view2 = {"resource_id": "com.ichi2.anki:id/add_note_action"}
+        # view_list.append(view2)
+
+        # view3 = {
+        #     "resource_id": "com.ichi2.anki:id/id_note_editText",
+        #     "event": "set_text",
+        # }
+        # view_list.append(view3)
+
+        # view4 = {"resource_id": "com.ichi2.anki:id/action_save"}
+        # view_list.append(view4)
+
+        # view5 = {"content_description": "Navigate up"}
+        # view_list.append(view5)
+
+        # view6 = {"resource_id": "com.ichi2.anki:id/deckpicker_name"}
+        # view_list.append(view6)
+
+        # view7 = {"content_description": "More options"}
+        # view_list.append(view7)
+
+        # view8 = {"text": "Enable whiteboard"}
+        # view_list.append(view8)
+
+        # anki 4999
+        view1 = {"resource_id": "com.ichi2.anki:id/fab_expand_menu_button"}
+        view_list.append(view1)
+
+        view2 = {"resource_id": "com.ichi2.anki:id/add_note_action"}
+        view_list.append(view2)
+
+        view3 = {
+            "resource_id": "com.ichi2.anki:id/id_note_editText",
+            "event": "set_text",
+        }
+        view_list.append(view3)
+
+        view4 = {"resource_id": "com.ichi2.anki:id/action_save"}
+        view_list.append(view4)
+
+        view5 = {"content_description": "Navigate up"}
+        view_list.append(view5)
+        return view_list
 
     def generate_event(self):
         """
@@ -400,14 +444,46 @@ class MutatePolicy(UtgBasedInputPolicy):
         if len(self.main_path_list) == 0:
             return None
         view = self.main_path_list.pop(0)
+        if "event" in view:
+            if view["event"] == "set_text":
+                view = self.current_state.get_view_by_attribute(view)
+                event = SetTextEvent(
+                    view=view,
+                    text=st.text(
+                        alphabet=string.ascii_letters, min_size=1, max_size=5
+                    ).example(),
+                )
+                return event
         view = self.current_state.get_view_by_attribute(view)
+        if view is None:
+            return None
+        event = TouchEvent(view=view)
+        return event
+
+    def get_event_from_view(self, view):
+        if "event" in view:
+            if view["event"] == "set_text":
+                view = self.current_state.get_view_by_attribute(view)
+                if view is None:
+                    return None
+                event = SetTextEvent(
+                    view=view,
+                    text=st.text(
+                        alphabet=string.ascii_letters, min_size=1, max_size=5
+                    ).example(),
+                )
+                return event
+        view = self.current_state.get_view_by_attribute(view)
+        if view is None:
+            return None
         event = TouchEvent(view=view)
         return event
 
     def mutate_the_main_path(self):
         event = None
         if self.mutate_node_index_on_main_path == -2:
-            self.mutate_node_index_on_main_path = len(self.shortest_path_states) - 1
+            self.mutate_node_index_on_main_path = len(self.main_path) - 1
+            return self.stop_app_events()
         # 意味着停止变异
         if self.mutate_node_index_on_main_path == -1:
             self.logger.info("finish mutate the main path")
@@ -417,27 +493,41 @@ class MutatePolicy(UtgBasedInputPolicy):
             return self.stop_app_events()
         # 首先判断是否开始在主路径上进行变异，如果还没开始，则首先要将app引导到开始变异的那个节点
         if not self.start_mutate_on_the_node:
+            # # 如果已经到达目标node，则开始变异
+            # if (
+            #     self.current_state.structure_str
+            #     == self.shortest_path_states[self.mutate_node_index_on_main_path]
+            # ):
+            #     self.start_mutate_on_the_node = True
+            #     self.logger.info(
+            #         "reach the node and start mutate on the node: %d"
+            #         % self.mutate_node_index_on_main_path
+            #     )
+            # # 如果还没到达目标node，则继续引导app到目标node
+            # elif self.utg.is_on_shortest_path(self.current_state):
+            #     event = self.utg.get_G2_nav_action_on_shoretest_path(self.current_state)
+            #     self.logger.info("select event to next state on the shortest path")
+            #     return event
+            # # 如果当前state不在shortest path上, 则重新启动吧
+            # else:
+            #     event = self.stop_app_events()
+            #     self.logger.info(
+            #         "current state is not on the shortest path, restart the app"
+            #     )
+            #     return event
             # 如果已经到达目标node，则开始变异
-            if (
-                self.current_state.structure_str
-                == self.shortest_path_states[self.mutate_node_index_on_main_path]
-            ):
+            if self.step_on_the_path == self.mutate_node_index_on_main_path:
                 self.start_mutate_on_the_node = True
                 self.logger.info(
                     "reach the node and start mutate on the node: %d"
                     % self.mutate_node_index_on_main_path
                 )
+                self.step_on_the_path = 0
             # 如果还没到达目标node，则继续引导app到目标node
-            elif self.utg.is_on_shortest_path(self.current_state):
-                event = self.utg.get_G2_nav_action_on_shoretest_path(self.current_state)
-                self.logger.info("select event to next state on the shortest path")
-                return event
-            # 如果当前state不在shortest path上, 则重新启动吧
             else:
-                event = self.stop_app_events()
-                self.logger.info(
-                    "current state is not on the shortest path, restart the app"
-                )
+                view = self.main_path[self.step_on_the_path]
+                event = self.get_event_from_view(view)
+                self.step_on_the_path += 1
                 return event
 
         # 如果已经开始在主路径上进行变异，则继续变异
@@ -604,6 +694,11 @@ class MutatePolicy(UtgBasedInputPolicy):
 
         # 还没有到达target state，则继续探索当前path
         if self.path_index < len(self.paths):
+            if self.paths[self.path_index] is None:
+                self.logger.info("path is None")
+                self.path_index += 1
+                self.step_in_each_path = 0
+                return self.stop_app_events()
             if self.step_in_each_path == len(self.paths[self.path_index]):
                 # 说明已经走到最后一个state了，check property
                 self.check_rule_with_precondition()

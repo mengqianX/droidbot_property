@@ -40,13 +40,42 @@ class Test(AndroidCheck):
         # self.device(text="DONE").click()
         # self.device(text="OK").click()
 
-    @precondition(lambda self: self.device(text="Send troubleshooting report").exists())
+    @precondition(
+        lambda self: self.device(resourceId="com.ichi2.anki:id/files").exists()
+    )
     @rule()
     def rule2(self):
-        print("reach get help")
-        self.device(text="Send troubleshooting report").click()
-        assert self.device(text="REPORT").exists()
-        self.device(text="CANCEL").click()
+        # print("reach get help")
+        # self.device(text="Send troubleshooting report").click()
+        # assert self.device(text="REPORT").exists()
+        # self.device(text="CANCEL").click()
+
+        # self.device(resourceId="com.ichi2.anki:id/flashcard_frame").click()
+        # assert (
+        #     self.device(resourceId="com.ichi2.anki:id/action_undo").info['enabled']
+        #     == True
+        # )
+
+        deck_number = self.device(resourceId="com.ichi2.anki:id/files").info[
+            'childCount'
+        ]
+        selected_deck = random.randint(0, deck_number - 1)
+
+        self.device(
+            resourceId="com.ichi2.anki:id/DeckPickerHoriz", index=selected_deck
+        ).click()
+        selected_deck_name = (
+            self.device(resourceId="com.ichi2.anki:id/toolbar")
+            .child(index=1)
+            .info['text']
+        )
+        self.device.press("back")
+        self.device(description="Navigate up").click()
+        self.device(text="Card browser").click()
+        assert (
+            self.device(resourceId="com.ichi2.anki:id/dropdown_deck_name").info['text']
+            == selected_deck_name
+        )
 
     # @rule()
     # def rule3(self):

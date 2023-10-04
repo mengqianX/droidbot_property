@@ -909,13 +909,13 @@ class Device(object):
             self.adb.type(text)
 
     def view_set_text(self, text):
-        if self.droidbot_ime.connected:
-            self.droidbot_ime.input_text(text=text, mode=0)
-        else:
-            self.logger.warning(
-                "`adb shell input text` doesn't support setting text, appending instead."
-            )
-            self.adb.type(text)
+        # if self.droidbot_ime.connected:
+        #     self.droidbot_ime.input_text(text=text, mode=0)
+        # else:
+        self.logger.warning(
+            "`adb shell input text` doesn't support setting text, appending instead."
+        )
+        self.adb.type(text)
 
     def key_press(self, key_code):
         self.adb.press(key_code)

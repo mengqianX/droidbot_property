@@ -1,4 +1,5 @@
 import copy
+import logging
 import math
 import os
 
@@ -41,6 +42,7 @@ class DeviceState(object):
         self.possible_events = None
         self.width = device.get_width(refresh=True)
         self.height = device.get_height(refresh=False)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @property
     def activity_short_name(self):
@@ -559,12 +561,16 @@ class DeviceState(object):
         view_list = self.views
 
         for attribute_name, attribute_value in attribute_dict.items():
+            if attribute_name == "event":
+                continue
             view_list = self.get_view_list_by_atrribute(
                 attribute_name, attribute_value, view_list
             )
         if len(view_list) == 0:
-            self.logger.info("No view found for the attribute_dict %s" % attribute_dict)
-
+            self.logger.warning(
+                "No view found for the attribute_dict %s" % attribute_dict
+            )
+            return None
         return view_list[0]
 
     def get_view_list_by_atrribute(
