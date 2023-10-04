@@ -17,8 +17,8 @@
                 ".\\output\\markor-2.10.9\\test1",
                 ".\\xml_graph\\markor-2.10.9_CTG.xml",
                 "MainActivity",
-                "SettingsActivity",
-                "dfs_greedy"
+                "MainActivity",
+                "pbt"
             ]
         },
         {
@@ -29,13 +29,13 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                ".\\apk\\AnkiDroid-2.15.2.apk",
+                ".\\apk\\AnkiDroid-2.15alpha34.apk",
                 "emulator-5554",
-                ".\\output\\anki\\test6",
+                ".\\output\\anki\\test_0",
                 ".\\xml_graph\\Anki_CTG.xml",
                 "DeckPicker",
-                "Statistics",
-                "dfs_greedy"
+                "DeckPicker",
+                "mutate"
             ]
         }
     ]

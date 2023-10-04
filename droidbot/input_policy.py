@@ -341,10 +341,16 @@ class MutatePolicy(UtgBasedInputPolicy):
         # event1 = TouchEvent(view=view1)
         event_list.append(view1)
 
-        view2 = {"text": "Settings"}
+        view2 = {"text": "Help"}
         # view2 = self.current_state.get_view_by_attribute(view2)
         # event2 = TouchEvent(view=view2)
         event_list.append(view2)
+
+        view3 = {"text": "Get Help"}
+        event_list.append(view3)
+
+        # view4 = {"text": "Send troubleshooting report"}
+        # event_list.append(view4)
         return event_list
 
     def generate_event(self):
@@ -586,24 +592,24 @@ class MutatePolicy(UtgBasedInputPolicy):
             start_app_intent = self.app.get_start_intent()
             return IntentEvent(intent=start_app_intent)
 
-        # 如果已经到达target state，则重启app ，换下一条path
-        if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
-            self.logger.info("has rule that matches the precondition during diverse")
-            # 检查rule是否被满足
-            self.check_rule_with_precondition()
-            self.reach_precondition_path_number.append(self.path_index)
-            self.path_index += 1
-            self.step_in_each_path = 0
-            return self.stop_app_events()
+        # # 如果已经到达target state，则重启app ，换下一条path
+        # if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
+        #     self.logger.info("has rule that matches the precondition during diverse")
+        #     # 检查rule是否被满足
+        #     self.check_rule_with_precondition()
+        #     self.reach_precondition_path_number.append(self.path_index)
+        #     self.path_index += 1
+        #     self.step_in_each_path = 0
+        #     return self.stop_app_events()
 
         # 还没有到达target state，则继续探索当前path
         if self.path_index < len(self.paths):
-            # 为了防止走入一个死循环，如果在当前path中走的步数超过了当前path的长度的2倍，则放弃当前path
-            if self.step_in_each_path > len(self.paths[self.path_index]) * 2:
-                self.logger.info(
-                    "give up current path: %d, because it explore too many steps"
-                    % self.path_index
-                )
+            if self.step_in_each_path == len(self.paths[self.path_index]):
+                # 说明已经走到最后一个state了，check property
+                self.check_rule_with_precondition()
+            # 如果当前step 超过path的长度，则结束当前path
+            if self.step_in_each_path >= len(self.paths[self.path_index]):
+                self.logger.info("finish current path: %d, " % self.path_index)
                 self.not_reach_precondition_path_number.append(self.path_index)
                 self.path_index += 1
                 self.step_in_each_path = 0
@@ -616,6 +622,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             current_state_on_path = self.paths[self.path_index][self.step_in_each_path][
                 0
             ]
+
             if self.current_state.structure_str == current_state_on_path:
                 next_event = self.paths[self.path_index][self.step_in_each_path][2]
                 next_state_structure = self.paths[self.path_index][
@@ -632,6 +639,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             self.logger.info("cannot find next event in the %d path" % self.path_index)
             self.not_reach_precondition_path_number.append(self.path_index)
             self.path_index += 1
+            self.logger.info("start next path: %d" % self.path_index)
             self.step_in_each_path = 0
             return self.stop_app_events()
         else:
@@ -739,12 +747,12 @@ class MutatePolicy(UtgBasedInputPolicy):
 
     def stop_app_events(self):
         # self.logger.info("reach the target state, restart the app")
-        stop_app_intent = self.app.get_stop_intent()
-        stop_event = IntentEvent(stop_app_intent)
+        stop_app_intent = KillAppEvent(app=self.app)
+        # stop_event = IntentEvent(stop_app_intent)
 
         self.__event_trace += EVENT_FLAG_STOP_APP
         self.logger.info("stop the app and go back to the main activity")
-        return stop_event
+        return stop_app_intent
 
     def __update_utg(self):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)
