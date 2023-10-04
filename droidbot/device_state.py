@@ -162,10 +162,18 @@ class DeviceState(object):
             )
         else:
             view_signatures = set()
-            for view in self.views:
-                view_signature = DeviceState.__get_content_free_view_signature(view)
-                if view_signature:
-                    view_signatures.add(view_signature)
+            # ankidroid bug 5450. 之前的抽象方式会导致两个关键的state被认为是一样的
+            if self.activity_short_name == "DeckPicker":
+                view_signatures = list()
+                for view in self.views:
+                    view_signature = DeviceState.__get_content_free_view_signature(view)
+                    if view_signature:
+                        view_signatures.append(view_signature)
+            else:
+                for view in self.views:
+                    view_signature = DeviceState.__get_content_free_view_signature(view)
+                    if view_signature:
+                        view_signatures.add(view_signature)
             state_str = "%s{%s}" % (
                 self.foreground_activity,
                 ",".join(sorted(view_signatures)),
