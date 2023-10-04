@@ -40,12 +40,13 @@ class Test(AndroidCheck):
         # self.device(text="DONE").click()
         # self.device(text="OK").click()
 
-    @precondition(lambda self: self.device(text="Appearance").exists())
+    @precondition(lambda self: self.device(text="Send troubleshooting report").exists())
     @rule()
     def rule2(self):
-        print("reach rule 2")
-        self.device(text="Appearance").click()
-        assert self.device(text="Day theme").exists()
+        print("reach get help")
+        self.device(text="Send troubleshooting report").click()
+        assert self.device(text="REPORT").exists()
+        self.device(text="CANCEL").click()
 
     # @rule()
     # def rule3(self):
@@ -76,7 +77,7 @@ t = Test(
     apk_path=apk_path,
     device_serial=device_serial,
     output_dir=output_dir,
-    explore_event_count=100,
+    explore_event_count=200,
     diverse_event_count=200,
     xml_path=xml_path,
     source_activity=source_activity,
