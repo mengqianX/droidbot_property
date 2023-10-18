@@ -561,7 +561,7 @@ class DeviceState(object):
         view_list = self.views
 
         for attribute_name, attribute_value in attribute_dict.items():
-            if attribute_name == "event":
+            if attribute_name == "event_type":
                 continue
             view_list = self.get_view_list_by_atrribute(
                 attribute_name, attribute_value, view_list

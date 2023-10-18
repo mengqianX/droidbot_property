@@ -378,24 +378,28 @@ class MutatePolicy(UtgBasedInputPolicy):
         # view_list.append(view8)
 
         # anki 4999
-        view1 = {"resource_id": "com.ichi2.anki:id/fab_expand_menu_button"}
-        view_list.append(view1)
+        # view1 = {"resource_id": "com.ichi2.anki:id/fab_expand_menu_button"}
+        # view_list.append(view1)
 
-        view2 = {"resource_id": "com.ichi2.anki:id/add_note_action"}
-        view_list.append(view2)
+        # view2 = {"resource_id": "com.ichi2.anki:id/add_note_action"}
+        # view_list.append(view2)
 
-        view3 = {
-            "resource_id": "com.ichi2.anki:id/id_note_editText",
-            "event": "set_text",
-        }
-        view_list.append(view3)
+        # view3 = {
+        #     "resource_id": "com.ichi2.anki:id/id_note_editText",
+        #     "event": "set_text",
+        # }
+        # view_list.append(view3)
 
-        view4 = {"resource_id": "com.ichi2.anki:id/action_save"}
-        view_list.append(view4)
+        # view4 = {"resource_id": "com.ichi2.anki:id/action_save"}
+        # view_list.append(view4)
 
-        view5 = {"content_description": "Navigate up"}
-        view_list.append(view5)
-        return view_list
+        # view5 = {"content_description": "Navigate up"}
+        # view_list.append(view5)
+        import json
+
+        f = open("anki.json", "r")
+        event_list = json.load(f)
+        return event_list
 
     def generate_event(self):
         """
@@ -444,17 +448,17 @@ class MutatePolicy(UtgBasedInputPolicy):
         if len(self.main_path_list) == 0:
             return None
         view = self.main_path_list.pop(0)
-        if "event" in view:
-            if view["event"] == "set_text":
-                view = self.current_state.get_view_by_attribute(view)
-                event = SetTextEvent(
-                    view=view,
-                    text=st.text(
-                        alphabet=string.ascii_letters, min_size=1, max_size=5
-                    ).example(),
-                )
-                return event
-        view = self.current_state.get_view_by_attribute(view)
+        
+        if view["event_type"] == "set_text":
+            view = self.current_state.get_view_by_attribute(view["ui_element"])
+            event = SetTextEvent(
+                view=view,
+                text=st.text(
+                    alphabet=string.ascii_letters, min_size=1, max_size=5
+                ).example(),
+            )
+            return event
+        view = self.current_state.get_view_by_attribute(view["ui_element"])
         if view is None:
             return None
         event = TouchEvent(view=view)
