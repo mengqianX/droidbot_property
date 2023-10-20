@@ -447,10 +447,16 @@ class MutatePolicy(UtgBasedInputPolicy):
         """
         if len(self.main_path_list) == 0:
             return None
-        view = self.main_path_list.pop(0)
-        
-        if view["event_type"] == "set_text":
-            view = self.current_state.get_view_by_attribute(view["ui_element"])
+        event_dict = self.main_path_list.pop(0)
+        event = self.get_event_from_dict(event_dict)
+        return event
+
+    def get_event_from_dict(self, event_dict):
+        # 如果是set_text事件，则需要先获取view，然后再生成任意字符串的set_text事件
+        if event_dict["event_type"] == "set_text":
+            view = self.current_state.get_view_by_attribute(event_dict["ui_element"])
+            if view is None:
+                return None
             event = SetTextEvent(
                 view=view,
                 text=st.text(
@@ -458,26 +464,7 @@ class MutatePolicy(UtgBasedInputPolicy):
                 ).example(),
             )
             return event
-        view = self.current_state.get_view_by_attribute(view["ui_element"])
-        if view is None:
-            return None
-        event = TouchEvent(view=view)
-        return event
-
-    def get_event_from_view(self, view):
-        if "event" in view:
-            if view["event"] == "set_text":
-                view = self.current_state.get_view_by_attribute(view)
-                if view is None:
-                    return None
-                event = SetTextEvent(
-                    view=view,
-                    text=st.text(
-                        alphabet=string.ascii_letters, min_size=1, max_size=5
-                    ).example(),
-                )
-                return event
-        view = self.current_state.get_view_by_attribute(view)
+        view = self.current_state.get_view_by_attribute(event_dict["ui_element"])
         if view is None:
             return None
         event = TouchEvent(view=view)
@@ -497,29 +484,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             return self.stop_app_events()
         # 首先判断是否开始在主路径上进行变异，如果还没开始，则首先要将app引导到开始变异的那个节点
         if not self.start_mutate_on_the_node:
-            # # 如果已经到达目标node，则开始变异
-            # if (
-            #     self.current_state.structure_str
-            #     == self.shortest_path_states[self.mutate_node_index_on_main_path]
-            # ):
-            #     self.start_mutate_on_the_node = True
-            #     self.logger.info(
-            #         "reach the node and start mutate on the node: %d"
-            #         % self.mutate_node_index_on_main_path
-            #     )
-            # # 如果还没到达目标node，则继续引导app到目标node
-            # elif self.utg.is_on_shortest_path(self.current_state):
-            #     event = self.utg.get_G2_nav_action_on_shoretest_path(self.current_state)
-            #     self.logger.info("select event to next state on the shortest path")
-            #     return event
-            # # 如果当前state不在shortest path上, 则重新启动吧
-            # else:
-            #     event = self.stop_app_events()
-            #     self.logger.info(
-            #         "current state is not on the shortest path, restart the app"
-            #     )
-            #     return event
-            # 如果已经到达目标node，则开始变异
+
             if self.step_on_the_path == self.mutate_node_index_on_main_path:
                 self.start_mutate_on_the_node = True
                 self.logger.info(
@@ -530,7 +495,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             # 如果还没到达目标node，则继续引导app到目标node
             else:
                 view = self.main_path[self.step_on_the_path]
-                event = self.get_event_from_view(view)
+                event = self.get_event_from_dict(view)
                 self.step_on_the_path += 1
                 return event
 

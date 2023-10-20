@@ -1,7 +1,7 @@
 import os
 import networkx as nx
 from xml.dom import minidom
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 class Guide(object):
@@ -55,7 +55,7 @@ class Guide(object):
         '''
 
         nx.draw(self.G_activity, with_labels=True)
-        plt.show()
+        #plt.show()
 
     def get_shortest_path(self, source, target):
         '''
