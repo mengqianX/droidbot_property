@@ -321,7 +321,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.mutate_node_index_on_main_path = -2
         self.start_mutate_on_the_node = False
         self.shortest_path_states = None
-        self.max_number_of_mutate_steps_on_single_node = 10
+        self.max_number_of_mutate_steps_on_single_node = 50
         self.current_number_of_mutate_steps_on_single_node = 0
         self.stop_mutate = False
         self.step_on_the_path = 0  # 用于记录在main path 上执行了几个event,方便引导app到达目标base node
@@ -336,68 +336,9 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.step_in_each_path = 0
 
     def get_main_path(self):
-        # 指定好要点击的view
-        view_list = []
-
-        # anki 5554
-        # view1 = {"content_description": "Navigate up"}
-        # event_list.append(view1)
-
-        # view2 = {"text": "Help"}
-        # event_list.append(view2)
-
-        # view3 = {"text": "Get Help"}
-        # event_list.append(view3)
-
-        # anki 6119
-        # view1 = {"resource_id": "com.ichi2.anki:id/fab_expand_menu_button"}
-        # view_list.append(view1)
-
-        # view2 = {"resource_id": "com.ichi2.anki:id/add_note_action"}
-        # view_list.append(view2)
-
-        # view3 = {
-        #     "resource_id": "com.ichi2.anki:id/id_note_editText",
-        #     "event": "set_text",
-        # }
-        # view_list.append(view3)
-
-        # view4 = {"resource_id": "com.ichi2.anki:id/action_save"}
-        # view_list.append(view4)
-
-        # view5 = {"content_description": "Navigate up"}
-        # view_list.append(view5)
-
-        # view6 = {"resource_id": "com.ichi2.anki:id/deckpicker_name"}
-        # view_list.append(view6)
-
-        # view7 = {"content_description": "More options"}
-        # view_list.append(view7)
-
-        # view8 = {"text": "Enable whiteboard"}
-        # view_list.append(view8)
-
-        # anki 4999
-        # view1 = {"resource_id": "com.ichi2.anki:id/fab_expand_menu_button"}
-        # view_list.append(view1)
-
-        # view2 = {"resource_id": "com.ichi2.anki:id/add_note_action"}
-        # view_list.append(view2)
-
-        # view3 = {
-        #     "resource_id": "com.ichi2.anki:id/id_note_editText",
-        #     "event": "set_text",
-        # }
-        # view_list.append(view3)
-
-        # view4 = {"resource_id": "com.ichi2.anki:id/action_save"}
-        # view_list.append(view4)
-
-        # view5 = {"content_description": "Navigate up"}
-        # view_list.append(view5)
         import json
 
-        f = open("anki.json", "r")
+        f = open("anki_5450.json", "r")
         event_list = json.load(f)
         return event_list
 
@@ -412,7 +353,9 @@ class MutatePolicy(UtgBasedInputPolicy):
         event = self.check_the_app_on_foreground()
         if event is not None:
             return event
-
+        # 在app 启动后执行定义好的初始化事件
+        if self.action_count == 2:
+            self.run_initial_rules()
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
         rules_satisfy_precondition = (
             self.android_check.get_rules_that_pass_the_preconditions()
@@ -646,6 +589,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             # 重新安装app，防止之前的状态影响当前的探索
             self.device.uninstall_app(self.app)
             self.device.install_app(self.app)
+            self.run_initial_rules()
             self.path_index = 0
             self.step_in_each_path = 0
             start_app_intent = self.app.get_start_intent()
