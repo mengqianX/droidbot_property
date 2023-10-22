@@ -15,6 +15,7 @@ from .input_event import (
     ManualEvent,
     SetTextEvent,
     KillAppEvent,
+    UIEvent,
 )
 from hypothesis import given, strategies as st
 from .utg import UTG
@@ -321,7 +322,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.mutate_node_index_on_main_path = -2
         self.start_mutate_on_the_node = False
         self.shortest_path_states = None
-        self.max_number_of_mutate_steps_on_single_node = 50
+        self.max_number_of_mutate_steps_on_single_node = 10
         self.current_number_of_mutate_steps_on_single_node = 0
         self.stop_mutate = False
         self.step_on_the_path = 0  # 用于记录在main path 上执行了几个event,方便引导app到达目标base node
@@ -589,12 +590,14 @@ class MutatePolicy(UtgBasedInputPolicy):
             # 重新安装app，防止之前的状态影响当前的探索
             self.device.uninstall_app(self.app)
             self.device.install_app(self.app)
-            self.run_initial_rules()
+            self.need_initialize = True
             self.path_index = 0
             self.step_in_each_path = 0
             start_app_intent = self.app.get_start_intent()
             return IntentEvent(intent=start_app_intent)
-
+        if self.need_initialize:
+            self.run_initial_rules()
+            self.need_initialize = False
         # # 如果已经到达target state，则重启app ，换下一条path
         # if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
         #     self.logger.info("has rule that matches the precondition during diverse")
@@ -631,18 +634,33 @@ class MutatePolicy(UtgBasedInputPolicy):
                 0
             ]
 
-            if self.current_state.structure_str == current_state_on_path:
-                next_event = self.paths[self.path_index][self.step_in_each_path][2]
-                next_state_structure = self.paths[self.path_index][
-                    self.step_in_each_path
-                ][1]
-                self.logger.info("find next event in the %d path" % self.path_index)
-                self.logger.info(
-                    "next state structure in the path: %s" % next_state_structure
-                )
+            # 如果当前state和path上的state一致，则选择下一个event
+            # if self.current_state.structure_str == current_state_on_path:
+            #     next_event = self.paths[self.path_index][self.step_in_each_path][2]
+            #     next_state_structure = self.paths[self.path_index][
+            #         self.step_in_each_path
+            #     ][1]
+            #     self.logger.info("find next event in the %d path" % self.path_index)
+            #     self.logger.info(
+            #         "next state structure in the path: %s" % next_state_structure
+            #     )
+            #     self.step_in_each_path += 1
+            #     return next_event
+
+            # 老方法：按照当前state的structure和path上的state的structure进行比较，找到下一个event，
+            # 不太靠谱，因为抽象的原因导致这种方式匹配state不准确
+            # 新方法：不匹配state信息，只匹配event信息。也就是说，直接在当前state上查找是否能找到event对应的view。
+            # 如果能找到，则返回这个view对于的event
+            next_event = self.paths[self.path_index][self.step_in_each_path][2]
+            if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                if self.current_state.is_view_exist(view_in_next_event):
+                    self.logger.info("find next event in the %d path" % self.path_index)
+                    self.step_in_each_path += 1
+                    return next_event
+            else:
                 self.step_in_each_path += 1
                 return next_event
-
             # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
             self.logger.info("cannot find next event in the %d path" % self.path_index)
             self.not_reach_precondition_path_number.append(self.path_index)
@@ -656,7 +674,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             self.logger.info(
                 "number of fail paths: %d", len(self.not_reach_precondition_path_number)
             )
-            raise Exception("finish all paths and stop")
+            raise InputInterruptedException("finish explore all paths")
         return None
 
     def __get_nav_target(self, current_state):

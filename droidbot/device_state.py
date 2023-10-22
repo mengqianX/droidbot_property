@@ -591,3 +591,17 @@ class DeviceState(object):
         if len(view_list) == 0:
             self.logger.info("No view found for %s" % attribute_value)
         return view_list
+
+    # 判断view 是否存在
+    def is_view_exist(self, view_dict):
+        """
+        判断view 是否存在
+        :param view_dict: view dict
+        :return: boolean
+        """
+        for view in self.views:
+            if DeviceState.__get_view_signature(view) == DeviceState.__get_view_signature(
+                view_dict
+            ):
+                return True
+        return False
