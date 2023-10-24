@@ -246,8 +246,8 @@ class UTG(object):
             #     self.logger.info("Highlight path: %s --> %s" % (from_state, to_state))
 
             # Highlight last transition
-            if state_transition == self.last_transition:
-                utg_edge["color"] = "red"
+            # if state_transition == self.last_transition:
+            #     utg_edge["color"] = "red"
 
             utg_edges.append(utg_edge)
 
