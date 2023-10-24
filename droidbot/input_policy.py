@@ -4,6 +4,7 @@ import json
 import logging
 import random
 import copy
+import time
 from .utils import safe_get_dict
 from abc import abstractmethod
 
@@ -301,12 +302,12 @@ class MutatePolicy(UtgBasedInputPolicy):
     测试人员提供一条main path, 然后在main path上进行变异
     """
 
-    def __init__(self, device, app, random_input, android_check=None, guide=None):
+    def __init__(self, device, app, random_input, android_check=None, guide=None,main_path_path=None):
         super(MutatePolicy, self).__init__(
             device, app, random_input, android_check, guide
         )
         self.logger = logging.getLogger(self.__class__.__name__)
-
+        self.main_path_path = main_path_path
         self.__nav_target = None
         self.__nav_num_steps = -1
         self.__num_restarts = 0
@@ -335,11 +336,14 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.pass_rule_path_number = []
         self.fail_rule_path_number = []
         self.step_in_each_path = 0
+        # 在我们计算diverse path的时候，是在G图上进行计算，还是G2. True 代表G， False 代表G2
+        self.compute_diverse_path_on_G_or_G2 = True
 
     def get_main_path(self):
         import json
-
-        f = open("anki_5450.json", "r")
+        if self.main_path_path is None:
+            raise Exception("main path path is None")
+        f = open(self.main_path_path, "r")
         event_list = json.load(f)
         return event_list
 
@@ -357,6 +361,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         # 在app 启动后执行定义好的初始化事件
         if self.action_count == 2:
             self.run_initial_rules()
+            time.sleep(2)
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
         rules_satisfy_precondition = (
             self.android_check.get_rules_that_pass_the_preconditions()
@@ -365,12 +370,15 @@ class MutatePolicy(UtgBasedInputPolicy):
             self.logger.info("has rule that matches the precondition")
             self.reach_target_during_exploration = True
             self.utg.set_target_state(self.current_state)
-            if self.shortest_path_states is None:
-                self.shortest_path_states = self.utg.get_states_on_shortest_path()
+            # if self.shortest_path_states is None:
+            #     self.shortest_path_states = self.utg.get_states_on_shortest_path()
 
         else:
             self.logger.info("no rule matches the precondition")
-
+        if self.action_count == 2:
+            return None
+        if self.action_count == 3:
+            self.utg.first_state_after_initialization = self.current_state
         # 如果变异停止了，则根据model开始生成diverse path 来测property
         if self.stop_mutate:
             event = self.generate_events_from_diverse_paths()
@@ -584,7 +592,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
             # 获取从first state 到 target state的path
-            self.paths = self.utg.get_paths_mutate_on_the_main_path()
+            self.paths = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2)
             # augument_path = self.utg.get_paths_with_loop_mutate_on_base_path()
             # self.paths.extend(augument_path)
             # 重新安装app，防止之前的状态影响当前的探索
@@ -598,6 +606,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         if self.need_initialize:
             self.run_initial_rules()
             self.need_initialize = False
+            return None
         # # 如果已经到达target state，则重启app ，换下一条path
         # if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
         #     self.logger.info("has rule that matches the precondition during diverse")
@@ -618,7 +627,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             if self.step_in_each_path == len(self.paths[self.path_index]):
                 # 说明已经走到最后一个state了，check property
                 self.check_rule_with_precondition()
-            # 如果当前step 超过path的长度，则结束当前path
+            # 如果当前step 大于等于path的长度，则结束当前path
             if self.step_in_each_path >= len(self.paths[self.path_index]):
                 self.logger.info("finish current path: %d, " % self.path_index)
                 self.not_reach_precondition_path_number.append(self.path_index)
@@ -630,9 +639,9 @@ class MutatePolicy(UtgBasedInputPolicy):
             self.logger.info(
                 "current path length %d " % len(self.paths[self.path_index])
             )
-            current_state_on_path = self.paths[self.path_index][self.step_in_each_path][
-                0
-            ]
+            # current_state_on_path = self.paths[self.path_index][self.step_in_each_path][
+            #     0
+            # ]
 
             # 如果当前state和path上的state一致，则选择下一个event
             # if self.current_state.structure_str == current_state_on_path:

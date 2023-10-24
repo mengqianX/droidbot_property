@@ -55,6 +55,7 @@ class InputManager(object):
         replay_output=None,
         android_check=None,
         guide=None,
+        main_path_path=None
     ):
         """
         manage input event sent to the target device
@@ -89,6 +90,7 @@ class InputManager(object):
 
         self.android_check = android_check
         self.guide = guide
+        self.main_path_path = main_path_path
         self.policy = self.get_input_policy(device, app, master)
         self.profiling_method = profiling_method
 
@@ -117,6 +119,7 @@ class InputManager(object):
                 self.random_input,
                 self.android_check,
                 self.guide,
+                main_path_path=self.main_path_path
             )
         elif self.policy_name == POLICY_MEMORY_GUIDED:
             from .input_policy2 import MemoryGuidedPolicy

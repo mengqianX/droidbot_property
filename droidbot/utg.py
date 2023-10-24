@@ -32,6 +32,7 @@ class UTG(object):
         self.first_state = None
         self.last_state = None
 
+        self.first_state_after_initialization = None
         self.start_time = datetime.datetime.now()
 
         self.guide = guide
@@ -568,9 +569,24 @@ class UTG(object):
 
     # 使用了dfs的算法，找到从first state 到 target state的所有的路径，每条路径可能包含相同的节点，但不包含相同的边，
     # 目的是为了将一些环路也计算进去
-    def get_paths_mutate_on_the_main_path(self):
+    def get_paths_mutate_on_the_main_path(self,state_str_or_structure):
+        graph = None
+        first_state = None
+        target = None
+        if state_str_or_structure:
+            graph = self.G
+            first_state = self.first_state.state_str
+            target = self.target_state.state_str
+            if self.first_state_after_initialization:
+                first_state = self.first_state_after_initialization.state_str
+        else:
+            graph = self.G2
+            first_state = self.first_state.structure_str
+            target = self.target_state.structure_str
+            if self.first_state_after_initialization:
+                first_state = self.first_state_after_initialization.structure_str
+        
         paths = []
-        target = self.target_state.structure_str
 
         # number_of_meet_target: 目的是允许在最后一个state再走一个环路回到最后一个state,有利于找到更多bug
         def dfs(node, path, edges, number_of_meet_target):
@@ -578,7 +594,7 @@ class UTG(object):
                 number_of_meet_target += 1
                 paths.append(path)
                 if number_of_meet_target == 1:
-                    for neighbor in self.G2.successors(node):
+                    for neighbor in graph.successors(node):
                         if (node, neighbor) in edges:
                             edges.remove((node, neighbor))
                             dfs(
@@ -589,26 +605,32 @@ class UTG(object):
                             )
                             edges.append((node, neighbor))
                 return
-            for neighbor in self.G2.successors(node):
+            for neighbor in graph.successors(node):
                 if (node, neighbor) in edges:
                     edges.remove((node, neighbor))
                     dfs(neighbor, path + [neighbor], edges, number_of_meet_target)
                     edges.append((node, neighbor))
 
-        edges = list(nx.edges(self.G2))
+        edges = list(nx.edges(graph))
         dfs(
-            self.first_state.structure_str,
-            [self.first_state.structure_str],
+            first_state,
+            [first_state],
             edges,
             number_of_meet_target=0,
         )
         paths = sorted(paths, key=lambda x: len(x))
         nav_edges = []
         for path in paths:
-            nav_edges.append(self.get_edges_from_path(path))
+            nav_edges.append(self.get_edges_from_path(path,state_str_or_structure))
         return nav_edges
 
-    def get_edges_from_path(self, path):
+    def get_edges_from_path(self, path,state_str_or_structure):
+        # state_str_or_structure 表明是在G这个图上还是G2
+        graph = None
+        if state_str_or_structure:
+            graph = self.G
+        else:
+            graph = self.G2
         if path is None:
             return None
         nav_edges = []
@@ -617,7 +639,7 @@ class UTG(object):
             return None
         start_state_structure_str = state_strs[0]
         for state_str in state_strs[1:]:
-            edge = self.G2[start_state_structure_str][state_str]
+            edge = graph[start_state_structure_str][state_str]
             edge_event_strs = list(edge["events"].keys())
             # start_state = random.choice(self.G.nodes[start_state_str]['states'])
             event_str = random.choice(edge_event_strs)

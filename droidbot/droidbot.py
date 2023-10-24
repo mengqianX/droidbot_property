@@ -50,6 +50,7 @@ class DroidBot(object):
         replay_output=None,
         android_check=None,
         guide=None,
+        main_path_path=None
     ):
         """
         initiate droidbot with configurations
@@ -124,6 +125,7 @@ class DroidBot(object):
                 replay_output=replay_output,
                 android_check=android_check,
                 guide=self.guide,
+                main_path_path=main_path_path
             )
         except Exception:
             import traceback

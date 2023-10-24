@@ -108,6 +108,7 @@ class AndroidCheck(object):
         device_serial="emulator-5554",
         output_dir="output",
         xml_path=None,
+        main_path_path=None,
         source_activity=None,
         target_activity=None,
         is_emulator=True,
@@ -163,6 +164,7 @@ class AndroidCheck(object):
             replay_output=replay_output,
             android_check=self,
             guide=self.guide,
+            main_path_path=main_path_path
         )
         self.device = u2.connect(self.device_serial)
         self.device.implicitly_wait(5)  # set default element wait timeout = 5 seconds
