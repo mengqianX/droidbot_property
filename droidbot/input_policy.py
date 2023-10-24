@@ -323,7 +323,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.mutate_node_index_on_main_path = -2
         self.start_mutate_on_the_node = False
         self.shortest_path_states = None
-        self.max_number_of_mutate_steps_on_single_node = 10
+        self.max_number_of_mutate_steps_on_single_node = 50
         self.current_number_of_mutate_steps_on_single_node = 0
         self.stop_mutate = False
         self.step_on_the_path = 0  # 用于记录在main path 上执行了几个event,方便引导app到达目标base node
