@@ -357,6 +357,8 @@ class MutatePolicy(UtgBasedInputPolicy):
 
         event = self.check_the_app_on_foreground()
         if event is not None:
+            self.last_state = self.current_state
+            self.last_event = event
             return event
         # 在app 启动后执行定义好的初始化事件
         if self.action_count == 2:

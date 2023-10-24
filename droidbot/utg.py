@@ -233,8 +233,8 @@ class UTG(object):
                 "label": ", ".join([str(x["event_id"]) for x in event_list]),
                 "events": event_list,
             }
-            if self.highlight_shortest_path(from_state, to_state):
-                utg_edge["color"] = "red"
+            # if self.highlight_shortest_path(from_state, to_state):
+            #     utg_edge["color"] = "red"
             # if self.highlight_path(
             #     from_state,
             #     to_state,
@@ -245,9 +245,9 @@ class UTG(object):
             #     utg_edge["color"] = "red"
             #     self.logger.info("Highlight path: %s --> %s" % (from_state, to_state))
 
-            # # Highlight last transition
-            # if state_transition == self.last_transition:
-            #     utg_edge["color"] = "red"
+            # Highlight last transition
+            if state_transition == self.last_transition:
+                utg_edge["color"] = "red"
 
             utg_edges.append(utg_edge)
 
