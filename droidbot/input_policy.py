@@ -315,15 +315,15 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.__event_trace = ""
         self.__missed_states = set()
         self.__random_explore = False
-
+        # used in execute main path
         self.main_path = self.get_main_path()
         self.main_path_list = copy.deepcopy(self.main_path)
-
+        self.execute_main_path = True
         # used in mutate phase
         self.mutate_node_index_on_main_path = -2
         self.start_mutate_on_the_node = False
         self.shortest_path_states = None
-        self.max_number_of_mutate_steps_on_single_node = 50
+        self.max_number_of_mutate_steps_on_single_node = 20
         self.current_number_of_mutate_steps_on_single_node = 0
         self.stop_mutate = False
         self.step_on_the_path = 0  # 用于记录在main path 上执行了几个event,方便引导app到达目标base node
@@ -364,32 +364,37 @@ class MutatePolicy(UtgBasedInputPolicy):
         if self.action_count == 2:
             self.run_initial_rules()
             time.sleep(2)
-        # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
-        rules_satisfy_precondition = (
-            self.android_check.get_rules_that_pass_the_preconditions()
-        )
-        if len(rules_satisfy_precondition) > 0:
-            self.logger.info("has rule that matches the precondition")
-            self.reach_target_during_exploration = True
-            self.utg.set_target_state(self.current_state)
-            # if self.shortest_path_states is None:
-            #     self.shortest_path_states = self.utg.get_states_on_shortest_path()
 
-        else:
-            self.logger.info("no rule matches the precondition")
         if self.action_count == 2:
             return None
         if self.action_count == 3:
             self.utg.first_state_after_initialization = self.current_state
+
+        if self.execute_main_path:
+            # 首先，根据用户指定的path，生成一条路径到达Precondition
+            event = self.get_main_path_event()
+            if event:
+                self.last_state = self.current_state
+                self.last_event = event
+                return event
+            else:
+                self.execute_main_path = False
+                # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
+                rules_satisfy_precondition = (
+                    self.android_check.get_rules_that_pass_the_preconditions()
+                )
+                if len(rules_satisfy_precondition) > 0:
+                    self.logger.info("has rule that matches the precondition")
+                    self.utg.set_target_state(self.current_state)
+                else:
+                    self.logger.info("no rule matches the precondition")
+
+
         # 如果变异停止了，则根据model开始生成diverse path 来测property
         if self.stop_mutate:
             event = self.generate_events_from_diverse_paths()
         else:
-            # 首先，根据用户指定的path，生成一条路径到达Precondition
-            event = self.get_main_path_event()
-            # 如果用户指定的path已经走完了，就开始对这条路径进行变异
-            if event is None:
-                event = self.mutate_the_main_path()
+            event = self.mutate_the_main_path()
 
         self.last_state = self.current_state
         self.last_event = event

@@ -590,6 +590,8 @@ class UTG(object):
 
         # number_of_meet_target: 目的是允许在最后一个state再走一个环路回到最后一个state,有利于找到更多bug
         def dfs(node, path, edges, number_of_meet_target):
+            if len(path) > 30:
+                return
             if node == target:
                 number_of_meet_target += 1
                 paths.append(path)
