@@ -39,7 +39,7 @@ EVENT_FLAG_TOUCH = "+touch"
 
 # Policy taxanomy
 POLICY_MUTATE = "mutate"
-POLICY_PBT = "pbt"
+POLICY_BUILD_MODEL = "build_model"
 POLICY_RANDOM = "random"
 POLICY_NAIVE_DFS = "dfs_naive"
 POLICY_GREEDY_DFS = "dfs_greedy"
@@ -800,7 +800,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)
 
 
-class PbtFuzzingPolicy(UtgBasedInputPolicy):
+class BuildModelPolicy(UtgBasedInputPolicy):
     """
     DFS/BFS (according to search_method) strategy to explore UFG (new)
     + PBF testing strategy
@@ -809,7 +809,7 @@ class PbtFuzzingPolicy(UtgBasedInputPolicy):
     def __init__(
         self, device, app, random_input, search_method, android_check=None, guide=None
     ):
-        super(PbtFuzzingPolicy, self).__init__(
+        super(BuildModelPolicy, self).__init__(
             device, app, random_input, android_check, guide
         )
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -1335,15 +1335,10 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             "go",
             "next",
         ]
-
-        self.__nav_target = None
-        self.__nav_num_steps = -1
         self.__num_restarts = 0
         self.__num_steps_outside = 0
         self.__event_trace = ""
         self.__missed_states = set()
-        self.__random_explore = False
-
         self.guide = guide
         # yiheng: add a new variable to record the current explore mode
         # if mode = GUIDE, it means we didn't encounter the target state,
@@ -1353,6 +1348,49 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         self.explore_mode = GUIDE
         self.number_of_steps_outside_the_shortest_path = 0
         self.reached_state_on_the_shortest_path = []
+    def generate_event(self):
+        """
+        generate an event
+        @return:
+        """
+        # 在app 启动后执行定义好的初始化事件
+        if self.action_count == 2:
+            self.run_initial_rules()
+    
+        # Get current device state
+        self.current_state = self.device.get_current_state()
+        if self.current_state is None:
+            import time
+            time.sleep(5)
+            return KeyEvent(name="BACK")
+
+        self.__update_utg()
+    
+        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+        if len(rules_to_check) > 0:
+            self.logger.info("has rule that matches the precondition")
+            # 以50%的概率选择是否check rule
+            if random.random() < 0.5:   
+                self.logger.info(" check rule")
+                self.check_rule_with_precondition()
+                return None
+            else:
+                self.logger.info("don't check rule")
+        event = None
+
+        if event is None:
+            event = self.generate_event_based_on_utg()
+
+        # update last events for humanoid
+        if self.device.humanoid is not None:
+            self.humanoid_events = self.humanoid_events + [event]
+            if len(self.humanoid_events) > 3:
+                self.humanoid_events = self.humanoid_events[1:]
+
+        self.last_state = self.current_state
+        self.last_event = event
+        return event
+
 
     def generate_event_based_on_utg(self):
         """
@@ -1421,9 +1459,9 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         #     event = self.guide_the_exploration()
         #     if event is not None:
         #         return event
-        if self.guide:
-            if self.device.get_activity_short_name() == self.guide.target_activity:
-                raise InputInterruptedException("Target state reached.")
+        # if self.guide:
+        #     if self.device.get_activity_short_name() == self.guide.target_activity:
+        #         raise InputInterruptedException("Target state reached.")
         # Get all possible input events
         possible_events = current_state.get_possible_input()
 
@@ -1433,7 +1471,9 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         self.__event_trace += EVENT_FLAG_EXPLORE
         return random.choice(possible_events)
-
+    
+    def __update_utg(self):
+        self.utg.add_transition(self.last_event, self.last_state, self.current_state)
 
 class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
     """

@@ -7,11 +7,11 @@ from .input_event import EventLog
 from .input_policy import (
     MutatePolicy,
     POLICY_MUTATE,
-    POLICY_PBT,
+    POLICY_BUILD_MODEL,
     POLICY_RANDOM,
     UtgBasedInputPolicy,
     UtgNaiveSearchPolicy,
-    PbtFuzzingPolicy,
+    BuildModelPolicy,
     UtgRandomPolicy,
     POLICY_NAIVE_DFS,
     POLICY_GREEDY_DFS,
@@ -103,8 +103,8 @@ class InputManager(object):
             input_policy = UtgNaiveSearchPolicy(
                 device, app, self.random_input, self.policy_name
             )
-        elif self.policy_name == POLICY_PBT:
-            input_policy = PbtFuzzingPolicy(
+        elif self.policy_name == POLICY_BUILD_MODEL:
+            input_policy = BuildModelPolicy(
                 device,
                 app,
                 self.random_input,
@@ -121,6 +121,8 @@ class InputManager(object):
                 self.guide,
                 main_path_path=self.main_path_path
             )
+        elif self.policy_name == POLICY_RANDOM:
+            input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check)
         elif self.policy_name == POLICY_MEMORY_GUIDED:
             from .input_policy2 import MemoryGuidedPolicy
 
