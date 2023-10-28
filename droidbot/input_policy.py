@@ -86,7 +86,7 @@ class InputPolicy(object):
             if result:
                 self.logger.info("-------initialize successfully-----------")
             else:
-                self.logger.info("-------initialize failed-----------")
+                self.logger.error("-------initialize failed-----------")
 
     def start(self, input_manager):
         """
@@ -134,28 +134,14 @@ class InputPolicy(object):
                 traceback.print_exc()
                 continue
             self.action_count += 1
-        # if self.reach_target_during_exploration:
-        #     self.logger.info("------------ reach the target state during exploration")
-        # else:
-        #     self.logger.info(
-        #         "------------ not reach the target state during exploration"
-        #     )
-        # self.logger.info("all path lengths: %d", len(self.paths))
-        # self.logger.info(
-        #     "number of reach precondition paths: %d",
-        #     len(self.reach_precondition_path_number),
-        # )
-        # self.logger.info(
-        #     "number of not reach precondition paths: %d",
-        #     len(self.not_reach_precondition_path_number),
-        # )
-        # self.logger.info(
-        #     "number of pass rule paths: %d", len(self.pass_rule_path_number)
-        # )
-        # self.logger.info(
-        #     "number of fail rule paths: %d", len(self.fail_rule_path_number)
-        # )
+        self.tear_down()
 
+    @abstractmethod    
+    def tear_down(self):
+        """
+        输出一些统计信息
+        """
+        pass
     @abstractmethod
     def generate_event(self):
         """
@@ -216,20 +202,24 @@ class UtgBasedInputPolicy(InputPolicy):
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         if len(rules_to_check) == 0:
             print("No rules match the precondition")
-            # execute event from policy
-            # self.execute_policy_event()
+            if hasattr(self,"not_reach_precondition_path_number"):
+                self.not_reach_precondition_path_number.append(self.path_index)
             return
             # continue
+        if hasattr(self,"reach_precondition_path_number"):
+            self.reach_precondition_path_number.append(self.path_index)
         rule_to_check = random.choice(rules_to_check)
 
         if rule_to_check is not None:
             result = self.android_check.execute_rule(rule_to_check)
             if result:
-                print("-------check rule : pass------")
-                self.pass_rule_path_number.append(self.path_index)
+                self.logger.info("-------check rule : pass------")
+                if hasattr(self, 'pass_rule_path_number'):
+                  self.pass_rule_path_number.append(self.path_index)
             else:
-                print("-------rule execute failed-----------")
-                self.fail_rule_path_number.append(self.path_index)
+                self.logger.error("-------rule execute failed-----------")
+                if hasattr(self, 'fail_rule_path_number'):
+                    self.fail_rule_path_number.append(self.path_index)
 
     def check_rule_without_precondition(self):
         rules_to_check = self.android_check.get_rules_without_preconditions()
@@ -364,8 +354,6 @@ class MutatePolicy(UtgBasedInputPolicy):
         if self.action_count == 2:
             self.run_initial_rules()
             time.sleep(2)
-
-        if self.action_count == 2:
             return None
         if self.action_count == 3:
             self.utg.first_state_after_initialization = self.current_state
@@ -613,16 +601,7 @@ class MutatePolicy(UtgBasedInputPolicy):
         if self.need_initialize:
             self.run_initial_rules()
             self.need_initialize = False
-            return None
-        # # 如果已经到达target state，则重启app ，换下一条path
-        # if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
-        #     self.logger.info("has rule that matches the precondition during diverse")
-        #     # 检查rule是否被满足
-        #     self.check_rule_with_precondition()
-        #     self.reach_precondition_path_number.append(self.path_index)
-        #     self.path_index += 1
-        #     self.step_in_each_path = 0
-        #     return self.stop_app_events()
+            return None     
 
         # 还没有到达target state，则继续探索当前path
         if self.path_index < len(self.paths):
@@ -637,32 +616,13 @@ class MutatePolicy(UtgBasedInputPolicy):
             # 如果当前step 大于等于path的长度，则结束当前path
             if self.step_in_each_path >= len(self.paths[self.path_index]):
                 self.logger.info("finish current path: %d, " % self.path_index)
-                self.not_reach_precondition_path_number.append(self.path_index)
                 self.path_index += 1
                 self.step_in_each_path = 0
-
                 return self.stop_app_events()
-
+            
             self.logger.info(
                 "current path length %d " % len(self.paths[self.path_index])
             )
-            # current_state_on_path = self.paths[self.path_index][self.step_in_each_path][
-            #     0
-            # ]
-
-            # 如果当前state和path上的state一致，则选择下一个event
-            # if self.current_state.structure_str == current_state_on_path:
-            #     next_event = self.paths[self.path_index][self.step_in_each_path][2]
-            #     next_state_structure = self.paths[self.path_index][
-            #         self.step_in_each_path
-            #     ][1]
-            #     self.logger.info("find next event in the %d path" % self.path_index)
-            #     self.logger.info(
-            #         "next state structure in the path: %s" % next_state_structure
-            #     )
-            #     self.step_in_each_path += 1
-            #     return next_event
-
             # 老方法：按照当前state的structure和path上的state的structure进行比较，找到下一个event，
             # 不太靠谱，因为抽象的原因导致这种方式匹配state不准确
             # 新方法：不匹配state信息，只匹配event信息。也就是说，直接在当前state上查找是否能找到event对应的view。
@@ -674,24 +634,38 @@ class MutatePolicy(UtgBasedInputPolicy):
                     self.logger.info("find next event in the %d path" % self.path_index)
                     self.step_in_each_path += 1
                     return next_event
+                else:
+                    # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
+                    self.logger.info("cannot find next event in the %d path" % self.path_index)
+                    self.not_reach_precondition_path_number.append(self.path_index)
+                    self.path_index += 1
+                    self.logger.info("start next path: %d" % self.path_index)
+                    self.step_in_each_path = 0
+                    return self.stop_app_events()
             else:
                 self.step_in_each_path += 1
                 return next_event
-            # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
-            self.logger.info("cannot find next event in the %d path" % self.path_index)
-            self.not_reach_precondition_path_number.append(self.path_index)
-            self.path_index += 1
-            self.logger.info("start next path: %d" % self.path_index)
-            self.step_in_each_path = 0
-            return self.stop_app_events()
         else:
-            self.step_in_each_path = 0
-            self.logger.info("finish explore all paths: %d", len(self.paths))
-            self.logger.info(
-                "number of fail paths: %d", len(self.not_reach_precondition_path_number)
-            )
             raise InputInterruptedException("finish explore all paths")
         return None
+    
+    def tear_down(self):
+        self.logger.info("All paths number: %d", len(self.paths))
+        self.logger.info("finish explore paths: %d", self.path_index)
+        self.logger.info(
+            "number of reach precondition paths: %d",
+            len(self.reach_precondition_path_number),
+        )
+        self.logger.info(
+            "number of not reach precondition paths: %d",
+            len(self.not_reach_precondition_path_number),
+        )
+        self.logger.info(
+            "number of pass rule paths: %d", len(self.pass_rule_path_number)
+        )
+        self.logger.info(
+            "number of fail rule paths: %d", len(self.fail_rule_path_number)
+        )
 
     def __get_nav_target(self, current_state):
         # If last event is a navigation event
@@ -803,7 +777,9 @@ class MutatePolicy(UtgBasedInputPolicy):
 class BuildModelPolicy(UtgBasedInputPolicy):
     """
     DFS/BFS (according to search_method) strategy to explore UFG (new)
-    + PBF testing strategy
+    这个类用于: 用户没有提供base path,因此:
+    1. 工具首先要进行探索，构建一个模型
+    2. 基于这个模型，生成多条路径，然后执行这些路径
     """
 
     def __init__(
@@ -861,39 +837,87 @@ class BuildModelPolicy(UtgBasedInputPolicy):
         self.fail_rule_path_number = []
         self.step_in_each_path = 0
 
+    def generate_event(self):   
+        """
+        generate an event
+        @return:
+        """
+        # Get current device state
+        self.current_state = self.device.get_current_state(self.action_count)
+        if self.current_state is None:
+            import time
+
+            time.sleep(5)
+            return KeyEvent(name="BACK")
+
+        self.__update_utg()
+
+        event = self.check_the_app_on_foreground()
+        if event is not None:
+            self.last_state = self.current_state
+            self.last_event = event
+            return event
+        
+        # 在app 启动后执行定义好的初始化事件
+        if self.action_count == 2:
+            self.run_initial_rules()
+            time.sleep(2)
+            return None
+        
+        if self.action_count == 3:
+            self.utg.first_state_after_initialization = self.current_state
+
+        # first explore the app, then test the properties
+        if self.action_count < self.input_manager.explore_event_count:
+            self.logger.info("Explore the app")
+            event = self.explore_app() 
+        elif self.action_count == self.input_manager.explore_event_count:
+            event = KillAppEvent(app=self.app)
+        else:
+            self.logger.info("Test the app")
+            event = self.generate_event_based_on_utg()
+
+        self.last_state = self.current_state
+        self.last_event = event
+        return event
+    
     def guide_diverse_mode(self):
         next_event = None
 
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
             # 获取从first state 到 target state的path
-            self.paths = self.utg.get_paths_to_state(
-                self.utg.first_state, self.utg.target_state
-            )
+            self.paths = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2)
             # 重新安装app，防止之前的状态影响当前的探索
             self.device.uninstall_app(self.app)
             self.device.install_app(self.app)
+            self.need_initialize = True
             self.path_index = 0
             self.step_in_each_path = 0
-
-        # 如果已经到达target state，则重启app ，换下一条path
-        if len(self.android_check.get_rules_that_pass_the_preconditions()) > 0:
-            self.logger.info("has rule that matches the precondition during diverse")
-            # 检查rule是否被满足
-            self.check_rule_with_precondition()
-            self.reach_precondition_path_number.append(self.path_index)
-            self.path_index += 1
-            self.step_in_each_path = 0
-            return self.stop_app_events()
+            start_app_intent = self.app.get_start_intent()
+            return IntentEvent(intent=start_app_intent)
+        
+        if self.need_initialize:
+            self.run_initial_rules()
+            self.need_initialize = False
+            return None
+        
 
         # 还没有到达target state，则继续探索当前path
         if self.path_index < len(self.paths):
-            # 为了防止走入一个死循环，如果在当前path中走的步数超过了当前path的长度的2倍，则放弃当前path
-            if self.step_in_each_path > len(self.paths[self.path_index]) * 2:
-                self.logger.info(
-                    "give up current path: %d, because it explore too many steps"
-                    % self.path_index
-                )
+            if self.paths[self.path_index] is None:
+                self.logger.info("path is None")
+                self.path_index += 1
+                self.step_in_each_path = 0
+                return self.stop_app_events()
+            
+            if self.step_in_each_path >=len(self.paths[self.path_index]):
+                # 说明已经走到最后一个state了，check property
+                self.check_rule_with_precondition()
+
+            # 如果当前step 大于等于path的长度，则结束当前path
+            if self.step_in_each_path >= len(self.paths[self.path_index]):
+                self.logger.info("finish current path: %d, " % self.path_index)
                 self.not_reach_precondition_path_number.append(self.path_index)
                 self.path_index += 1
                 self.step_in_each_path = 0
@@ -903,30 +927,57 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             self.logger.info(
                 "current path length %d " % len(self.paths[self.path_index])
             )
-            for curren_state_structure, next_state_structure, event in self.paths[
-                self.path_index
-            ]:
-                if self.current_state.structure_str == curren_state_structure:
-                    self.step_in_each_path += 1
-                    next_event = event
+            # 老方法：按照当前state的structure和path上的state的structure进行比较，找到下一个event，
+            # 不太靠谱，因为抽象的原因导致这种方式匹配state不准确
+            # 新方法：不匹配state信息，只匹配event信息。也就是说，直接在当前state上查找是否能找到event对应的view。
+            # 如果能找到，则返回这个view对于的event
+            next_event = self.paths[self.path_index][self.step_in_each_path][2]
+            if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                if self.current_state.is_view_exist(view_in_next_event):
                     self.logger.info("find next event in the %d path" % self.path_index)
-                    self.logger.info(
-                        "next state structure in the path: %s" % next_state_structure
-                    )
+                    self.step_in_each_path += 1
                     return next_event
+            else:
+                self.step_in_each_path += 1
+                return next_event
+
             # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
             self.logger.info("cannot find next event in the %d path" % self.path_index)
             self.not_reach_precondition_path_number.append(self.path_index)
             self.path_index += 1
+            self.logger.info("start next path: %d" % self.path_index)
+            self.step_in_each_path = 0
             return self.stop_app_events()
         else:
-            self.step_in_each_path = 0
-            self.logger.info("finish explore all paths: %d", len(self.paths))
-            self.logger.info(
-                "number of fail paths: %d", len(self.not_reach_precondition_path_number)
-            )
-            raise Exception("finish all paths and stop")
+            raise InputInterruptedException("finish explore all paths")
         return None
+    
+    def tear_down(self):
+        self.logger.info("finish explore all paths: %d", len(self.paths))
+        self.logger.info(
+            "number of fail paths: %d", len(self.not_reach_precondition_path_number)
+        )
+        if self.reach_target_during_exploration:
+            self.logger.info("------------ reach the target state during exploration")
+        else:
+            self.logger.info(
+                "------------ not reach the target state during exploration"
+            )
+        self.logger.info(
+            "number of reach precondition paths: %d",
+            len(self.reach_precondition_path_number),
+        )
+        self.logger.info(
+            "number of not reach precondition paths: %d",
+            len(self.not_reach_precondition_path_number),
+        )
+        self.logger.info(
+            "number of pass rule paths: %d", len(self.pass_rule_path_number)
+        )
+        self.logger.info(
+            "number of fail rule paths: %d", len(self.fail_rule_path_number)
+        )
 
     def guide_explore_mode(self):
         # 首先，判断是否到达target state
@@ -1308,7 +1359,59 @@ class BuildModelPolicy(UtgBasedInputPolicy):
         self.__nav_target = None
         self.__nav_num_steps = -1
         return None
+    def check_the_app_on_foreground(self):
+        if self.current_state.get_app_activity_depth(self.app) < 0:
+            # If the app is not in the activity stack
+            start_app_intent = self.app.get_start_intent()
 
+            # It seems the app stucks at some state, has been
+            # 1) force stopped (START, STOP)
+            #    just start the app again by increasing self.__num_restarts
+            # 2) started at least once and cannot be started (START)
+            #    pass to let viewclient deal with this case
+            # 3) nothing
+            #    a normal start. clear self.__num_restarts.
+
+            if self.__event_trace.endswith(
+                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                self.__num_restarts += 1
+                self.logger.info(
+                    "The app had been restarted %d times.", self.__num_restarts
+                )
+            else:
+                self.__num_restarts = 0
+
+            # pass (START) through
+            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                if self.__num_restarts > MAX_NUM_RESTARTS:
+                    # If the app had been restarted too many times, enter random mode
+                    msg = "The app had been restarted too many times. Entering random mode."
+                    self.logger.info(msg)
+                    self.__random_explore = True
+                else:
+                    # Start the app
+                    self.__event_trace += EVENT_FLAG_START_APP
+                    self.logger.info("Trying to start the app...")
+                    return IntentEvent(intent=start_app_intent)
+
+        elif self.current_state.get_app_activity_depth(self.app) > 0:
+            # If the app is in activity stack but is not in foreground
+            self.__num_steps_outside += 1
+
+            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
+                # If the app has not been in foreground for too long, try to go back
+                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
+                    stop_app_intent = self.app.get_stop_intent()
+                    go_back_event = IntentEvent(stop_app_intent)
+                else:
+                    go_back_event = KeyEvent(name="BACK")
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                self.logger.info("Going back to the app...")
+                return go_back_event
+        else:
+            # If the app is in foreground
+            self.__num_steps_outside = 0
 
 class UtgRandomPolicy(UtgBasedInputPolicy):
     """
@@ -1358,7 +1461,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             self.run_initial_rules()
     
         # Get current device state
-        self.current_state = self.device.get_current_state()
+        self.current_state = self.device.get_current_state(self.action_count)
         if self.current_state is None:
             import time
             time.sleep(5)
