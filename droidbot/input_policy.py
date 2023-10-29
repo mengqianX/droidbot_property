@@ -211,6 +211,7 @@ class UtgBasedInputPolicy(InputPolicy):
         rule_to_check = random.choice(rules_to_check)
 
         if rule_to_check is not None:
+            self.logger.info("-------check rule : %s------" % rule_to_check)
             result = self.android_check.execute_rule(rule_to_check)
             if result:
                 self.logger.info("-------check rule : pass------")
