@@ -10,8 +10,13 @@ from abc import abstractmethod
 
 from .input_event import (
     InputEvent,
+    KEY_RotateDeviceNeutralEvent,
+    KEY_RotateDeviceRightEvent,
     KeyEvent,
     IntentEvent,
+    RotateDevice,
+    RotateDeviceNeutralEvent,
+    RotateDeviceRightEvent,
     TouchEvent,
     ManualEvent,
     SetTextEvent,
@@ -1452,6 +1457,9 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         self.explore_mode = GUIDE
         self.number_of_steps_outside_the_shortest_path = 0
         self.reached_state_on_the_shortest_path = []
+
+        self.last_rotate_events = KEY_RotateDeviceNeutralEvent
+
     def generate_event(self):
         """
         generate an event
@@ -1484,12 +1492,14 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         if event is None:
             event = self.generate_event_based_on_utg()
-
-        # update last events for humanoid
-        if self.device.humanoid is not None:
-            self.humanoid_events = self.humanoid_events + [event]
-            if len(self.humanoid_events) > 3:
-                self.humanoid_events = self.humanoid_events[1:]
+        # 旋转屏幕事件。如果之前执行过旋转屏幕事件，那么下一次执行的旋转屏幕事件应该是相反的
+        if isinstance(event, RotateDevice):
+            if self.last_rotate_events == KEY_RotateDeviceNeutralEvent:
+                self.last_rotate_events = KEY_RotateDeviceRightEvent
+                event = RotateDeviceRightEvent()
+            else:
+                self.last_rotate_events = KEY_RotateDeviceNeutralEvent
+                event = RotateDeviceNeutralEvent()
 
         self.last_state = self.current_state
         self.last_event = event
@@ -1572,6 +1582,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         if self.random_input:
             random.shuffle(possible_events)
         possible_events.append(KeyEvent(name="BACK"))
+        possible_events.append(RotateDevice())
 
         self.__event_trace += EVENT_FLAG_EXPLORE
         return random.choice(possible_events)

@@ -977,3 +977,13 @@ class Device(object):
 
     def get_activity_short_name(self):
         return self.get_top_activity_name().split(".")[-1]
+
+    def rotate_device_right(self):
+        self.adb.disable_auto_rotation()
+        time.sleep(1)
+        self.adb.rotate_right()
+
+    def rotate_device_neutral(self):
+        self.adb.disable_auto_rotation()
+        time.sleep(1)
+        self.adb.rotate_neutral()

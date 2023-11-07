@@ -362,3 +362,21 @@ class ADB(Adapter):
             encoded = str(text)
         # TODO find out which characters can be dangerous, and handle non-English characters
         self.shell("input text %s" % encoded)
+
+    def disable_auto_rotation(self):
+        """
+        Disable auto rotation
+        """
+        self.shell("content insert --uri content://settings/system --bind name:s:accelerometer_rotation --bind value:i:0")
+
+    def rotate_right(self):
+        """
+        Rotate the device to the right
+        """
+        self.shell("content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:1")
+
+    def rotate_neutral(self):
+        """
+        Rotate the device to the neutral position
+        """
+        self.shell("content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:0")

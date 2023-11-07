@@ -76,7 +76,8 @@ KEY_SetTextEvent = "set_text"
 KEY_IntentEvent = "intent"
 KEY_SpawnEvent = "spawn"
 KEY_KillAppEvent = "kill_app"
-
+KEY_RotateDeviceRightEvent = "rotate_device_right"
+KEY_RotateDeviceNeutralEvent = "rotate_device_neutral"
 
 class InvalidEventException(Exception):
     pass
@@ -388,7 +389,43 @@ class KillAppEvent(InputEvent):
     def get_event_str(self, state):
         return "%s()" % self.__class__.__name__
 
+class RotateDevice(InputEvent):
+    def __init__(self):
+        super().__init__()
 
+    @staticmethod
+    def get_random_instance(device, app):
+        return None
+
+    def send(self, device):
+        # do nothing
+        pass
+
+    def get_event_str(self, state):
+        return "%s()" % self.__class__.__name__
+
+class RotateDeviceRightEvent(RotateDevice):
+    """
+    an event to rotate device
+    """
+    def __init__(self):
+        super().__init__()
+    
+    def send(self, device):
+        device.rotate_device_right()
+        return True
+
+class RotateDeviceNeutralEvent(RotateDevice):
+    """
+    an event to rotate device
+    """
+    def __init__(self):
+        super().__init__()
+    
+    def send(self, device):
+        device.rotate_device_neutral()
+        return True
+    
 class KeyEvent(InputEvent):
     """
     a key pressing event
