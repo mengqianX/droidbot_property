@@ -55,11 +55,12 @@ class Test(AndroidCheck):
 
     @precondition(
         lambda self: self.device(
-            resourceId="net.gsantner.markor:id/new_file_dialog__name"
+            resourceId="net.gsantner.markor:id/fab_add_new_item"
         ).exists()
     )
     @rule()
     def rule_add_note(self):
+        self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").click()
         time.sleep(1)
         name = st.text(alphabet=string.ascii_letters,min_size=1, max_size=6).example()
         self.device(resourceId="net.gsantner.markor:id/new_file_dialog__name").set_text(
@@ -102,7 +103,7 @@ class Test(AndroidCheck):
 
     @precondition(
         lambda self: self.device(
-            resourceId="net.gsantner.markor:id/new_file_dialog__name"
+            resourceId="net.gsantner.markor:id/fab_add_new_item"
         ).exists()
     )
     @rule()
