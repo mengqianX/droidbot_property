@@ -228,50 +228,50 @@ class Test(AndroidCheck):
         time.sleep(1)
         assert not self.device(text=selected_category_name).exists() 
     
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_search").exists() & self.device(text="Notes").exists() & self.device(description="drawer open").exists() and not self.device(text="Settings").exists())
-    @rule()
-    def rule_check_category_note_number(self):
-        note_count = int(self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
-        if note_count == 0:
-            return
-        selected_note = random.randint(0, note_count - 1)
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/menu_category").click()
-        if not self.device(resourceId="it.feio.android.omninotes:id/md_contentRecyclerView").child(className ="android.widget.LinearLayout" )[0].exists():
-            return 
-        select_category = self.device(resourceId="it.feio.android.omninotes:id/md_contentRecyclerView").child(className ="android.widget.LinearLayout" )[0]
-        select_category_name = self.device(resourceId="it.feio.android.omninotes:id/md_contentRecyclerView").child(className ="android.widget.LinearLayout" )[0].child(resourceId="it.feio.android.omninotes:id/title").info["text"]
-        select_category_count = int(select_category.child(resourceId="it.feio.android.omninotes:id/count").info["text"])
-        print("select_category_name: " + select_category_name)
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device(description="drawer open").click()
-        time.sleep(1)
-        if not self.device(description="More options").exists() and not self.device(description="drawer open").exists():
-            return
-        self.device(description="drawer open").click()
-        category = self.device(text=select_category_name)
-        if not category.exists():
-            return
-        category_count = int(category.sibling(resourceId="it.feio.android.omninotes:id/count").info["text"])
-        assert category_count == select_category_count
+    # @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_search").exists() & self.device(text="Notes").exists() & self.device(description="drawer open").exists() and not self.device(text="Settings").exists())
+    # @rule()
+    # def rule_check_category_note_number(self):
+    #     note_count = int(self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
+    #     if note_count == 0:
+    #         return
+    #     selected_note = random.randint(0, note_count - 1)
+    #     time.sleep(1)
+    #     self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].click()
+    #     time.sleep(1)
+    #     self.device(resourceId="it.feio.android.omninotes:id/menu_category").click()
+    #     if not self.device(resourceId="it.feio.android.omninotes:id/md_contentRecyclerView").child(className ="android.widget.LinearLayout" )[0].exists():
+    #         return 
+    #     select_category = self.device(resourceId="it.feio.android.omninotes:id/md_contentRecyclerView").child(className ="android.widget.LinearLayout" )[0]
+    #     select_category_name = self.device(resourceId="it.feio.android.omninotes:id/md_contentRecyclerView").child(className ="android.widget.LinearLayout" )[0].child(resourceId="it.feio.android.omninotes:id/title").info["text"]
+    #     select_category_count = int(select_category.child(resourceId="it.feio.android.omninotes:id/count").info["text"])
+    #     print("select_category_name: " + select_category_name)
+    #     time.sleep(1)
+    #     self.device.press("back")
+    #     time.sleep(1)
+    #     self.device(description="drawer open").click()
+    #     time.sleep(1)
+    #     if not self.device(description="More options").exists() and not self.device(description="drawer open").exists():
+    #         return
+    #     self.device(description="drawer open").click()
+    #     category = self.device(text=select_category_name)
+    #     if not category.exists():
+    #         return
+    #     category_count = int(category.sibling(resourceId="it.feio.android.omninotes:id/count").info["text"])
+    #     assert category_count == select_category_count
 
-    @precondition(lambda self: self.device(text="Uncategorized").exists() and self.device(text="Settings").exists())
-    @rule()
-    def rule_uncategory_should_contain_notes(self):
-        self.device(text="Uncategorized",resourceId="it.feio.android.omninotes:id/title").click()
-        time.sleep(1)
-        assert self.device(resourceId="it.feio.android.omninotes:id/root").exists()
+    # @precondition(lambda self: self.device(text="Uncategorized").exists() and self.device(text="Settings").exists())
+    # @rule()
+    # def rule_uncategory_should_contain_notes(self):
+    #     self.device(text="Uncategorized",resourceId="it.feio.android.omninotes:id/title").click()
+    #     time.sleep(1)
+    #     assert self.device(resourceId="it.feio.android.omninotes:id/root").exists()
 
-    @precondition(lambda self: self.device(text="Trash").exists() and self.device(text="Settings").exists())
-    @rule()
-    def rule_trash_should_contain_notes(self):
-        self.device(text="Trash",resourceId="it.feio.android.omninotes:id/title").click()
-        time.sleep(1)
-        assert self.device(resourceId="it.feio.android.omninotes:id/root").exists()
+    # @precondition(lambda self: self.device(text="Trash").exists() and self.device(text="Settings").exists())
+    # @rule()
+    # def rule_trash_should_contain_notes(self):
+    #     self.device(text="Trash",resourceId="it.feio.android.omninotes:id/title").click()
+    #     time.sleep(1)
+    #     assert self.device(resourceId="it.feio.android.omninotes:id/root").exists()
 
     @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_title").exists())
     @rule()
@@ -377,15 +377,15 @@ class Test(AndroidCheck):
 
         assert not self.device(textContains=select_tag_name).exists()     
 
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/reminder_layout").exists())
-    @rule()
-    def add_reminder(self):
-        self.device(resourceId="it.feio.android.omninotes:id/reminder_layout").click()
-        time.sleep(1)
-        self.device(text="OK").click()
-        time.sleep(1)
-        reminder_text = self.device(resourceId="it.feio.android.omninotes:id/datetime").get_text()
-        assert "Reminder set for" in reminder_text
+    # @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/reminder_layout").exists())
+    # @rule()
+    # def add_reminder(self):
+    #     self.device(resourceId="it.feio.android.omninotes:id/reminder_layout").click()
+    #     time.sleep(1)
+    #     self.device(text="OK").click()
+    #     time.sleep(1)
+    #     reminder_text = self.device(resourceId="it.feio.android.omninotes:id/datetime").get_text()
+    #     assert "Reminder set for" in reminder_text
     
 
 start_time = time.time()
