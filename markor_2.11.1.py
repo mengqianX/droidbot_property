@@ -51,6 +51,8 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/action_sort").click()
         time.sleep(1)
         self.device(text="Reverse order").click()
+        time.sleep(1)
+        self.device(text="Folder first").click()
         
 
     @precondition(
@@ -87,7 +89,7 @@ class Test(AndroidCheck):
     def search_in_the_file(self):
         content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").info['text']
         time.sleep(1)
-        words = content.split(" ")
+        words = content.split("\n")
         search_word = random.choice(words)
         print("search word: "+str(search_word))
         self.device(resourceId="net.gsantner.markor:id/action_search").click()
@@ -130,7 +132,38 @@ class Test(AndroidCheck):
         self.device(text="OK").click()
         assert self.device(text=new_name).exists()
 
+    @precondition(lambda self: self.device(resourceId="net.gsantner.markor:id/action_save").exists() and self.device(resourceId="net.gsantner.markor:id/action_save").info["enabled"] == True)
+    @rule()
+    def rule_save_file(self):
+        file_name = self.device(resourceId="net.gsantner.markor:id/note__activity__text_note_title").get_text()
+        origin_content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text()
+        print("origin_content: " + origin_content)
+        self.device(resourceId="net.gsantner.markor:id/action_save").click()
+        time.sleep(1)
+        self.device.press("back")
+        time.sleep(1)
+        if not self.device(text=file_name+".md").exists():
+            print("do not find the file")
+            return
+        self.device(text=file_name+".md").click()
+        time.sleep(1)
+        content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text()
+        print("content: " + content)
+        assert content == origin_content
 
+    @precondition(lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists())
+    @rule()
+    def rule_preview_should_not_change_content(self):
+        origin_content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text()
+        self.device(resourceId="net.gsantner.markor:id/action_preview").click()
+        time.sleep(1)
+        if not self.device(resourceId="net.gsantner.markor:id/action_edit").exists():
+            print("don't find edit button")
+            return
+        self.device(resourceId="net.gsantner.markor:id/action_edit").click()
+        time.sleep(1)
+        content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text()
+        assert content == origin_content, "content changed after preview"
 
 start_time = time.time()
 
