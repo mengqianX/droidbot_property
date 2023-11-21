@@ -52,6 +52,8 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="Reverse order").click()
         time.sleep(1)
+        self.device(resourceId="net.gsantner.markor:id/action_sort").click()
+        time.sleep(1)
         self.device(text="Folder first").click()
         
 
@@ -65,6 +67,8 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").click()
         time.sleep(1)
         name = st.text(alphabet=string.ascii_letters,min_size=1, max_size=6).example()
+        suffix = self.device(resourceId="net.gsantner.markor:id/new_file_dialog__ext").get_text()
+        name = name+"."+suffix
         self.device(resourceId="net.gsantner.markor:id/new_file_dialog__name").set_text(
             name
         )
@@ -81,7 +85,6 @@ class Test(AndroidCheck):
         if self.device(resourceId="net.gsantner.markor:id/action_save").exists():
             self.device.press("back")
         time.sleep(1)
-        name = name+".md"
         assert self.device(text=name).exists()
         
     @precondition(lambda self: self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").exists() and self.device(resourceId="net.gsantner.markor:id/action_search").exists())
@@ -118,6 +121,11 @@ class Test(AndroidCheck):
         file_index = random.randint(0, file_count - 1)
         selected_file = self.device(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title")[file_index]
         file_name = selected_file.info['text']
+        is_file = True
+        if "." not in file_name:
+            is_file = False
+            print("not a file")
+            return
         file_name_suffix = file_name.split(".")[-1]
         print("file name: "+str(file_name))
         selected_file.long_click()
@@ -125,12 +133,14 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/action_rename_selected_item").click()
         time.sleep(1)
         name = st.text(alphabet=string.ascii_letters,min_size=1, max_size=6).example()
-        new_name  = name+"."+file_name_suffix
-        print("new file name: "+str(new_name))
-        self.device(resourceId="net.gsantner.markor:id/new_name").set_text(new_name)
+        if is_file:
+            name = name+"."+file_name_suffix
+        print("new file name: "+str(name))
+        self.device(resourceId="net.gsantner.markor:id/new_name").set_text(name)
         time.sleep(1)
         self.device(text="OK").click()
-        assert self.device(text=new_name).exists()
+        time.sleep(1)
+        assert self.device(text=name).exists()
 
     @precondition(lambda self: self.device(resourceId="net.gsantner.markor:id/action_save").exists() and self.device(resourceId="net.gsantner.markor:id/action_save").info["enabled"] == True)
     @rule()
