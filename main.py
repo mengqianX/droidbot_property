@@ -167,6 +167,8 @@ class AndroidCheck(object):
             main_path_path=main_path_path
         )
         self.device = u2.connect(self.device_serial)
+        # disable keyboard
+        self.device.set_fastinput_ime(True)
         self.device.implicitly_wait(5)  # set default element wait timeout = 5 seconds
         self._initialize_rules_to_run = copy(self.initialize_rules())
         if not self.rules():
