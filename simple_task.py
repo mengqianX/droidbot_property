@@ -75,9 +75,81 @@ class Test(AndroidCheck):
         time.sleep(1)
         assert tag_name in content
     
+    @precondition(
+        lambda self: int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count) > 0 and not self.device(text="Quick filter").exists() and not self.device(text="Settings").exists() and not self.device(text="Saved filters").exists())
+    @rule()
+    def add_list(self):
+        task_count = int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count)
+        print("task count: "+str(task_count))
+        selected_task = random.randint(0, task_count - 1)
+        print("selected task: "+str(selected_task))
+        selected_task = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext")[selected_task]
+        selected_task_name = selected_task.get_text()
+        print("selected task name: "+str(selected_task_name))
+        selected_task.click()
+        self.device(resourceId="nl.mpcjanssen.simpletask:id/update").click()
+        time.sleep(1)
+        self.device(resourceId="nl.mpcjanssen.simpletask:id/btnContext").click()
+        list_name = st.text(alphabet=string.ascii_letters,min_size=1, max_size=6).example()
+        print("list name: "+str(list_name))
+        self.device(resourceId="nl.mpcjanssen.simpletask:id/new_item_text").set_text(list_name)
+        time.sleep(1)
+        self.device(text="OK").click()
+        content = self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").get_text()
+        print("content: "+str(content))
+        time.sleep(1)
+        assert list_name in content
 
+    @precondition(lambda self: self.device(resourceId="nl.mpcjanssen.simpletask:id/fab").exists())
+    @rule()
+    def add_task(self):
+        count = self.device(resourceId="nl.mpcjanssen.simpletask:id/checkBox").count
+        if count > 10:
+            print("task count is more than 13, do not add task") 
+            return
+        self.device(resourceId="nl.mpcjanssen.simpletask:id/fab").click()
+        content = st.text(alphabet=string.ascii_letters,min_size=1, max_size=10).example()
+        print("content: "+str(content))
+        self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").set_text(content)
+        time.sleep(1)
+        self.device(resourceId="nl.mpcjanssen.simpletask:id/btnSave").click()
+        time.sleep(1)
+        new_count = self.device(resourceId="nl.mpcjanssen.simpletask:id/checkBox").count
+        print("new count: "+str(new_count))
+        assert new_count == count + 1   
 
+    @precondition(lambda self: self.device(description="More options").exists())
+    @rule()
+    def action_enter_setting(self):
+        self.device(description="More options").click()
+        time.sleep(1)
+        self.device(text="Settings").click()
 
+    @precondition(
+        lambda self: int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count) > 0 and not self.device(text="Quick filter").exists() and not self.device(text="Settings").exists() and not self.device(text="Saved filters").exists())
+    @rule()
+    def rule_delete_task(self):
+        task_count = int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count)
+        if task_count == 0:
+            print("task count is 0")
+            return
+        print("task count: "+str(task_count))
+        selected_task = random.randint(0, task_count - 1)
+        print("selected task: "+str(selected_task))
+        selected_task = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext")[selected_task]
+        selected_task_name = selected_task.get_text()
+        print("selected task name: "+str(selected_task_name))
+        selected_task.click()
+        time.sleep(1)
+        self.device(resourceId="nl.mpcjanssen.simpletask:id/context_delete").click()
+        time.sleep(1)
+        self.device(text="OK").click()
+        time.sleep(1)
+        new_count = int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count)
+        print("new count: "+str(new_count))
+        assert new_count == task_count - 1
+
+        
 start_time = time.time()
 
 args = sys.argv[1:]
