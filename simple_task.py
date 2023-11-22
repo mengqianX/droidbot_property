@@ -33,6 +33,7 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
+        self.device.set_fastinput_ime(True)
         self.device(text="OK").click()
         time.sleep(1)
         self.device(resourceId="nl.mpcjanssen.simpletask:id/fab").click()
@@ -46,6 +47,7 @@ class Test(AndroidCheck):
         self.device(resourceId="nl.mpcjanssen.simpletask:id/new_item_text").set_text(tag_name)
         time.sleep(1)
         self.device(text="OK").click()
+        time.sleep(1)
         self.device(resourceId="nl.mpcjanssen.simpletask:id/btnSave").click()
 
     @precondition(
@@ -149,7 +151,7 @@ class Test(AndroidCheck):
         print("new count: "+str(new_count))
         assert new_count == task_count - 1
 
-        
+
 start_time = time.time()
 
 args = sys.argv[1:]
