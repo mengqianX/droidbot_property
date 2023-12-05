@@ -45,6 +45,9 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/done").click()
         time.sleep(1)
+        if self.device(text="OK").exists():
+            self.device(text="OK").click()
+            time.sleep(1)
         # 打开设置-在navigation 中显示没有被分类的Notes
         self.device(description="drawer open").click()
         time.sleep(1)
@@ -72,13 +75,14 @@ class Test(AndroidCheck):
         # 添加新的category
         self.device(resourceId="it.feio.android.omninotes:id/menu_category").click()
         time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/md_buttonDefaultPositive").click()
+        self.device(resourceId="it.feio.android.omninotes:id/buttonDefaultPositive").click()
         time.sleep(1)
         category_name = st.text(alphabet=string.printable,min_size=1, max_size=10).example()
         self.device(resourceId="it.feio.android.omninotes:id/category_title").set_text(category_name)
         time.sleep(1)
         self.device(text="OK").click()
-        self.device(description="drawer closed").click()
+        time.sleep(1)
+        self.device.press("back")
     
     @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/count").exists() and self.device(text="SETTINGS").exists())
     @rule()
