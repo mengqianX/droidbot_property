@@ -123,8 +123,8 @@ t = Test(
     apk_path="./apk/OmniNotes-5.3.1.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/340/1",
-    explore_event_count=100,
-    diverse_event_count=100,
+    explore_event_count=500,
+    diverse_event_count=500,
     policy_name="random",
 )
 t.start()
