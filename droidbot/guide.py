@@ -7,7 +7,7 @@ from xml.dom import minidom
 class Guide(object):
     def __init__(
         self,
-        xml_path=None,
+        xml_path="None",
         source_activity=None,
         target_activity=None,
     ):

@@ -107,7 +107,7 @@ class AndroidCheck(object):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        xml_path=None,
+        xml_path="None",
         main_path_path=None,
         source_activity=None,
         target_activity=None,
@@ -236,8 +236,8 @@ class AndroidCheck(object):
         except UiObjectNotFoundError:
             print("Could not find the UI object.")
             return False
-        except AssertionError:
-            print("Assertion error.")
+        except AssertionError as e:
+            print("Assertion error."+str(e))
             # write_rule_result(
             #     f"Assertion error::{rule.function.__name__} failed",
             #     self.fuzzing.current_event,

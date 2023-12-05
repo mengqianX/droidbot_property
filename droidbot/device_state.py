@@ -525,8 +525,11 @@ class DeviceState(object):
 
         for view_id in enabled_view_ids:
             if self.__safe_dict_get(self.views[view_id], 'editable'):
+                from hypothesis import strategies as st
+                import string
+                sample_text = st.text(alphabet=string.ascii_letters+string.digits,min_size=1, max_size=5).example()
                 possible_events.append(
-                    SetTextEvent(view=self.views[view_id], text="HelloWorld")
+                    SetTextEvent(view=self.views[view_id], text=sample_text)
                 )
                 touch_exclude_view_ids.add(view_id)
                 # TODO figure out what event can be sent to editable views
