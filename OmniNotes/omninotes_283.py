@@ -81,7 +81,8 @@ class Test(AndroidCheck):
         self.device(resourceId="it.feio.android.omninotes:id/category_title").set_text(category_name)
         time.sleep(1)
         self.device(text="OK").click()
-        self.device(description="drawer closed").click()
+        time.sleep(1)
+        self.device.press("back")
     
     @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/search_query").exists() and self.device(resourceId="it.feio.android.omninotes:id/root").exists() and not self.device(text="SETTINGS").exists())
     @rule()
