@@ -120,7 +120,7 @@ class Test(AndroidCheck):
         time.sleep(1)
 
         assert not self.device(textContains=select_tag_name).exists()    
-        new_content = self.device(resourceId="it.feio.android.omninotes:id/detail_content").info["text"]
+        new_content = self.device(resourceId="it.feio.android.omninotes:id/detail_content").info["text"].strip()
         print("new_content: " + str(new_content))
         origin_content_exlude_tag = origin_content.replace(select_tag_name, "").strip()
         print("origin_content_exlude_tag: " + str(origin_content_exlude_tag))
@@ -149,7 +149,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/OmniNotes-6.0.5.apk",
+    apk_path="./apk/OmniNotes-5.4.0.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/786/1",
     explore_event_count=500,
