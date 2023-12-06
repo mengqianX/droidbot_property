@@ -33,6 +33,7 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
+        self.device.set_fastinput_ime(True)
         self.device(resourceId="it.feio.android.omninotes:id/next").click()
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/next").click()
@@ -78,7 +79,8 @@ class Test(AndroidCheck):
         self.device(resourceId="it.feio.android.omninotes:id/category_title").set_text(category_name)
         time.sleep(1)
         self.device(text="OK").click()
-        self.device(description="drawer closed").click()
+        time.sleep(1)
+        self.device.press("back")
     
     @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_share").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_tag").exists() )
     @rule()
