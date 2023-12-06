@@ -88,7 +88,7 @@ class Test(AndroidCheck):
     @rule()
     def search_result_should_not_contain_other_notes(self):
         print("time: " + str(time.time() - start_time))
-        text = self.device(resourceId="it.feio.android.omninotes:id/search_query").get_text()
+        text = self.device(resourceId="it.feio.android.omninotes:id/search_query").get_text().split(" ")[1]
         print("search text: " + text)
         if not self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").exists():
             return
