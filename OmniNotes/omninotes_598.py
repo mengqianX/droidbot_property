@@ -33,6 +33,7 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
+        self.device.set_fastinput_ime(True)
         self.device(resourceId="it.feio.android.omninotes:id/next").click()
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/next").click()
@@ -137,7 +138,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         assert not self.device(text="PASSWORD FORGOTTEN").exists()
     
-    precondition(lambda self: self.device(description="More options").exists() and self.device(description="it.feio.android.omninotes:id/menu_attachment").exists())
+    precondition(lambda self: self.device(description="More options").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_attachment").exists())
     @rule()
     def action_lock_a_note(self):
         self.device(description="More options").click()
