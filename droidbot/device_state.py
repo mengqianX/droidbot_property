@@ -527,7 +527,7 @@ class DeviceState(object):
             if self.__safe_dict_get(self.views[view_id], 'editable'):
                 from hypothesis import strategies as st
                 import string
-                sample_text = st.text(alphabet=string.ascii_letters+string.digits,min_size=1, max_size=5).example()
+                sample_text = st.text(alphabet=string.printable,min_size=1, max_size=8).example()
                 possible_events.append(
                     SetTextEvent(view=self.views[view_id], text=sample_text)
                 )
