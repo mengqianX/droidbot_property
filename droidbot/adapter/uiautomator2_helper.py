@@ -61,7 +61,7 @@ class Uiautomator2_Helper:
             "visible": element.get("visible-to-user") == "true",
             "checkable": element.get("checkable") == "true",
             "child_count": len(element),
-            "editable": element.get("editable") == "true",
+            "editable": element.get("class") == "android.widget.EditText",
             "clickable": element.get("clickable") == "true",
             "is_password": element.get("password") == "true",
             "focusable": element.get("focusable") == "true",
