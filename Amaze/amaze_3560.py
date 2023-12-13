@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(description="More options").exists() and self.device(resourceId="com.amaze.filemanager:id/firstline").count < 7 and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
     @rule()
     def action_create_folder(self):
+        print("time: " + str(time.time() - start_time))
         self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
         time.sleep(1)
         self.device(text="Folder").click()
@@ -50,6 +51,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
     @rule()
     def rule_open_folder(self):
+        print("time: " + str(time.time() - start_time))
         count = self.device(resourceId="com.amaze.filemanager:id/firstline").count
         print("count: "+str(count))
         index = random.randint(0, count-1)
