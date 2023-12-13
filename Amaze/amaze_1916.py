@@ -36,6 +36,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(text="Recent files").exists()  and self.device(text="Internal Storage").exists() and len(self.add_file_names) > 0)
     @rule()
     def rule_recent_file(self):
+        print("time: " + str(time.time() - start_time))
         self.device(text="Recent files").click()
         time.sleep(1)
         recent_added_file = self.add_file_names[-1]
@@ -45,6 +46,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(resourceId="com.amaze.filemanager:id/instagram").exists())
     @rule()
     def add_file(self):
+        print("time: " + str(time.time() - start_time))
         self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
         time.sleep(1)
         self.device(text="File").click()

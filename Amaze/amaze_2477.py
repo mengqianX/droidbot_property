@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(text="Color").exists() and self.device(text="Customize").exists())
     @rule()
     def back_should_not_go_to_main_setting(self):
+        print("time: " + str(time.time() - start_time))
         self.device.press.back()
         time.sleep(1)
         assert not self.device(text="Settings").exists()

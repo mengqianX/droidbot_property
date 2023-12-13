@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(resourceId="com.amaze.filemanager:id/fab_expand_menu_button").exists() and not self.device(resourceId="com.amaze.filemanager:id/design_menu_item_action_area").exists())
     @rule()
     def rule_rename(self):
+        print("time: " + str(time.time() - start_time))
         count = self.device(resourceId="com.amaze.filemanager:id/firstline").count
         print("count: "+str(count))
         index = random.randint(0, count-1)

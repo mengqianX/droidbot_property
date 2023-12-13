@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(text="/storage/emulated/0").exists())
     @rule()
     def should_display_files(self):
+        print("time: " + str(time.time() - start_time))
         assert self.device(resourceId="com.amaze.filemanager:id/firstline").exists()
 
 start_time = time.time()

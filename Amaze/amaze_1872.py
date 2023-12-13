@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(text="Internal Storage").exists())
     @rule()
     def search_folder_should_be_opened(self):
+        print("time: " + str(time.time() - start_time))
         folder = self.device(text="Folders").down(resourceId="com.amaze.filemanager:id/firstline")
         print("folder: "+str(folder.get_text()))
         self.device(resourceId="com.amaze.filemanager:id/search").click()

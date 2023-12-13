@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(text="Recent files").exists() and self.device(text="Images").exists())
     @rule()
     def rule_open_recent_files(self):
+        print("time: " + str(time.time() - start_time))
         self.device(text="Recent files").click()
         time.sleep(1)
         number_of_files = self.device(resourceId="com.amaze.filemanager:id/second").count

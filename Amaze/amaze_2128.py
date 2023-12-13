@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists())
     @rule()
     def rule_FAB_should_appear(self):
+        print("time: " + str(time.time() - start_time))
         assert self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists(), "FAB should appear"
         self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
         time.sleep(1)

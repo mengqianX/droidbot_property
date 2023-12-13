@@ -35,7 +35,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/action_mode_close_button").exists() and self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and self.device(resourceId="com.amaze.filemanager:id/cpy").exists())
     @rule()
     def rotate_should_persist_selected_item(self):
-        
+        print("time: " + str(time.time() - start_time))
         self.device.set_orientation('l')
         time.sleep(1)
         self.device.set_orientation('n')
@@ -63,7 +63,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.8.4.apk",
+    apk_path="./apk/amaze-3.5.2.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/2910/1",
     explore_event_count=500,

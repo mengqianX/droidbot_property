@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(text="Go Back").exists() and self.device(resourceId="com.amaze.filemanager:id/second").exists())
     @rule()
     def rule_go_back(self):
+        print("time: " + str(time.time() - start_time))
         original_path = self.device(resourceId="com.amaze.filemanager:id/fullpath").get_text()
         print("original path: "+str(original_path))
         time.sleep(1)

@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(textContains="Search results").exists())
     @rule()
     def should_display_files(self):
+        print("time: " + str(time.time() - start_time))
         self.device.set_orientation("l")
         time.sleep(1)
         self.device.set_orientation("n")

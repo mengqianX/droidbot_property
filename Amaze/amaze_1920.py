@@ -34,6 +34,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(text="FTP Server").exists())
     @rule()
     def should_notice_user_when_no_network(self):
+        print("time: " + str(time.time() - start_time))
         self.device.open_quick_settings()
         time.sleep(1)
         if self.device(description="Airplane mode").get_text() == "ON":
