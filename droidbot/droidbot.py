@@ -133,7 +133,8 @@ class DroidBot(object):
             traceback.print_exc()
             self.stop()
             sys.exit(-1)
-
+        self.resource_path = "Document"
+        self.send_documents()
     @staticmethod
     def get_instance():
         if DroidBot.instance is None:
@@ -216,6 +217,9 @@ class DroidBot(object):
             proxy = xmlrpc.client.ServerProxy(self.input_manager.policy.master)
             proxy.stop_worker(self.device.serial)
 
-
+    def send_documents(self):
+        if self.device:
+            for file in os.listdir(self.resource_path):
+                self.device.push_file(os.path.join(self.resource_path, file), "/sdcard/")
 class DroidBotException(Exception):
     pass
