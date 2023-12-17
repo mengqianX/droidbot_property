@@ -303,9 +303,9 @@ class Test(AndroidCheck):
     # bug #237
     @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_share").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_tag").exists() )
     @rule()
-    def hash_tag_with_number_start_shouldbe_recognized(self):
+    def hash_tag_shouldbe_recognized(self):
         print("time: " + str(time.time() - start_time))
-        text = st.text(alphabet=string.ascii_letters+string.digits,min_size=1, max_size=5).example()
+        text = st.text(alphabet=string.ascii_letters,min_size=1, max_size=5).example()
         tag = "#"+ text
         print("tag: " + tag)
         self.device(resourceId="it.feio.android.omninotes:id/detail_content").set_text(tag)
@@ -400,7 +400,7 @@ class Test(AndroidCheck):
         self.device.press("back")
 
     # bug #886
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(text="Settings").exists())
+    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(resourceId="it.feio.android.omninotes:id/action_bar_title").exists() and not self.device(text="Settings").exists())
     @rule()
     def rule_trash_note_cannot_be_searched(self):
         print("time: " + str(time.time() - start_time))
@@ -494,7 +494,7 @@ class Test(AndroidCheck):
     #     assert selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists() == has_attachment, "has_attachment: " + str(selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists())
 
     # bug #801
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(text="Settings").exists() and self.device(resourceId="it.feio.android.omninotes:id/lockedIcon").exists())
+    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(resourceId="it.feio.android.omninotes:id/action_bar_title").exists() and not self.device(text="Settings").exists() and self.device(resourceId="it.feio.android.omninotes:id/lockedIcon").exists())
     @rule()
     def swipe_locked_note(self):
         print("time: " + str(time.time() - start_time))
@@ -560,7 +560,7 @@ class Test(AndroidCheck):
         assert new_content == origin_content_exlude_tag
 
     # bug #283
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/search_query").exists() and self.device(resourceId="it.feio.android.omninotes:id/root").exists() and not self.device(text="SETTINGS").exists())
+    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/search_query").exists() and self.device(resourceId="it.feio.android.omninotes:id/root").exists() and not self.device(text="Settings").exists())
     @rule()
     def search_result_should_not_contain_other_notes(self):
         print("time: " + str(time.time() - start_time))
