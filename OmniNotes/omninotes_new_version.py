@@ -248,7 +248,7 @@ class Test(AndroidCheck):
         assert self.device(text=category_name).right(resourceId="it.feio.android.omninotes:id/count").get_text() == "1"
     
     # bug #381
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/toolbar").child(text="Trash").exists() and self.device(resourceId="it.feio.android.omninotes:id/root").exists() and not self.device(text="SETTINGS").exists())
+    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/toolbar").child(text="Trash").exists() and self.device(resourceId="it.feio.android.omninotes:id/root").exists() and not self.device(text="Settings").exists())
     @rule()
     def restore_note_from_trash_should_work(self):
         print("time: " + str(time.time() - start_time))
@@ -409,7 +409,7 @@ class Test(AndroidCheck):
         note_count = int(self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
         selected_note = random.randint(0, note_count - 1)
         selected_note_name = self.device(resourceId="it.feio.android.omninotes:id/note_title")[selected_note].info['text']
-        print("selected_note: " + str(selected_note))
+        print("selected_note: " + str(selected_note_name))
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].long_click()
         time.sleep(1)
@@ -433,11 +433,11 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device.send_action("search")
         time.sleep(1)
-        assert not self.device(text=selected_note_name,resourceId="it.feio.android.omninotes:id/note_title").exists()
+        assert not self.device(text=selected_note_name,resourceId="it.feio.android.omninotes:id/note_title").exists(),"note should not be searched"
         # 点击checklist 看能否找到
         self.device(resourceId="it.feio.android.omninotes:id/menu_uncomplete_checklists").click()
         time.sleep(1)
-        assert not self.device(text=selected_note_name,resourceId="it.feio.android.omninotes:id/note_title").exists()
+        assert not self.device(text=selected_note_name,resourceId="it.feio.android.omninotes:id/note_title").exists(),"note should not be searched in checklist"
 
     # # bug #812
     # @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_search").exists() and self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(text="SETTINGS").exists())
