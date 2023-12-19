@@ -60,10 +60,10 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="CREATE").click()
         time.sleep(1)
-        assert self.device(resourceId="com.amaze.filemanager:id/firstline",text=folder_name).exists(), "create folder failed with folder_name: " + folder_name
+        assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(folder_name, allow_scroll_search=True).exists(), "create folder failed with folder_name: " + folder_name
 
     # bug #3560  
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists())
+    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and not self.device(text="Type to search…").exists())
     @rule()
     def rule_open_folder(self):
         print("time: " + str(time.time() - start_time))
@@ -129,7 +129,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="CLOSE").click()
         time.sleep(1)
-        assert self.device(text=selected_file_name).exists()
+        assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(selected_file_name, allow_scroll_search=True).exists(), "unhide file failed with file name: " + str(selected_file_name)
 
     # bug #2518
     @precondition(lambda self: self.device(text="App Manager").exists() and self.device(description="More options").exists())
@@ -161,7 +161,7 @@ class Test(AndroidCheck):
         assert not self.device(text="Settings").exists()
 
     # bug #2128
-    @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists())
+    @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/item_count").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists())
     @rule()
     def rule_FAB_should_appear(self):
         print("time: " + str(time.time() - start_time))
@@ -199,9 +199,18 @@ class Test(AndroidCheck):
     @rule()
     def search_folder_should_be_opened(self):
         print("time: " + str(time.time() - start_time))
-        folder = self.device(text="Folders").down(resourceId="com.amaze.filemanager:id/firstline")
+        # 先随机选择一个folder
+        folder_count = self.device(resourceId="com.amaze.filemanager:id/firstline").count
+        print("folder count: "+str(folder_count))
+        folder_index = random.randint(0, folder_count-1)
+        print("folder index: "+str(folder_index))
+        folder = self.device(resourceId="com.amaze.filemanager:id/firstline")[folder_index]
         folder_name = folder.get_text()
         print("folder: "+str(folder_name))
+        if "." in folder_name:
+            print("may not be a folder ")
+            return
+        # 再去搜索这个folder
         self.device(resourceId="com.amaze.filemanager:id/search").click()
         time.sleep(1)
         self.device(resourceId="com.amaze.filemanager:id/search_edit_text").set_text(folder_name)
@@ -228,7 +237,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="EXTRACT").click()
         time.sleep(1)
-        assert self.device(text=folder_name).exists(), "extract zip file failed with zip file name: "+str(zip_file.get_text())
+        assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(folder_name,allow_scroll_search=True,resourceId="com.amaze.filemanager:id/firstline").exists(), "extract zip file failed with zip file name: "+str(zip_file.get_text())
 
     # bug #1797
     @precondition(lambda self: self.device(text="Type to search…").exists() )
