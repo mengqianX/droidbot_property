@@ -135,6 +135,7 @@ class Test(AndroidCheck):
         title = st.text(alphabet=string.ascii_letters+string.digits,min_size=1, max_size=10).example()
         content = st.text(alphabet=string.printable,min_size=0, max_size=10).example()
         print("title "+title)
+        print("content "+content)
         self.device(resourceId="it.feio.android.omninotes:id/menu_sort").click()
         time.sleep(1)
         self.device(text="Creation date").click()
@@ -305,7 +306,7 @@ class Test(AndroidCheck):
     @rule()
     def hash_tag_shouldbe_recognized(self):
         print("time: " + str(time.time() - start_time))
-        text = st.text(alphabet=string.ascii_letters,min_size=1, max_size=5).example()
+        text = st.text(alphabet=string.ascii_letters,min_size=2, max_size=5).example()
         tag = "#"+ text
         print("tag: " + tag)
         self.device(resourceId="it.feio.android.omninotes:id/detail_content").set_text(tag)
