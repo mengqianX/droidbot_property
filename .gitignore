@@ -8,7 +8,7 @@ droidbot/output*/*
 droidbot/apk/*
 *output/
 
-*.sh
+#*.sh
 # test_*.py
 .vscode/*
 # Distribution / packaging
