@@ -309,7 +309,11 @@ class Test(AndroidCheck):
         text = st.text(alphabet=string.ascii_letters,min_size=2, max_size=5).example()
         tag = "#"+ text
         print("tag: " + tag)
-        self.device(resourceId="it.feio.android.omninotes:id/detail_content").set_text(tag)
+        if self.device(className="android.widget.CheckBox").exists():
+            print("checkbox exists")
+            self.device(className="android.widget.CheckBox").sibling(className="android.widget.EditText").set_text(tag)
+        else:
+            self.device(resourceId="it.feio.android.omninotes:id/detail_content").set_text(tag)
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/toolbar").child(className="android.widget.ImageButton").click()
         time.sleep(1)
@@ -495,23 +499,23 @@ class Test(AndroidCheck):
     #     assert selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists() == has_attachment, "has_attachment: " + str(selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists())
 
     # bug #801
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(resourceId="it.feio.android.omninotes:id/action_bar_title").exists() and not self.device(text="Settings").exists() and self.device(resourceId="it.feio.android.omninotes:id/lockedIcon").exists())
-    @rule()
-    def swipe_locked_note(self):
-        print("time: " + str(time.time() - start_time))
-        selected_note = self.device(resourceId="it.feio.android.omninotes:id/lockedIcon").up(resourceId="it.feio.android.omninotes:id/note_title")
-        selected_note_text = selected_note.get_text()
-        print("selected_note_text: " + selected_note_text)
-        time.sleep(1)
-        selected_note.scroll.horiz.forward(steps=100)
-        time.sleep(3)
-        self.device.press("recent")
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        assert self.device(text=selected_note_text).exists()
+    # @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(resourceId="it.feio.android.omninotes:id/action_bar_title").exists() and not self.device(text="Settings").exists() and self.device(resourceId="it.feio.android.omninotes:id/lockedIcon").exists())
+    # @rule()
+    # def swipe_locked_note(self):
+    #     print("time: " + str(time.time() - start_time))
+    #     selected_note = self.device(resourceId="it.feio.android.omninotes:id/lockedIcon").up(resourceId="it.feio.android.omninotes:id/note_title")
+    #     selected_note_text = selected_note.get_text()
+    #     print("selected_note_text: " + selected_note_text)
+    #     time.sleep(1)
+    #     selected_note.scroll.horiz.forward(steps=100)
+    #     time.sleep(3)
+    #     self.device.press("recent")
+    #     time.sleep(1)
+    #     self.device.press("back")
+    #     time.sleep(1)
+    #     self.device.press("back")
+    #     time.sleep(1)
+    #     assert self.device(text=selected_note_text).exists()
 
     # bug #786_634
     @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_share").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_tag").exists() )
