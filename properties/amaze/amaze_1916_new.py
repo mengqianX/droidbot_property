@@ -30,28 +30,36 @@ class Test(AndroidCheck):
             target_activity=target_activity,
             policy_name=policy_name,
         )
+        self.add_file_names = []
+    
 
-    @precondition(lambda self: self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(text="Internal Storage").exists())
+    @precondition(lambda self: self.device(text="Recent files").exists()  and self.device(text="Internal Storage").exists() and len(self.add_file_names) > 0)
     @rule()
-    def search_folder_should_be_opened(self):
+    def rule_recent_file(self):
         print("time: " + str(time.time() - start_time))
-        folder = self.device(text="Folders").down(resourceId="com.amaze.filemanager:id/firstline")
-        print("folder: "+str(folder.get_text()))
-        self.device(resourceId="com.amaze.filemanager:id/search").click()
+        self.device(text="Recent files").click()
         time.sleep(1)
-        self.device(resourceId="com.amaze.filemanager:id/search_edit_text").set_text(folder.get_text())
-        time.sleep(1)
-        self.device.set_fastinput_ime(False) # 切换成正常的输入法
-        self.device.send_action("search") # 模拟输入法的搜索
-        time.sleep(1)
-        self.device.set_fastinput_ime(True)
-        time.sleep(1)
-        assert self.device(text=folder.get_text()).exists(), "search folder failed with folder name: "+str(folder.get_text())
-        folder.click()
-        time.sleep(1)
-        assert not self.device(text="Open As").exists(), "open folder failed with folder name: "+str(folder.get_text())
+        recent_added_file = self.add_file_names[-1]
+        print("recent added file: "+str(recent_added_file))
+        assert self.device(text=recent_added_file).exists()
 
+    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(resourceId="com.amaze.filemanager:id/instagram").exists())
+    @rule()
+    def add_file(self):
+        print("time: " + str(time.time() - start_time))
+        self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
+        time.sleep(1)
+        self.device(text="File").click()
+        time.sleep(1)
+        file_name = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()+".txt"
+        print("file name: "+str(file_name))
 
+        self.device(resourceId="com.amaze.filemanager:id/singleedittext_input").set_text(file_name)
+        time.sleep(1)
+        self.device(text="CREATE").click()
+        time.sleep(1)
+        self.add_file_names.append(file_name)
+        assert self.device(text=file_name).exists()    
 start_time = time.time()
 
 # args = sys.argv[1:]
@@ -74,9 +82,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.4.3.apk",
+    apk_path="./apk/amaze-3.8.4.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/1872/1",
+    output_dir="output/amaze/1916/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",

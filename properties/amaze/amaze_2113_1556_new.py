@@ -31,26 +31,9 @@ class Test(AndroidCheck):
             policy_name=policy_name,
         )
 
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(description="More options").exists() and self.device(resourceId="com.amaze.filemanager:id/firstline").count < 7 and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
+    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(text="Cloud Connection").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists())
     @rule()
-    def action_create_folder(self):
-        print("time: " + str(time.time() - start_time))
-        self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
-        time.sleep(1)
-        self.device(text="Folder").click()
-        time.sleep(1)
-        folder_name = st.text(alphabet=string.printable,min_size=1, max_size=5).example()
-        print("folder_name: " + folder_name)
-        self.device(resourceId="com.amaze.filemanager:id/singleedittext_input").set_text(folder_name)
-        time.sleep(1)
-        self.device(text="CREATE").click()
-        time.sleep(1)
-        assert self.device(resourceId="com.amaze.filemanager:id/firstline",text=folder_name).exists(), "create folder failed with folder_name: " + folder_name
-
-    # bug #3560  
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
-    @rule()
-    def rule_open_folder(self):
+    def rule_rename(self):
         print("time: " + str(time.time() - start_time))
         count = self.device(resourceId="com.amaze.filemanager:id/firstline").count
         print("count: "+str(count))
@@ -58,20 +41,20 @@ class Test(AndroidCheck):
         print("index: "+str(index))
         selected_file = self.device(resourceId="com.amaze.filemanager:id/firstline")[index]
         selected_file_name = selected_file.get_text()
-        print("selected file or dir name: "+str(selected_file_name))
+        print("selected file name: "+str(selected_file_name))
         selected_file.right(resourceId="com.amaze.filemanager:id/properties").click()
         time.sleep(1)
-        if self.device(text="Open with").exists():
-            print("its a file, not a folder")
-            return
-        self.device.press("back")
+        self.device(text="Rename").click()
         time.sleep(1)
-        selected_file.click()
+        new_file_name = st.text(alphabet=string.printable,min_size=1, max_size=5).example()
+        print("new file name: "+str(new_file_name))
+        self.device(resourceId="com.amaze.filemanager:id/singleedittext_input").set_text(new_file_name)
         time.sleep(1)
-        full_path = self.device(resourceId="com.amaze.filemanager:id/fullpath").get_text()
-        print("full path: "+str(full_path))     
-        assert selected_file_name in full_path
-        self.device.press("back")
+        self.device(text="SAVE").click()
+        time.sleep(1)
+        assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(new_file_name, allow_scroll_search=True).exists(), "rename failed with new_file_name: " + new_file_name
+    
+
 start_time = time.time()
 
 # args = sys.argv[1:]
@@ -96,7 +79,7 @@ start_time = time.time()
 t = Test(
     apk_path="./apk/amaze-3.8.4.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/3560/1",
+    output_dir="output/amaze/2113/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",

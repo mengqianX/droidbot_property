@@ -31,20 +31,15 @@ class Test(AndroidCheck):
             policy_name=policy_name,
         )
 
-    @precondition(lambda self: self.device(text="Go Back").exists() and self.device(resourceId="com.amaze.filemanager:id/second").exists())
+    @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/item_count").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists())
     @rule()
-    def rule_go_back(self):
+    def rule_FAB_should_appear(self):
         print("time: " + str(time.time() - start_time))
-        original_path = self.device(resourceId="com.amaze.filemanager:id/fullpath").get_text()
-        print("original path: "+str(original_path))
+        assert self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists(), "FAB should appear"
+        self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
         time.sleep(1)
-        self.device(text="Go Back",resourceId="com.amaze.filemanager:id/secondLine").click()
-        time.sleep(1)
-        after_path = self.device(resourceId="com.amaze.filemanager:id/fullpath").get_text()
-        print("after path: "+str(after_path))
-        expected_path = '/'.join(original_path.split("/")[:-1])
-        print("expected path: "+str(expected_path))
-        assert after_path == expected_path
+        assert self.device(resourceId="com.amaze.filemanager:id/sd_label").exists()
+    
 
 start_time = time.time()
 
@@ -68,9 +63,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.3.0RC10.apk",
+    apk_path="./apk/amaze-3.8.4.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/1499/1",
+    output_dir="output/amaze/2128/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",

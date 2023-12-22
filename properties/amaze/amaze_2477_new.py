@@ -31,28 +31,14 @@ class Test(AndroidCheck):
             policy_name=policy_name,
         )
 
-    @precondition(lambda self: self.device(text="FTP Server").exists())
+    @precondition(lambda self: self.device(text="Color").exists() and self.device(text="Customize").exists())
     @rule()
-    def should_notice_user_when_no_network(self):
+    def back_should_not_go_to_main_setting(self):
         print("time: " + str(time.time() - start_time))
-        self.device.open_quick_settings()
+        self.device.press.back()
         time.sleep(1)
-        if self.device(description="Airplane mode").get_text() == "ON":
-            self.device(description="Airplane mode").click()
-            time.sleep(1)
-            print("airplane mode on")
-            self.device(description="Airplane mode").click()
-            time.sleep(1)
-            return 
-        self.device(description="Airplane mode").click()
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device(text="START").click()
-        time.sleep(1)
-        assert self.device(text="OPEN SETTINGS").exists()
+        assert not self.device(text="Settings").exists()
+    
 
 start_time = time.time()
 
@@ -76,9 +62,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.4.3.apk",
+    apk_path="./apk/amaze-3.8.4.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/1920/1",
+    output_dir="output/amaze/2477/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",

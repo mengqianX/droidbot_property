@@ -31,14 +31,13 @@ class Test(AndroidCheck):
             policy_name=policy_name,
         )
 
-    @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists())
+    @precondition(lambda self: self.device(text="App Manager").exists() and self.device(description="More options").exists())
     @rule()
-    def rule_FAB_should_appear(self):
+    def click_sort_should_work(self):
         print("time: " + str(time.time() - start_time))
-        assert self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists(), "FAB should appear"
-        self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
+        self.device(resourceId="com.amaze.filemanager:id/sort").click()
         time.sleep(1)
-        assert self.device(resourceId="com.amaze.filemanager:id/sd_label").exists()
+        assert self.device(text="Sort By").exists()
     
 
 start_time = time.time()
@@ -63,9 +62,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.5.3.apk",
+    apk_path="./apk/amaze-9c8048a.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/2128/1",
+    output_dir="output/amaze/2498/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",

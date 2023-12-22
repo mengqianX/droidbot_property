@@ -31,37 +31,36 @@ class Test(AndroidCheck):
             policy_name=policy_name,
         )
 
-    
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
+    @precondition(lambda self: self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(text="Internal Storage").exists())
     @rule()
-    def rule_hide_unhide_file(self):
+    def search_folder_should_be_opened(self):
         print("time: " + str(time.time() - start_time))
-        # 先去hide 一个文件或者文件夹
-        count = self.device(resourceId="com.amaze.filemanager:id/firstline").count
-        print("count: "+str(count))
-        index = random.randint(0, count-1)
-        print("index: "+str(index))
-        selected_file = self.device(resourceId="com.amaze.filemanager:id/firstline")[index]
-        selected_file_name = selected_file.get_text()
-        print("selected file name: "+str(selected_file_name))
-        selected_file.long_click()
+        # 先随机选择一个folder
+        folder_count = self.device(resourceId="com.amaze.filemanager:id/firstline").count
+        print("folder count: "+str(folder_count))
+        folder_index = random.randint(0, folder_count-1)
+        print("folder index: "+str(folder_index))
+        folder = self.device(resourceId="com.amaze.filemanager:id/firstline")[folder_index]
+        folder_name = folder.get_text()
+        print("folder: "+str(folder_name))
+        if "." in folder_name:
+            print("may not be a folder ")
+            return
+        # 再去搜索这个folder
+        self.device(resourceId="com.amaze.filemanager:id/search").click()
         time.sleep(1)
-        self.device(description="More options").click()
+        self.device(resourceId="com.amaze.filemanager:id/search_edit_text").set_text(folder_name)
         time.sleep(1)
-        self.device(text="Hide").click()
+        self.device.set_fastinput_ime(False) # 切换成正常的输入法
+        self.device.send_action("search") # 模拟输入法的搜索
         time.sleep(1)
-        assert not self.device(text=selected_file_name).exists()
+        self.device.set_fastinput_ime(True)
         time.sleep(1)
-        # 再去unhide 一个文件或者文件夹
-        self.device(description="More options").click()
+        assert self.device(text=folder_name).exists(), "search folder failed with folder name: "+str(folder_name)
+        self.device(text=folder_name).click()
         time.sleep(1)
-        self.device(text="Hidden Files").click()
-        time.sleep(1)
-        self.device(text=selected_file_name).right(resourceId="com.amaze.filemanager:id/delete_button").click()
-        time.sleep(1)
-        self.device(text="CLOSE").click()
-        time.sleep(1)
-        assert self.device(text=selected_file_name).exists()
+        assert not self.device(text="Open As").exists(), "open folder failed with folder name: "+str(folder_name)
+
 
 start_time = time.time()
 
@@ -85,9 +84,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.6.1.apk",
+    apk_path="./apk/amaze-3.4.3.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/2687/1",
+    output_dir="output/amaze/1872/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",

@@ -61,7 +61,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="CLOSE").click()
         time.sleep(1)
-        assert self.device(text=selected_file_name).exists()
+        assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(selected_file_name, allow_scroll_search=True).exists(), "unhide file failed with file name: " + str(selected_file_name)
 
 start_time = time.time()
 
@@ -85,9 +85,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.4.3.apk",
+    apk_path="./apk/amaze-3.6.1.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/1712/1",
+    output_dir="output/amaze/2687/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",
