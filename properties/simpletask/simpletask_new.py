@@ -38,6 +38,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(resourceId="nl.mpcjanssen.simpletask:id/fab").click()
         content = st.text(alphabet=string.ascii_letters,min_size=1, max_size=10).example()
+        time.sleep(1)
         self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").set_text(content)
         time.sleep(1)
         self.device(resourceId="nl.mpcjanssen.simpletask:id/btnProject").click()
