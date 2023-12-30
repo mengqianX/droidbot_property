@@ -149,6 +149,25 @@ class Test(AndroidCheck):
             self.device(description="Navigate up").click()
             time.sleep(1)
             assert self.device(resourceId="de.rampro.activitydiary:id/activity_name",text=name).exists() , "activity name not exists"
+
+    # bug #59
+    @precondition(
+        lambda self: self.device(text="Manage activities").exists() and self.device(resourceId="de.rampro.activitydiary:id/action_show_hide_deleted").exists() and self.device(description="Navigate up").exists() and self.device(resourceId="de.rampro.activitydiary:id/activity_name").exists()
+    )
+    @rule()
+    def delete_activity(self):
+        activity_count = int(self.device(resourceId="de.rampro.activitydiary:id/activity_name").count)
+        print("activity count: " + str(activity_count))
+        selected_activity_index = random.randint(0, activity_count - 1)
+        selected_activity = self.device(resourceId="de.rampro.activitydiary:id/activity_name")[selected_activity_index]
+        selected_activity_name = selected_activity.get_text()
+        print("selected activity: " + selected_activity_name)
+        selected_activity.click()
+        time.sleep(1)
+        self.device(resourceId="de.rampro.activitydiary:id/action_edit_delete").click()
+        time.sleep(1)
+        assert self.device(text=selected_activity_name).exists() == False, "activity not deleted"
+
 start_time = time.time()
 
 # args = sys.argv[1:]
