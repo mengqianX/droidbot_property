@@ -33,7 +33,7 @@ class Test(AndroidCheck):
 
     # bug #253
     @precondition(
-        lambda self: self.device(text="Activity Diary").exists() and not self.device(text="<No Activity>").exists() and self.device(description="Statistics").info["selected"] and not self.device(text="Settings").exists()
+        lambda self: self.device(text="Activity Diary").exists() and not self.device(text="<No Activity>").exists() and self.device(description="Statistics").info["selected"] and not self.device(text="Settings").exists() and self.device(text="Map").exists()
     )
     @rule()
     def click_content_should_enter_diary_entry(self):
@@ -47,7 +47,7 @@ class Test(AndroidCheck):
 
     # bug #176
     @precondition(
-        lambda self: self.device(text="Activity Diary").exists() and self.device(resourceId="de.rampro.activitydiary:id/select_card_view").exists() and not self.device(text="Settings").exists()
+        lambda self: self.device(text="Activity Diary").exists() and self.device(resourceId="de.rampro.activitydiary:id/select_card_view").exists() and not self.device(text="Settings").exists() and int(self.device(resourceId="de.rampro.activitydiary:id/select_card_view").count) > 0
     )
     @rule()
     def long_click_activity_should_edit_it(self):
@@ -147,6 +147,10 @@ class Test(AndroidCheck):
         time.sleep(1)
         if self.device(resourceId="de.rampro.activitydiary:id/textinput_error").exists():
             self.device(description="Navigate up").click()
+            time.sleep(1)
+            assert self.device(resourceId="de.rampro.activitydiary:id/activity_name",text=name).exists() , "activity name not exists"
+        else:
+            self.device(description="Save").click()
             time.sleep(1)
             assert self.device(resourceId="de.rampro.activitydiary:id/activity_name",text=name).exists() , "activity name not exists"
 
