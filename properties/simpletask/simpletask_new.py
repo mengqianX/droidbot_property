@@ -106,18 +106,23 @@ class Test(AndroidCheck):
     @precondition(lambda self: self.device(resourceId="nl.mpcjanssen.simpletask:id/fab").exists() and not self.device(text="Saved filters").exists() and not self.device(text="Quick filter").exists())
     @rule()
     def add_task(self):
-        count = self.device(resourceId="nl.mpcjanssen.simpletask:id/checkBox").count
+        count = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count
         if count > 10:
             print("task count is more than 13, do not add task") 
             return
         self.device(resourceId="nl.mpcjanssen.simpletask:id/fab").click()
+        time.sleep(1)
+        original_content = self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").get_text()
+        print("original content: "+str(original_content))
+
         content = st.text(alphabet=string.ascii_letters,min_size=1, max_size=10).example()
+        content = original_content + content
         print("content: "+str(content))
         self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").set_text(content)
         time.sleep(1)
         self.device(resourceId="nl.mpcjanssen.simpletask:id/btnSave").click()
         time.sleep(1)
-        new_count = self.device(resourceId="nl.mpcjanssen.simpletask:id/checkBox").count
+        new_count = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count
         print("new count: "+str(new_count))
         assert new_count == count + 1   
 
@@ -150,8 +155,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         new_count = int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count)
         print("new count: "+str(new_count))
-        assert new_count == task_count - 1
-
+        assert self.device(text=selected_task_name).exists() == False, "task not deleted"
     # bug #1060
     @precondition(
         lambda self: self.device(text="Quick filter").exists() and self.device(text="CLEAR FILTER").exists() and self.device(resourceId="android:id/text1",className="android.widget.CheckedTextView").exists()
@@ -193,7 +197,7 @@ class Test(AndroidCheck):
 
     # bug #993
     @precondition(
-        lambda self: int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count) > 0 and not self.device(text="Quick filter").exists() and not self.device(text="Settings").exists() and not self.device(text="Saved filters").exists())
+        lambda self: int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count) > 0 and not self.device(text="Quick filter").exists() and not self.device(text="Settings").exists() and not self.device(text="Saved filters").exists() and not self.device(resourceId="nl.mpcjanssen.simpletask:id/filter_text").exists())
     @rule()
     def save_reopen_task_should_not_change_number(self):
         task_count = int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count)
@@ -207,8 +211,11 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(resourceId="nl.mpcjanssen.simpletask:id/update").click()
         time.sleep(1)
-        
+        original_content = self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").get_text()
+        print("original content: "+str(original_content))
+
         content = st.text(alphabet=string.ascii_letters,min_size=0, max_size=3).example()
+        content = str(original_content) + content
         print("content: "+str(content))
         self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").set_text(content)
         time.sleep(1)
@@ -365,9 +372,9 @@ class Test(AndroidCheck):
     def closing_task_should_not_influence_other_tasks(self):
         task_count = int(self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count)
         print("task count: "+str(task_count))
-        selected_task = random.randint(0, task_count - 1)
-        print("selected task: "+str(selected_task))
-        selected_task = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext")[selected_task]
+        selected_task_index = random.randint(0, task_count - 1)
+        print("selected task: "+str(selected_task_index))
+        selected_task = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext")[selected_task_index]
         selected_task_name = selected_task.get_text()
         print("selected task name: "+str(selected_task_name))
         selected_task.click()
@@ -382,7 +389,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         
         new_selected_task_index = random.randint(0, task_count - 1)
-        while new_selected_task_index == selected_task:
+        while new_selected_task_index == selected_task_index:
             new_selected_task_index = random.randint(0, task_count - 1)
         print("new selected task: "+str(new_selected_task_index))
         new_selected_task = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext")[new_selected_task_index]
