@@ -114,9 +114,10 @@ class Test(AndroidCheck):
         time.sleep(1)
         original_content = self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").get_text()
         print("original content: "+str(original_content))
-
+        if original_content == None:
+            original_content = ""
         content = st.text(alphabet=string.ascii_letters,min_size=1, max_size=10).example()
-        content = original_content + content
+        content = original_content +" "+ content
         print("content: "+str(content))
         self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").set_text(content)
         time.sleep(1)
@@ -212,10 +213,12 @@ class Test(AndroidCheck):
         self.device(resourceId="nl.mpcjanssen.simpletask:id/update").click()
         time.sleep(1)
         original_content = self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").get_text()
+        if original_content == None:
+            original_content = ""
         print("original content: "+str(original_content))
 
         content = st.text(alphabet=string.ascii_letters,min_size=0, max_size=3).example()
-        content = str(original_content) + content
+        content = str(original_content) + " " + content
         print("content: "+str(content))
         self.device(resourceId="nl.mpcjanssen.simpletask:id/taskText").set_text(content)
         time.sleep(1)
