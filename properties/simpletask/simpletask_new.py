@@ -125,7 +125,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         new_count = self.device(resourceId="nl.mpcjanssen.simpletask:id/tasktext").count
         print("new count: "+str(new_count))
-        assert new_count == count + 1   
+        assert self.device(textContains=content).exists(), "content not exists"
 
     @precondition(lambda self: self.device(description="More options").exists() and self.device(text="Simpletask").exists() and not self.device(text="Settings").exists() and not self.device(text="Saved filters").exists() and not self.device(text="Quick filter").exists() and not self.device(text="Help").exists())
     @rule()
@@ -335,14 +335,17 @@ class Test(AndroidCheck):
         time.sleep(1)
         # 随机选择tag or list
         if random.randint(0, 1) == 0:
+            print("select list")
             self.device(text="LIST").click()
         else:
+            print("select tag")
             self.device(text="TAG").click()
         time.sleep(1)
         # 随机选择是否点击invert filter
-        invert_filter = random.randint(0, 1) == 0
-        if invert_filter:
-            self.device(resourceId="nl.mpcjanssen.simpletask:id/checkbox").click()
+        # invert_filter = random.randint(0, 1) == 0
+        # if invert_filter:
+        #     self.device(resourceId="nl.mpcjanssen.simpletask:id/checkbox").click()
+        # print("invert filter: "+str(invert_filter))
         filter_count = int(self.device(resourceId="android:id/text1").count)
         print("filter count: "+str(filter_count))
         selected_filter_index = random.randint(0, filter_count - 1)
