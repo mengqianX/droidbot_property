@@ -7,7 +7,6 @@ import copy
 import time
 from .utils import safe_get_dict
 from abc import abstractmethod
-
 from .input_event import (
     InputEvent,
     KEY_RotateDeviceNeutralEvent,
@@ -99,7 +98,7 @@ class InputPolicy(object):
         :param input_manager: instance of InputManager
         """
         self.action_count = 0
-        self.input_manager = input_manager
+        self.input_manager = input_manager       
         while (
             input_manager.enabled
             and self.action_count
@@ -112,6 +111,7 @@ class InputPolicy(object):
                 #     event = KeyEvent(name="HOME")
                 # elif self.action_count == 1 and self.master is None:
                 #     event = IntentEvent(self.app.get_start_intent())
+                self.device.u2.set_fastinput_ime(True)
                 self.logger.info("action count: %d" % self.action_count)
                 if self.action_count == 0 and self.master is None:
                     event = KillAppEvent(app=self.app)

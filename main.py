@@ -233,11 +233,11 @@ class AndroidCheck(object):
             time.sleep(1)
             result = rule.function(self)
             time.sleep(1)
-        except UiObjectNotFoundError:
-            print("Could not find the UI object.")
+        except UiObjectNotFoundError as e:
+            print("Could not find the UI object. "+str(e))
             return False
         except AssertionError as e:
-            print("Assertion error."+str(e))
+            print("Assertion error. "+str(e))
             # write_rule_result(
             #     f"Assertion error::{rule.function.__name__} failed",
             #     self.fuzzing.current_event,
