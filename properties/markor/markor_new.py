@@ -202,13 +202,13 @@ class Test(AndroidCheck):
         original_content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text()
         print("original_content: " + str(original_content))
         content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=10).example()
-        print(content)
-        self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text(str(original_content)+content)
+        print("add content: "+content)
+        self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text(str(original_content)+" "+content)
         time.sleep(1)
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
         for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
+            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
             if content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
                 return True
         # new_content = self.device(resourceId="net.gsantner.markor:id/document__placeholder_fragment").child(className="android.view.View").info["contentDescription"]
@@ -260,7 +260,9 @@ class Test(AndroidCheck):
         )
     @rule()
     def change_view_mode_should_not_change_position(self):
-        content = str(self.device(className="android.widget.EditText").get_text())
+        content = self.device(className="android.widget.EditText").get_text()
+        if content is None:
+            content = ""
         print("content: " + content)
         added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
         print("added_content: " + added_content)
@@ -269,8 +271,8 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
         for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
-            if content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
+            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
+            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
                 return True
         assert False
     
