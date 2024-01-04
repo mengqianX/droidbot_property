@@ -404,8 +404,8 @@ start_time = time.time()
 # )
 t = Test(
     apk_path="./apk/markor/2.11.1.apk",
-    device_serial="emulator-5582",
-    output_dir="output/markor/new/15",
+    device_serial="emulator-5554",
+    output_dir="output/markor/new/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",
