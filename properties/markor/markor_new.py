@@ -272,8 +272,8 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
         for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
+            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].get_text())
+            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].get_text()):
                 return True
         assert False
     
