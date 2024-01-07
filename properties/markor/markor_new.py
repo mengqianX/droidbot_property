@@ -208,8 +208,9 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
         for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
-            if content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
+            
+            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].get_text())
+            if content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].get_text()):
                 return True
         # new_content = self.device(resourceId="net.gsantner.markor:id/document__placeholder_fragment").child(className="android.view.View").info["contentDescription"]
         # print("new_content: " + new_content)
@@ -271,8 +272,8 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
         for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
+            print("content: "+self.device(className="android.webkit.WebView").child(className="android.view.View")[i].get_text())
+            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].get_text()):
                 return True
         assert False
     
@@ -408,8 +409,8 @@ t = Test(
     apk_path="./apk/markor/2.11.1.apk",
     device_serial="emulator-5554",
     output_dir="output/markor/new/1",
-    explore_event_count=500,
-    diverse_event_count=500,
+    explore_event_count=1000,
+    diverse_event_count=1000,
     policy_name="random",
 )
 t.start()
