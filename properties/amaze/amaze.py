@@ -161,7 +161,7 @@ class Test(AndroidCheck):
         assert not self.device(text="Settings").exists()
 
     # bug #2128
-    @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/item_count").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists())
+    @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/item_count").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/sd_label").exists())
     @rule()
     def rule_FAB_should_appear(self):
         print("time: " + str(time.time() - start_time))
@@ -300,9 +300,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.8.4.apk",
+    apk_path="./apk/amaze/amaze-3.8.4.apk",
     device_serial="emulator-5554",
-    output_dir="output/amaze/test/1",
+    output_dir="output/amaze/new/1",
     explore_event_count=500,
     diverse_event_count=500,
     policy_name="random",
