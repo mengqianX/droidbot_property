@@ -63,7 +63,7 @@ class Test(AndroidCheck):
         assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(folder_name, allow_scroll_search=True).exists(), "create folder failed with folder_name: " + folder_name
 
     # bug #3560  
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and not self.device(text="Type to search…").exists())
+    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and not self.device(text="Type to search…").exists() and not self.device(text="Cloud Connection").exists())
     @rule()
     def rule_open_folder(self):
         print("time: " + str(time.time() - start_time))
@@ -74,6 +74,9 @@ class Test(AndroidCheck):
         selected_file = self.device(resourceId="com.amaze.filemanager:id/firstline")[index]
         selected_file_name = selected_file.get_text()
         print("selected file or dir name: "+str(selected_file_name))
+        if selected_file_name == "..":
+            print("not a folder")
+            return
         selected_file.right(resourceId="com.amaze.filemanager:id/properties").click()
         time.sleep(1)
         if self.device(text="Open with").exists():
@@ -100,7 +103,7 @@ class Test(AndroidCheck):
         assert self.device(resourceId="com.amaze.filemanager:id/check_icon").exists(), "rotate_should_persist_selected_item failed"
 
     # bug #2687
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists())
+    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and not self.device(text="Cloud Connection").exists())
     @rule()
     def rule_hide_unhide_file(self):
         print("time: " + str(time.time() - start_time))
@@ -263,7 +266,7 @@ class Test(AndroidCheck):
         assert characters in selected_file_name
 
     # bug #1499
-    @precondition(lambda self: self.device(text="Go Back").exists() and self.device(resourceId="com.amaze.filemanager:id/second").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").get_text() != "/storage/emulated/0" and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(text="Cloud Connection").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists())
+    @precondition(lambda self: self.device(text="Go Back").exists() and self.device(resourceId="com.amaze.filemanager:id/second").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").get_text() != "/storage/emulated/0" and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(text="Cloud Connection").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and not self.device(resourceId="com.amaze.filemanager:id/search_edit_text").exists())
     @rule()
     def rule_go_back(self):
         print("time: " + str(time.time() - start_time))
@@ -301,10 +304,10 @@ start_time = time.time()
 # )
 t = Test(
     apk_path="./apk/amaze/amaze-3.8.4.apk",
-    device_serial="emulator-5554",
-    output_dir="output/amaze/new/1",
-    explore_event_count=500,
-    diverse_event_count=500,
+    device_serial="emulator-5582",
+    output_dir="output/amaze/new/15",
+    explore_event_count=1000,
+    diverse_event_count=1000,
     policy_name="random",
 )
 t.start()
