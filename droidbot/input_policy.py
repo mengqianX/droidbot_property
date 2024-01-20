@@ -45,6 +45,7 @@ EVENT_FLAG_TOUCH = "+touch"
 POLICY_MUTATE = "mutate"
 POLICY_BUILD_MODEL = "build_model"
 POLICY_RANDOM = "random"
+POLICY_RANDOM_TWO = "random_two"
 POLICY_NAIVE_DFS = "dfs_naive"
 POLICY_GREEDY_DFS = "dfs_greedy"
 POLICY_NAIVE_BFS = "bfs_naive"
@@ -1424,10 +1425,11 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
     random input policy based on UTG
     """
 
-    def __init__(self, device, app, random_input=True, android_check=None, guide=None):
+    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False):
         super(UtgRandomPolicy, self).__init__(
-            device, app, random_input, android_check, guide
+            device, app, random_input, android_check
         )
+        self.restart_app_after_check_property = restart_app_after_check_property
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferred_buttons = [
@@ -1448,13 +1450,6 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         self.__num_steps_outside = 0
         self.__event_trace = ""
         self.__missed_states = set()
-        self.guide = guide
-        # yiheng: add a new variable to record the current explore mode
-        # if mode = GUIDE, it means we didn't encounter the target state,
-        #   so we choose to guide the exploration to the target state.
-        # if mode = DIVERSE, it means we have encountered the target state,
-        #   we choose to explore the app in order to generate more states to encounter the target state.
-        self.explore_mode = GUIDE
         self.number_of_steps_outside_the_shortest_path = 0
         self.reached_state_on_the_shortest_path = []
 
@@ -1485,6 +1480,9 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             if random.random() < 0.5:   
                 self.logger.info(" check rule")
                 self.check_rule_with_precondition()
+                if self.restart_app_after_check_property:
+                    self.logger.info("restart app after check property")
+                    return KillAppEvent(app=self.app)
                 return None
             else:
                 self.logger.info("don't check rule")

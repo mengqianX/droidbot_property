@@ -5,6 +5,7 @@ import time
 
 from .input_event import EventLog
 from .input_policy import (
+    POLICY_RANDOM_TWO,
     MutatePolicy,
     POLICY_MUTATE,
     POLICY_BUILD_MODEL,
@@ -123,6 +124,8 @@ class InputManager(object):
             )
         elif self.policy_name == POLICY_RANDOM:
             input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check)
+        elif self.policy_name == POLICY_RANDOM_TWO:
+            input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check, restart_app_after_check_property=True)
         elif self.policy_name == POLICY_MEMORY_GUIDED:
             from .input_policy2 import MemoryGuidedPolicy
 
