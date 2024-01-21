@@ -93,7 +93,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device.set_orientation('n')
 
-        assert self.device(resourceId="it.feio.android.omninotes.alpha:id/search_src_text").get_text() == search_text
+        assert self.device(resourceId="it.feio.android.omninotes.alpha:id/search_src_text").exists() and self.device(resourceId="it.feio.android.omninotes.alpha:id/search_src_text").get_text() == search_text
 start_time = time.time()
 
 # args = sys.argv[1:]
@@ -116,11 +116,11 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/OmniNotes-6.2.0alpha.apk",
+    apk_path="./apk/omninotes/OmniNotes-6.2.0alpha.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/381/1",
-    explore_event_count=500,
-    diverse_event_count=500,
+    explore_event_count=50,
+    diverse_event_count=50,
     policy_name="random",
 )
 t.start()
