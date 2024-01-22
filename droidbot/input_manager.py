@@ -56,7 +56,8 @@ class InputManager(object):
         replay_output=None,
         android_check=None,
         guide=None,
-        main_path_path=None
+        main_path_path=None,
+        build_model_timeout=-1
     ):
         """
         manage input event sent to the target device
@@ -92,8 +93,11 @@ class InputManager(object):
         self.android_check = android_check
         self.guide = guide
         self.main_path_path = main_path_path
-        self.policy = self.get_input_policy(device, app, master)
+        
         self.profiling_method = profiling_method
+        self.build_model_timeout = build_model_timeout
+
+        self.policy = self.get_input_policy(device, app, master)
 
     def get_input_policy(self, device, app, master):
         if self.policy_name == POLICY_NONE:
@@ -112,6 +116,7 @@ class InputManager(object):
                 self.policy_name,
                 self.android_check,
                 self.guide,
+                self.build_model_timeout
             )
         elif self.policy_name == POLICY_MUTATE:
             input_policy = MutatePolicy(

@@ -569,7 +569,7 @@ class UTG(object):
 
     # 使用了dfs的算法，找到从first state 到 target state的所有的路径，每条路径可能包含相同的节点，但不包含相同的边，
     # 目的是为了将一些环路也计算进去
-    def get_paths_mutate_on_the_main_path(self,state_str_or_structure):
+    def get_paths_mutate_on_the_main_path(self,state_str_or_structure,number_of_meet_target=0):
         graph = None
         first_state = None
         target = None
@@ -588,9 +588,11 @@ class UTG(object):
         
         paths = []
 
-        # number_of_meet_target: 目的是允许在最后一个state再走一个环路回到最后一个state,有利于找到更多bug
+        # number_of_meet_target: 目的是允许在最后一个state再走一个环路回到最后一个state,有利于找到更多bug.
+        # =-1,则不允许再走一个环路
+        # =0,则允许再走一个环路
         def dfs(node, path, edges, number_of_meet_target):
-            if len(path) > 30:
+            if len(path) > 15:
                 return
             if node == target:
                 number_of_meet_target += 1
@@ -618,7 +620,7 @@ class UTG(object):
             first_state,
             [first_state],
             edges,
-            number_of_meet_target=0,
+            number_of_meet_target,
         )
         paths = sorted(paths, key=lambda x: len(x))
         nav_edges = []

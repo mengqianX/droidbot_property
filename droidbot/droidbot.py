@@ -50,7 +50,8 @@ class DroidBot(object):
         replay_output=None,
         android_check=None,
         guide=None,
-        main_path_path=None
+        main_path_path=None,
+        build_model_timeout=-1
     ):
         """
         initiate droidbot with configurations
@@ -126,7 +127,8 @@ class DroidBot(object):
                 replay_output=replay_output,
                 android_check=android_check,
                 guide=self.guide,
-                main_path_path=main_path_path
+                main_path_path=main_path_path,
+                build_model_timeout=build_model_timeout
             )
         except Exception:
             import traceback
@@ -153,6 +155,7 @@ class DroidBot(object):
         self.logger.info("Starting DroidBot")
         try:
             if self.timeout > 0:
+                self.logger.info("Will stop in %d seconds.", self.timeout)
                 self.timer = Timer(self.timeout, self.stop)
                 self.timer.start()
 

@@ -130,6 +130,7 @@ class AndroidCheck(object):
         humanoid=None,
         ignore_ad=None,
         replay_output=None,
+        build_model_timeout=-1
     ):
         self.apk_path = apk_path
         self.device_serial = device_serial
@@ -164,7 +165,8 @@ class AndroidCheck(object):
             replay_output=replay_output,
             android_check=self,
             guide=self.guide,
-            main_path_path=main_path_path
+            main_path_path=main_path_path,
+            build_model_timeout=build_model_timeout
         )
         self.device = u2.connect(self.device_serial)
         # disable keyboard
@@ -301,118 +303,7 @@ class AndroidCheck(object):
         """
         ...
 
-    def click(self, **kwargs):
-        # get name of the caller
-        caller_frame = inspect.currentframe().f_back
-        caller_name = caller_frame.f_code.co_name
-        print(f"---------The calling function is {caller_name}----------")
-        # Click on the device
-        # self.device(**kwargs).click()
-        # time.sleep(1)
-        uiobject = self.device(**kwargs)
-        if not uiobject.exists:
-            raise UiObjectNotFoundError
-        else:
-            # time.sleep(1)
-            current_rule_screenshot_path = self.fuzzing.device.save_rule_state(
-                self.fuzzing.result_path,
-                self.fuzzing.current_testcase,
-                self.fuzzing.current_event,
-                self.fuzzing.current_rule_event,
-            )
-            my_uiobject = MyUiObject(uiobject.info)
-            view = View(my_uiobject.to_line(), [])
-            time.sleep(1)
-            uiobject.click()
-            # print("info:  "+str(uiobject.info))
-            # print("toline: "+my_uiobject.to_line())
-            # print("uiobject:"+uiobject.get_text())
-            self.execute_event = Event(
-                view, "click", self.device, self.fuzzing.current_rule_event
-            )
-            draw_event(self.execute_event, current_rule_screenshot_path)
-            write_rule_event(
-                caller_name,
-                self.fuzzing.current_event,
-                self.fuzzing.current_rule_event,
-                self.execute_event,
-                self.fuzzing.read_trace,
-            )
-            print(
-                "----------execute Rule::"
-                + caller_name
-                + "::"
-                + self.execute_event.action
-                + "------------"
-            )
-            self.fuzzing.current_rule_event += 1
-            # current_rule_screenshot_path = self.fuzzing.device.save_rule_state(
-            # self.fuzzing.result_path,
-            # self.fuzzing.current_testcase,
-            # self.fuzzing.current_event,
-            # self.fuzzing.current_rule_event
-            # )
-
-    def long_click(self, **kwargs):
-        # get name of the caller
-        caller_frame = inspect.currentframe().f_back
-        caller_name = caller_frame.f_code.co_name
-        print(f"---------The calling function is {caller_name}----------")
-        # Long click on the device
-        # time.sleep(1)
-        uiobject = self.device(**kwargs)
-        if not uiobject.exists:
-            raise UiObjectNotFoundError
-        else:
-            # time.sleep(1)
-            current_rule_screenshot_path = self.fuzzing.device.save_rule_state(
-                self.fuzzing.result_path,
-                self.fuzzing.current_testcase,
-                self.fuzzing.current_event,
-                self.fuzzing.current_rule_event,
-            )
-            my_uiobject = MyUiObject(uiobject.info)
-            view = View(my_uiobject.to_line(), [])
-            time.sleep(1)
-            uiobject.long_click()
-            # print("info:  "+str(uiobject.info))
-            # print("toline: "+my_uiobject.to_line())
-            # print("uiobject:"+uiobject.get_text())
-            self.execute_event = Event(
-                view, "longclick", self.device, self.fuzzing.current_rule_event
-            )
-            draw_event(self.execute_event, current_rule_screenshot_path)
-            write_rule_event(
-                caller_name,
-                self.fuzzing.current_event,
-                self.fuzzing.current_rule_event,
-                self.execute_event,
-                self.fuzzing.read_trace,
-            )
-            print(
-                "----------execute Rule::"
-                + caller_name
-                + "::"
-                + self.execute_event.action
-                + "------------"
-            )
-            self.fuzzing.current_rule_event += 1
-
-    def double_click(self, **kwargs):
-        # Double click on the device
-        self.device(**kwargs).double_click()
-
-    def swipe(self, **kwargs):
-        # Swipe on the device
-        self.device(**kwargs).swipe()
-
-    def drag(self, **kwargs):
-        # Drag on the device
-        self.device(**kwargs).drag()
-
-    def exists(self, **kwargs):
-        # Check if the element exists
-        return self.device(**kwargs).exists()
+    
 
 
 # t = AndroidCheck("droidbot\\apk\\amaze_3.4.3.apk").start()

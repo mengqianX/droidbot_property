@@ -4,6 +4,7 @@ import json
 import logging
 import random
 import copy
+from threading import Timer
 import time
 from .utils import Time, safe_get_dict
 from abc import abstractmethod
@@ -782,7 +783,7 @@ class BuildModelPolicy(UtgBasedInputPolicy):
     """
 
     def __init__(
-        self, device, app, random_input, search_method, android_check=None, guide=None
+        self, device, app, random_input, search_method, android_check=None, guide=None, build_model_timeout=0
     ):
         super(BuildModelPolicy, self).__init__(
             device, app, random_input, android_check, guide
@@ -838,6 +839,16 @@ class BuildModelPolicy(UtgBasedInputPolicy):
 
         # 在我们计算diverse path的时候，是在G图上进行计算，还是G2. True 代表G， False 代表G2
         self.compute_diverse_path_on_G_or_G2 = True
+        self.enable_buide_model = True
+        self.build_model_timeout = build_model_timeout
+        if self.build_model_timeout > 0:
+            self.logger.info("build model timeout: %d" % self.build_model_timeout)
+            self.timer = Timer(self.build_model_timeout, self.stop_build_model)
+            self.timer.start()
+
+    def stop_build_model(self):
+        # 使用一个计时器，如果超过一定时间则停止构建模型
+        self.enable_buide_model = False
 
     def generate_event(self):   
         """
@@ -854,23 +865,25 @@ class BuildModelPolicy(UtgBasedInputPolicy):
 
         self.__update_utg()
 
-        event = self.check_the_app_on_foreground()
-        if event is not None:
-            self.last_state = self.current_state
-            self.last_event = event
-            return event
+        # event = self.check_the_app_on_foreground()
+        # if event is not None:
+        #     self.last_state = self.current_state
+        #     self.last_event = event
+        #     return event
         
         # 在app 启动后执行定义好的初始化事件
         if self.action_count == 2:
+            
             self.run_initial_rules()
+            import time
             time.sleep(2)
             return None
         
         if self.action_count == 3:
             self.utg.first_state_after_initialization = self.current_state
 
-        # first explore the app, then test the properties
-        if self.action_count < self.input_manager.explore_event_count:
+        # first explore the app, then generate diverse paths to test the properties
+        if self.action_count < self.input_manager.explore_event_count and self.enable_buide_model:
             self.logger.info("Explore the app")
             event = self.explore_app() 
         elif self.action_count == self.input_manager.explore_event_count:
@@ -916,17 +929,17 @@ class BuildModelPolicy(UtgBasedInputPolicy):
                 self.__num_restarts = 0
 
             # pass (START) through
-            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
-                if self.__num_restarts > MAX_NUM_RESTARTS:
-                    # If the app had been restarted too many times, enter random mode
-                    msg = "The app had been restarted too many times. Entering random mode."
-                    self.logger.info(msg)
-                    self.__random_explore = True
-                else:
-                    # Start the app
-                    self.__event_trace += EVENT_FLAG_START_APP
-                    self.logger.info("Trying to start the app...")
-                    return IntentEvent(intent=start_app_intent)
+            # if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+            # if self.__num_restarts > MAX_NUM_RESTARTS:
+            #     # If the app had been restarted too many times, enter random mode
+            #     msg = "The app had been restarted too many times."
+            #     self.logger.info(msg)
+            #     self.__random_explore = True
+            # else:
+            # Start the app
+            self.__event_trace += EVENT_FLAG_START_APP
+            self.logger.info("Trying to start the app...")
+            return IntentEvent(intent=start_app_intent)
 
         elif current_state.get_app_activity_depth(self.app) > 0:
             # If the app is in activity stack but is not in foreground
@@ -1000,7 +1013,8 @@ class BuildModelPolicy(UtgBasedInputPolicy):
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
             # 获取从first state 到 target state的path
-            self.paths = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2)
+            self.paths = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=0)
+            paths_2 = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=-1)
             # 重新安装app，防止之前的状态影响当前的探索
             self.device.uninstall_app(self.app)
             self.device.install_app(self.app)
@@ -1132,16 +1146,17 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             # If the app is in foreground
             self.__num_steps_outside = 0
 
+        if not self.reach_target_during_exploration:
         # 如果探索到了target activity，则设置好对应的target state，方便后面直接引导过去
-        rules_satisfy_precondition = (
-            self.android_check.get_rules_that_pass_the_preconditions()
-        )
-        if len(rules_satisfy_precondition) > 0:
-            self.logger.info("has rule that matches the precondition")
-            self.reach_target_during_exploration = True
-            self.utg.set_target_state(self.current_state)
-        else:
-            self.logger.info("no rule matches the precondition")
+            rules_satisfy_precondition = (
+                self.android_check.get_rules_that_pass_the_preconditions()
+            )
+            if len(rules_satisfy_precondition) > 0:
+                self.logger.info("has rule that matches the precondition")
+                self.reach_target_during_exploration = True
+                self.utg.set_target_state(self.current_state)
+            else:
+                self.logger.info("no rule matches the precondition")
 
         # Get all possible input events
         possible_events = current_state.get_possible_input()
