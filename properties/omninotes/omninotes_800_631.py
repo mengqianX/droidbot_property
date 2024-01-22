@@ -17,6 +17,8 @@ class Test(AndroidCheck):
         source_activity=None,
         target_activity=None,
         policy_name="pbt",
+        timeout=-1,
+        build_model_timeout=-1
     ):
         super().__init__(
             apk_path,
@@ -29,6 +31,8 @@ class Test(AndroidCheck):
             source_activity=source_activity,
             target_activity=target_activity,
             policy_name=policy_name,
+            timeout=timeout,
+            build_model_timeout=build_model_timeout
         )
 
     @initialize()
@@ -81,7 +85,7 @@ class Test(AndroidCheck):
         # time.sleep(1)
         # self.device.press("back")
     
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_share").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_tag").exists() )
+    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_share").exists() and self.device(resourceId="it.feio.android.omninotes:id/menu_tag").exists()  )
     @rule()
     def count_char_in_note(self):
         print("time: " + str(time.time() - start_time))
@@ -89,12 +93,13 @@ class Test(AndroidCheck):
         self.device(resourceId="it.feio.android.omninotes:id/detail_title").set_text(title)
         time.sleep(1)
         content = st.text(alphabet=string.ascii_letters,min_size=0, max_size=3).example()
-        self.device(resourceId="it.feio.android.omninotes:id/detail_content").set_text(content)
+        print("content: " + str(content))
+        self.device(className="android.widget.EditText")[1].set_text(content)
         time.sleep(1)
         title = self.device(resourceId="it.feio.android.omninotes:id/detail_title").get_text()
-        print("title: " + title)
+        print("title: " + str(title))
         content = self.device(resourceId="it.feio.android.omninotes:id/detail_content").get_text()
-        print("content: " + content)
+        print("content: " + str(content))
         import re
         number_of_char = len(re.findall(".",title)) + len(re.findall(".",content))
         print("number of char: " + str(number_of_char))
@@ -133,9 +138,11 @@ t = Test(
     apk_path="./apk/omninotes/OmniNotes-6.0.5.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/800/1",
-    explore_event_count=500,
-    diverse_event_count=500,
-    policy_name="random",
+    explore_event_count=50,
+    diverse_event_count=100,
+    policy_name="build_model",
+    timeout=120,
+    build_model_timeout=60
 )
 t.start()
 execution_time = time.time() - start_time

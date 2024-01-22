@@ -17,6 +17,8 @@ class Test(AndroidCheck):
         source_activity=None,
         target_activity=None,
         policy_name="pbt",
+        timeout=-1,
+        build_model_timeout=-1
     ):
         super().__init__(
             apk_path,
@@ -29,22 +31,13 @@ class Test(AndroidCheck):
             source_activity=source_activity,
             target_activity=target_activity,
             policy_name=policy_name,
+            timeout=timeout,
+            build_model_timeout=build_model_timeout
         )
 
-    @initialize()
-    def set_up(self):
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/done").click()
-        time.sleep(1)
+    # @initialize()
+    # def set_up(self):
+    #     pass
         
     
     @precondition(lambda self: self.device(text="Interface").exists() and self.device(text="Language").exists())
@@ -87,7 +80,9 @@ t = Test(
     output_dir="output/omninotes/833/1",
     explore_event_count=500,
     diverse_event_count=500,
-    policy_name="random",
+    policy_name="build_model",
+    timeout=120,
+    build_model_timeout=60
 )
 t.start()
 execution_time = time.time() - start_time
