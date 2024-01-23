@@ -107,7 +107,7 @@ class Test(AndroidCheck):
         self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].click()
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/menu_tag").click()
-
+        time.sleep(1)
         assert self.device(resourceId="it.feio.android.omninotes:id/title",textContains=text).exists()
 
 start_time = time.time()
