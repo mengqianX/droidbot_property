@@ -117,7 +117,7 @@ class Uiautomator2_Helper:
         :return: the selected root node
         """
         # 除去那些我们不关心的系统的package的node
-        exlude_package = ["com.android.systemui"]
+        exlude_package = ["com.android.systemui","com.github.uiautomator"]
         # iterate all the root nodes from the xml node, and select the one we want
         root = ET.fromstring(xml)
         for child in root:
