@@ -1017,7 +1017,7 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             # 获取从first state 到 target state的path
             simple_paths = self.utg.get_simple_paths_to_target_state(state_str_or_structure=self.compute_diverse_path_on_G_or_G2)
             print("simple paths length: ", len(simple_paths))
-            self.paths = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=0)
+            self.paths = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=-1)
             print("paths length: ", len(self.paths))
             # paths_2 = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=-1)
             # 重新安装app，防止之前的状态影响当前的探索
@@ -1079,6 +1079,7 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             next_event = self.paths[self.path_index][self.step_in_each_path][2]
             if isinstance(next_event, UIEvent):
                 view_in_next_event = next_event.view
+                # self.logger.info("view in next event: ", str(view_in_next_event))
                 if self.current_state.is_view_exist(view_in_next_event):
                     self.logger.info("find next event in the %d path" % self.path_index)
                     self.step_in_each_path += 1
