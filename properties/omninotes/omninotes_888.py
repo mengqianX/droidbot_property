@@ -17,6 +17,8 @@ class Test(AndroidCheck):
         source_activity=None,
         target_activity=None,
         policy_name="pbt",
+        timeout=-1,
+        build_model_timeout=-1
     ):
         super().__init__(
             apk_path,
@@ -29,6 +31,8 @@ class Test(AndroidCheck):
             source_activity=source_activity,
             target_activity=target_activity,
             policy_name=policy_name,
+            timeout=timeout,
+            build_model_timeout=build_model_timeout
         )
 
     @initialize()
@@ -118,10 +122,12 @@ start_time = time.time()
 t = Test(
     apk_path="./apk/omninotes/OmniNotes-6.2.0alpha.apk",
     device_serial="emulator-5554",
-    output_dir="output/omninotes/381/1",
-    explore_event_count=50,
-    diverse_event_count=50,
+    output_dir="output/omninotes/888/1",
+    explore_event_count=1000,
+    diverse_event_count=1000,
     policy_name="random",
+    timeout=600,
+    build_model_timeout=300
 )
 t.start()
 execution_time = time.time() - start_time
