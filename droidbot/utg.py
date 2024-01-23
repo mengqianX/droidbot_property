@@ -637,7 +637,9 @@ class UTG(object):
         paths = sorted(paths, key=lambda x: len(x))
         nav_edges = []
         for path in paths:
-            nav_edges.append(self.get_edges_from_path(path,state_str_or_structure))
+            edge = self.get_edges_from_path(path,state_str_or_structure)
+            if edge is not None:
+                nav_edges.append(edge)
         return nav_edges
 
     def get_edges_from_path(self, path,state_str_or_structure):
@@ -657,6 +659,9 @@ class UTG(object):
         for state_str in state_strs[1:]:
             edge = graph[start_state_structure_str][state_str]
             edge_event_strs = list(edge["events"].keys())
+            if edge_event_strs is None:
+                print("edge_event_strs is none")
+                return None
             # start_state = random.choice(self.G.nodes[start_state_str]['states'])
             event_str = random.choice(edge_event_strs)
             event = edge["events"][event_str]["event"]
