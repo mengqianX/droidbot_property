@@ -286,7 +286,6 @@ class UtgBasedInputPolicy(InputPolicy):
         """
         pass
 
-
 class MutatePolicy(UtgBasedInputPolicy):
     """
     测试人员提供一条main path, 然后在main path上进行变异
@@ -773,7 +772,6 @@ class MutatePolicy(UtgBasedInputPolicy):
     def __update_utg(self):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)
 
-
 class BuildModelPolicy(UtgBasedInputPolicy):
     """
     DFS/BFS (according to search_method) strategy to explore UFG (new)
@@ -845,6 +843,10 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             self.logger.info("build model timeout: %d" % self.build_model_timeout)
             self.timer = Timer(self.build_model_timeout, self.stop_build_model)
             self.timer.start()
+
+        # 记录没有走通的paths的前缀,在每一次执行一条path之前，都会检查当前path是否是之前走过的失败的path的前缀，如果是，则跳过这条path
+        self.not_reach_precondition_path_prefix = set()
+        self.skip_path = []
 
     def stop_build_model(self):
         # 使用一个计时器，如果超过一定时间则停止构建模型
@@ -1030,7 +1032,7 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             return None
         
 
-        # 还没有到达target state，则继续探索当前path
+        # 还没有探索完所有的path，则继续
         if self.path_index < len(self.paths):
             if self.paths[self.path_index] is None:
                 self.logger.info("path is None")
@@ -1044,11 +1046,9 @@ class BuildModelPolicy(UtgBasedInputPolicy):
                 if len(rules_to_check) > 0:
                     self.time_needed_to_satisfy_precondition.append(self.time_recoder.get_time_duration())
                     self.check_rule_with_precondition()
-
-            # 如果当前step 大于等于path的长度，则结束当前path
-            if self.step_in_each_path >= len(self.paths[self.path_index]):
+                else:
+                    self.not_reach_precondition_path_number.append(self.path_index)
                 self.logger.info("finish current path: %d, " % self.path_index)
-                self.not_reach_precondition_path_number.append(self.path_index)
                 self.path_index += 1
                 self.step_in_each_path = 0
 
@@ -1057,6 +1057,18 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             self.logger.info(
                 "current path length %d " % len(self.paths[self.path_index])
             )
+            # 在每条path开始之前检查一下当前path是否是之前走过的失败的path的前缀，如果是，则跳过这条path
+            if self.step_in_each_path == 0 and len(self.not_reach_precondition_path_prefix) > 0:
+                for i in range(len(self.paths[self.path_index])):
+                    if tuple(self.paths[self.path_index][:i+1]) in self.not_reach_precondition_path_prefix:
+                        self.logger.info("skip the path: %d" % self.path_index)
+                        self.skip_path.append(self.path_index)
+                        self.path_index += 1
+                        self.step_in_each_path = 0
+                        return self.stop_app_events()
+                
+
+
             # 老方法：按照当前state的structure和path上的state的structure进行比较，找到下一个event，
             # 不太靠谱，因为抽象的原因导致这种方式匹配state不准确
             # 新方法：不匹配state信息，只匹配event信息。也就是说，直接在当前state上查找是否能找到event对应的view。
@@ -1075,6 +1087,7 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             # 如果没有找到下一个事件，说明当前path走不通，就放弃当前path,走下一条path
             self.logger.info("cannot find next event in the %d path" % self.path_index)
             self.not_reach_precondition_path_number.append(self.path_index)
+            self.not_reach_precondition_path_prefix.add(tuple(self.paths[self.path_index][:self.step_in_each_path+1]))
             self.path_index += 1
             self.logger.info("start next path: %d" % self.path_index)
             self.step_in_each_path = 0
@@ -1163,7 +1176,8 @@ class BuildModelPolicy(UtgBasedInputPolicy):
 
         if self.random_input:
             random.shuffle(possible_events)
-
+            
+        possible_events.append(KeyEvent(name="BACK"))
         if self.search_method == POLICY_GREEDY_DFS:
             possible_events.append(KeyEvent(name="BACK"))
         elif self.search_method == POLICY_GREEDY_BFS:
@@ -1367,9 +1381,12 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             self.__num_steps_outside = 0
     
     def tear_down(self):
-        self.logger.info("finish explore all paths: %d", len(self.paths))
+        self.logger.info("all paths length: %d", len(self.paths))
         self.logger.info(
             "number of fail paths: %d", len(self.not_reach_precondition_path_number)
+        )
+        self.logger.info(
+            "number of skip paths: %d", len(self.skip_path)
         )
         if self.reach_target_during_exploration:
             self.logger.info("------------ reach the target state during exploration")
@@ -1600,7 +1617,6 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         else:
             self.logger.info("did not trigger the bug")
             return
-
 
 class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
     """
