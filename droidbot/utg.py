@@ -548,23 +548,35 @@ class UTG(object):
                     return self.find_state_according_to_state_str(to_state_str)
         return None
 
-    def get_paths_to_state(self, current_state, target_state):
+    def get_simple_paths_to_target_state(self,state_str_or_structure):
         # get all paths from source to target, and sort them according to the length
-        if current_state is None or target_state is None:
-            return None
-        current_structure_str = current_state.structure_str
-        target_structure_str = target_state.structure_str
+        graph = None
+        first_state = None
+        target_state = None
+        if state_str_or_structure:
+            graph = self.G
+            first_state = self.first_state.state_str
+            target_state = self.target_state.state_str
+            if self.first_state_after_initialization:
+                first_state = self.first_state_after_initialization.state_str
+        else:
+            graph = self.G2
+            first_state = self.first_state.structure_str
+            target_state = self.target_state.structure_str
+            if self.first_state_after_initialization:
+                first_state = self.first_state_after_initialization.structure_str
+
         paths = []
         paths = nx.all_simple_paths(
-            self.G2,
-            source=current_structure_str,
-            target=target_structure_str,
+            graph,
+            source=first_state,
+            target=target_state,
             cutoff=20,
         )
         paths = sorted(paths, key=lambda x: len(x))
         nav_edges = []
         for path in paths:
-            nav_edges.append(self.get_edges_from_path(path))
+            nav_edges.append(self.get_edges_from_path(path,state_str_or_structure))
         return nav_edges
 
     # 使用了dfs的算法，找到从first state 到 target state的所有的路径，每条路径可能包含相同的节点，但不包含相同的边，
@@ -592,7 +604,7 @@ class UTG(object):
         # =-1,则不允许再走一个环路
         # =0,则允许再走一个环路
         def dfs(node, path, edges, number_of_meet_target):
-            if len(path) > 15:
+            if len(path) > 10:
                 return
             if node == target:
                 number_of_meet_target += 1

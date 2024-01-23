@@ -1015,8 +1015,11 @@ class BuildModelPolicy(UtgBasedInputPolicy):
         # 如果还没开始进行diverse phase,则选择最短的path先进行探索
         if self.path_index == -1:
             # 获取从first state 到 target state的path
+            simple_paths = self.utg.get_simple_paths_to_target_state(state_str_or_structure=self.compute_diverse_path_on_G_or_G2)
+            print("simple paths length: ", len(simple_paths))
             self.paths = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=0)
-            paths_2 = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=-1)
+            print("paths length: ", len(self.paths))
+            # paths_2 = self.utg.get_paths_mutate_on_the_main_path(state_str_or_structure=self.compute_diverse_path_on_G_or_G2,number_of_meet_target=-1)
             # 重新安装app，防止之前的状态影响当前的探索
             self.device.uninstall_app(self.app)
             self.device.install_app(self.app)
@@ -1176,7 +1179,7 @@ class BuildModelPolicy(UtgBasedInputPolicy):
 
         if self.random_input:
             random.shuffle(possible_events)
-            
+
         possible_events.append(KeyEvent(name="BACK"))
         if self.search_method == POLICY_GREEDY_DFS:
             possible_events.append(KeyEvent(name="BACK"))
