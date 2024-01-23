@@ -571,7 +571,7 @@ class UTG(object):
             graph,
             source=first_state,
             target=target_state,
-            cutoff=20,
+            cutoff=10,
         )
         paths = sorted(paths, key=lambda x: len(x))
         nav_edges = []
