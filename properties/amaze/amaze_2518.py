@@ -10,13 +10,15 @@ class Test(AndroidCheck):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        explore_event_count=0,
-        diverse_event_count=100,
+        explore_event_count=5000,
+        diverse_event_count=5000,
         main_path_path=None,
         xml_path="None",
         source_activity=None,
         target_activity=None,
         policy_name="pbt",
+        timeout=-1,
+        build_model_timeout=-1
     ):
         super().__init__(
             apk_path,
@@ -29,6 +31,8 @@ class Test(AndroidCheck):
             source_activity=source_activity,
             target_activity=target_activity,
             policy_name=policy_name,
+            timeout=timeout,
+            build_model_timeout=build_model_timeout
         )
 
     @precondition(lambda self: self.device(text="App Manager").exists() and self.device(description="More options").exists())
@@ -67,9 +71,9 @@ t = Test(
     apk_path="./apk/amaze-9f3f1dc6c3.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/2518/1",
-    explore_event_count=500,
-    diverse_event_count=500,
     policy_name="random",
+    timeout=7200,
+    build_model_timeout=3600
 )
 t.start()
 execution_time = time.time() - start_time
