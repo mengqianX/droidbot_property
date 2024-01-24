@@ -37,6 +37,9 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
+        if self.device(text="OK").exists():
+            self.device(text="OK").click()
+            time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/next").click()
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/next").click()
