@@ -659,7 +659,7 @@ class UTG(object):
         for state_str in state_strs[1:]:
             edge = graph[start_state_structure_str][state_str]
             edge_event_strs = list(edge["events"].keys())
-            if edge_event_strs is None:
+            if edge_event_strs is None or len(edge_event_strs) == 0:
                 print("edge_event_strs is none")
                 return None
             # start_state = random.choice(self.G.nodes[start_state_str]['states'])
