@@ -100,8 +100,10 @@ class Test(AndroidCheck):
         print("title: " + str(title))
         content = self.device(resourceId="it.feio.android.omninotes:id/detail_content").get_text()
         print("content: " + str(content))
+        if content  is None:
+            content = ""
         import re
-        number_of_char = len(re.findall(".",title)) + len(re.findall(".",content))
+        number_of_char = len(re.findall(".",str(title))) + len(re.findall(".",str(content)))
         print("number of char: " + str(number_of_char))
         time.sleep(1)
         self.device(description="More options").click()
@@ -138,11 +140,11 @@ t = Test(
     apk_path="./apk/omninotes/OmniNotes-6.0.5.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/800/1",
-    explore_event_count=50,
-    diverse_event_count=100,
+    explore_event_count=1000,
+    diverse_event_count=1000,
     policy_name="build_model",
-    timeout=120,
-    build_model_timeout=60
+    timeout=3000,
+    build_model_timeout=1800
 )
 t.start()
 execution_time = time.time() - start_time

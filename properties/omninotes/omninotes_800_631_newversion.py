@@ -95,6 +95,8 @@ class Test(AndroidCheck):
         print("title: " + title)
         content = self.device(resourceId="it.feio.android.omninotes:id/detail_content").get_text()
         print("content: " + content)
+        if content  is None:
+            content = ""
         import re
         number_of_char = len(re.findall(".",title)) + len(re.findall(".",content))
         print("number of char: " + str(number_of_char))
@@ -130,7 +132,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/OmniNotes-6.3.0.apk",
+    apk_path="./apk/omninotes/OmniNotes-6.3.0.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/800/1",
     explore_event_count=500,
