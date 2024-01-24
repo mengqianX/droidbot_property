@@ -619,15 +619,15 @@ class UTG(object):
                                 edges,
                                 number_of_meet_target,
                             )
-                            edges.append((node, neighbor))
+                            edges.add((node, neighbor))
                 return
             for neighbor in graph.successors(node):
                 if (node, neighbor) in edges:
                     edges.remove((node, neighbor))
                     dfs(neighbor, path + [neighbor], edges, number_of_meet_target)
-                    edges.append((node, neighbor))
+                    edges.add((node, neighbor))
 
-        edges = list(nx.edges(graph))
+        edges = set(nx.edges(graph))
         dfs(
             first_state,
             [first_state],
