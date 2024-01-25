@@ -84,7 +84,10 @@ class InputPolicy(object):
         self.android_check = android_check
         self.input_manager = None
 
+        # 满足precondition的时候我们不一定会去check property
         self.time_needed_to_satisfy_precondition = []
+        # 实际在什么什么会去check property
+        self.time_to_check_rule = []
         self.time_needed_to_trigger_bug = []
 
     def run_initial_rules(self):
@@ -207,19 +210,29 @@ class UtgBasedInputPolicy(InputPolicy):
 
         if rule_to_check is not None:
             self.logger.info("-------check rule : %s------" % rule_to_check)
+            '''
+            0: assertion error
+            1: check property pass
+            2: UiObjectNotFoundError
+            3: don't need to check property,because the precondition is not satisfied
+            '''
+            
             result = self.android_check.execute_rule(rule_to_check)
-            if result:
-                self.logger.info("-------check rule : pass------")
-                self.logger.info("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
-                
-                if hasattr(self, 'pass_rule_path_number'):
-                  self.pass_rule_path_number.append(self.path_index)
-            else:
-                self.logger.error("-------rule execute failed-----------")
+            if result == 0:
+                self.logger.error("-------check rule : assertion error------")
                 self.logger.info("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
                 self.time_needed_to_trigger_bug.append(self.time_recoder.get_time_duration())
                 if hasattr(self, 'fail_rule_path_number'):
                     self.fail_rule_path_number.append(self.path_index)
+            elif result == 1:
+                self.logger.info("-------check rule : pass------")
+                self.logger.info("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
+                if hasattr(self, 'pass_rule_path_number'):
+                  self.pass_rule_path_number.append(self.path_index)
+            elif result == 2:
+                self.logger.error("-------rule execute failed UiObjectNotFoundError-----------")
+            else:
+                self.logger.info("-------precondition is not satisfied-----------")
 
     def check_rule_without_precondition(self):
         rules_to_check = self.android_check.get_rules_without_preconditions()
@@ -1435,11 +1448,12 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
     random input policy based on UTG
     """
 
-    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False):
+    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False, restart_app_after_100_events=False):
         super(UtgRandomPolicy, self).__init__(
             device, app, random_input, android_check
         )
         self.restart_app_after_check_property = restart_app_after_check_property
+        self.restart_app_after_100_events = restart_app_after_100_events
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferred_buttons = [
@@ -1486,10 +1500,12 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         
         if len(rules_to_check) > 0:
-            self.time_needed_to_satisfy_precondition.append(self.time_recoder.get_time_duration())
+            t = self.time_recoder.get_time_duration()
+            self.time_needed_to_satisfy_precondition.append(t)
             self.logger.info("has rule that matches the precondition and the time duration is "+ self.time_recoder.get_time_duration())
             # 以50%的概率选择是否check rule
             if random.random() < 0.5:   
+                self.time_to_check_rule.append(t)
                 self.logger.info(" check rule")
                 self.check_rule_with_precondition()
                 if self.restart_app_after_check_property:
@@ -1610,6 +1626,8 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             self.logger.info("the first time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition[0])
             self.logger.info("How many times satisfy the precondition: %s" % len(self.time_needed_to_satisfy_precondition))
             self.logger.info("the time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition)
+            self.logger.info("How many times check the property: %s" % len(self.time_to_check_rule))
+            self.logger.info("the time needed to check the property: %s" % self.time_to_check_rule)     
         else:
             self.logger.info("did not satisfy the precondition")
             return

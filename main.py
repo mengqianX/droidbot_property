@@ -219,8 +219,16 @@ class AndroidCheck(object):
     def execute_rules(self, rules):
         '''random choose a rule, if the rule has preconditions, check the preconditions.
         if the preconditions are satisfied, execute the rule.'''
+        '''
+        返回值：
+        0: assertion error
+        1: check property pass
+        2: UiObjectNotFoundError
+        3: don't need to check property,because the precondition is not satisfied
+        '''
+        
         if len(rules) == 0:
-            return True
+            return 3
         rule_to_check = random.choice(rules)
         self.current_rule = rule_to_check
         return self.execute_rule(rule_to_check)
@@ -228,45 +236,21 @@ class AndroidCheck(object):
     def execute_rule(self, rule):
         if len(rule.preconditions) > 0:
             if not all(precond(self) for precond in rule.preconditions):
-                return True
+                return 3
         # try to execute the rule and catch the exception if assertion error throws
-        result = True
+        result = 1
         try:
             time.sleep(1)
             result = rule.function(self)
             time.sleep(1)
         except UiObjectNotFoundError as e:
             print("Could not find the UI object. "+str(e))
-            return False
+            return 2
         except AssertionError as e:
             print("Assertion error. "+str(e))
-            # write_rule_result(
-            #     f"Assertion error::{rule.function.__name__} failed",
-            #     self.fuzzing.current_event,
-            #     self.fuzzing.current_rule_event,
-            #     self.execute_event,
-            #     self.fuzzing.read_trace,
-            # )
-            # write_bug_record(
-            #     self.fuzzing.current_testcase,
-            #     self.fuzzing.current_event,
-            #     self.fuzzing.current_rule_event,
-            #     self.execute_event,
-            #     self.fuzzing.bug_record_path,
-            #     self.fuzzing.bug_num,
-            # )
-            # self.fuzzing.device.save_rule_state(
-            #     self.fuzzing.result_path,
-            #     self.fuzzing.current_testcase,
-            #     self.fuzzing.current_event,
-            #     self.fuzzing.current_rule_event,
-            # )
-            # self.fuzzing.current_rule_event = 0
-            # self.fuzzing.find_bug = True
-            # # self.fuzzing.current_event = self.fuzzing.current_event + 1
-            return False
+            return 0
         finally:
-            result = True
+            result = 1
 
         return result
 
