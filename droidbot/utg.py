@@ -304,6 +304,12 @@ class UTG(object):
             reachable_states.append(target_state)
         return reachable_states
 
+    def reachable_from_one_state_to_another(self, from_state:str, to_state:str):
+        if from_state is None or to_state is None:
+            return False
+        if to_state in nx.descendants(self.G, from_state):
+            return True
+        return False
     # yiheng: get states on the shortest path to the target state
     def get_states_on_shortest_path(self):
         if self.first_state is None or self.target_state is None:
@@ -333,8 +339,8 @@ class UTG(object):
             for state_str in state_strs[1:]:
                 edge = self.G[start_state_str][state_str]
                 edge_event_strs = list(edge["events"].keys())
-                if self.random_input:
-                    random.shuffle(edge_event_strs)
+                # if self.random_input:
+                random.shuffle(edge_event_strs)
                 start_state = self.G.nodes[start_state_str]['state']
                 event = edge["events"][edge_event_strs[0]]["event"]
                 steps.append((start_state, event))

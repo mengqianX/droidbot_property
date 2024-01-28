@@ -47,6 +47,8 @@ POLICY_MUTATE = "mutate"
 POLICY_BUILD_MODEL = "build_model"
 POLICY_RANDOM = "random"
 POLICY_RANDOM_TWO = "random_two"
+POLICY_RANDOM_100 = "random_100"
+POLICY_MUTATE_MAIN_PATH = "mutate_main_path"
 POLICY_NAIVE_DFS = "dfs_naive"
 POLICY_GREEDY_DFS = "dfs_greedy"
 POLICY_NAIVE_BFS = "bfs_naive"
@@ -785,6 +787,410 @@ class MutatePolicy(UtgBasedInputPolicy):
     def __update_utg(self):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)
 
+class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
+    """
+        每100个event,就重启一次app.
+        一旦走到了precondition, 就标记好这个state,以一定的概率50%check property。
+        然后标记从app entry 到这个state的path,然后在这个path上进行变异。
+    """
+    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False, restart_app_after_100_events=False):
+        super(Mutate_Main_Path_Policy, self).__init__(
+            device, app, random_input, android_check
+        )
+        self.restart_app_after_check_property = restart_app_after_check_property
+        self.restart_app_after_100_events = restart_app_after_100_events
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        self.preferred_buttons = [
+            "yes",
+            "ok",
+            "activate",
+            "detail",
+            "more",
+            "access",
+            "allow",
+            "check",
+            "agree",
+            "try",
+            "go",
+            "next",
+        ]
+        self.__num_restarts = 0
+        self.__num_steps_outside = 0
+        self.__event_trace = ""
+        self.__missed_states = set()
+        self.number_of_steps_outside_the_shortest_path = 0
+        self.reached_state_on_the_shortest_path = []
+
+        self.last_rotate_events = KEY_RotateDeviceNeutralEvent
+
+        # 记录在随机探索的过程中是否满足了precondition
+        self.satisfy_precondition = False
+        # 记录从app entry 到满足precondition的state的path
+        self.mian_path = []
+        # 记录之后每次走main path的实际state
+        self.actual_main_path = []
+        # 记录每次app重启之后的第一个state
+        self.first_state = None
+
+        self.max_number_of_mutate_steps_on_single_node = 10
+        self.current_number_of_mutate_steps_on_single_node = 0
+        self.mutate_node_index_on_main_path = 0
+        self.step_on_the_path = 0
+
+        # 定义不同的状态，表示现在应该执行哪种策略
+        # explpore: 随机探索
+        # navigate_to_the_mutate_node: 引导app到达变异的node
+        # mutate_on_the_node: 在node上进行变异
+        # navigate_to_the_mutate_node: 引导app到达main path上
+        self.mode = "explore"
+        self.next_event = None
+    def generate_event(self):
+        """
+        generate an event
+        @return:
+        """
+        # 在app 启动后执行定义好的初始化事件
+        if self.action_count == 2:
+            self.run_initial_rules()
+    
+        # Get current device state
+        self.current_state = self.device.get_current_state(self.action_count)
+        if self.action_count == 2:
+            self.first_state = self.current_state
+        if self.current_state is None:
+            import time
+            time.sleep(5)
+            return KeyEvent(name="BACK")
+
+        self.__update_utg()
+        if self.action_count % 100 == 1:
+            self.first_state = self.current_state
+
+        # 如果还没有满足precondition，则每100个事件就重启app
+        if self.action_count % 100 == 0 and self.restart_app_after_100_events and not self.satisfy_precondition:
+            self.logger.info("restart app after 100 events")
+            return KillAppEvent(app=self.app)
+        
+        # 在kill app之后，需要重启app。这个操作是在第一次满足preocndition之后需要的
+        if self.next_event is not None:
+            next_event = self.next_event
+            self.next_event = None
+            return next_event
+        
+        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+        
+        if len(rules_to_check) > 0 and self.mode == "explore":
+            if self.mode == "explore":
+                self.mian_path = self.utg.get_navigation_steps(self.first_state, self.current_state)
+                self.actual_main_path = [None] * (len(self.mian_path)+1)
+                self.mutate_node_index_on_main_path = len(self.mian_path)
+            t = self.time_recoder.get_time_duration()
+            self.time_needed_to_satisfy_precondition.append(t)
+            self.logger.info("has rule that matches the precondition and the time duration is "+ self.time_recoder.get_time_duration())
+            # 以50%的概率选择是否check rule
+            if random.random() < 0.5:   
+                self.time_to_check_rule.append(t)
+                self.logger.info(" check rule")
+                self.check_rule_with_precondition()
+            else:
+                self.logger.info("don't check rule")
+            if self.mode == "explore":
+                self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+                self.next_event = IntentEvent(intent=self.app.get_start_intent())
+                return KillAppEvent(app=self.app)
+                    
+        
+        event = None
+        if self.mode == "explore":
+            event = self.generate_random_event_based_on_utg()
+        elif self.mode == "navigate_to_the_mutate_node_from_the_first_node":
+            event = self.navigate_to_the_mutate_node_from_the_first_node()
+        elif self.mode == "mutate_on_the_node":
+            event = self.mutate_on_the_node()
+        elif self.mode == "navigate_to_the_mutate_node":
+            event  = self.navigate_back_to_the_mutate_node()
+        elif self.mode == "navigate_to_the_precondition_from_the_mutate_node":
+            event = self.navigate_to_the_precondition_from_the_mutate_node()
+        elif self.mode == "navigate_to_the_precondition_from_the_first_node":
+            event = self.navigate_to_the_precondition_from_the_first_node()
+        else:
+            raise Exception("wrong mode")
+
+        if isinstance(event, RotateDevice):
+            if isinstance(event, RotateDeviceRightEvent):
+                self.last_rotate_events = KEY_RotateDeviceRightEvent
+            else:
+                self.last_rotate_events = KEY_RotateDeviceNeutralEvent
+
+        self.last_state = self.current_state
+        self.last_event = event
+        return event
+        
+
+    def navigate_to_the_mutate_node_from_the_first_node(self):
+        self.actual_main_path[self.step_on_the_path] = self.current_state
+        if self.mutate_node_index_on_main_path == -1:
+            self.logger.info("finish mutate all the nodes on the main path")
+            # self.mode = "navigate_to_the_precondition_from_the_first_node"
+            raise InputInterruptedException("finish explore all paths")
+        if self.step_on_the_path == self.mutate_node_index_on_main_path:
+                self.logger.info(
+                    "reach the node and start mutate on the node: %d"
+                    % self.mutate_node_index_on_main_path
+                )
+                self.step_on_the_path = 0
+                self.mode = "mutate_on_the_node"
+                return None
+        else:
+            # 如果还没到达目标node，则继续引导app到目标node
+            next_event = self.mian_path[self.step_on_the_path][1]
+            if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                # self.logger.info("view in next event: ", str(view_in_next_event))
+                if self.current_state.is_view_exist(view_in_next_event):
+                    self.logger.info("find next event in the %d step" % self.step_on_the_path)
+                    self.step_on_the_path += 1
+                    return next_event
+                else:
+                    # 如果没有找到下一个事件，说明当前path走不通
+                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+            else:
+                self.step_on_the_path += 1
+                return next_event
+    def navigate_to_the_precondition_from_the_first_node(self):
+        # self.actual_main_path[self.step_on_the_path] = self.current_state
+        if self.step_on_the_path == len(self.mian_path):
+            self.logger.info(
+                "reach the node and start mutate on the node: %d"
+                % self.mutate_node_index_on_main_path
+            )
+            self.step_on_the_path = 0
+            self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+            # 说明已经走到最后一个state了，check property
+            rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+            if len(rules_to_check) > 0:
+                self.time_needed_to_satisfy_precondition.append(self.time_recoder.get_time_duration())
+                self.check_rule_with_precondition()
+            self.next_event = IntentEvent(intent=self.app.get_start_intent())
+            return KillAppEvent(app=self.app)
+                
+        else:
+            # 如果还没到达目标node，则继续引导app到目标node
+            next_event = self.mian_path[self.step_on_the_path][1]
+            if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                # self.logger.info("view in next event: ", str(view_in_next_event))
+                if self.current_state.is_view_exist(view_in_next_event):
+                    self.logger.info("find next event in the %d step" % self.step_on_the_path)
+                    self.step_on_the_path += 1
+                    return next_event
+                else:
+                    # 如果没有找到下一个事件，说明当前path走不通
+                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+            else:
+                self.step_on_the_path += 1
+                return next_event        
+    def navigate_to_the_precondition_from_the_mutate_node(self):
+        if self.step_on_the_path == len(self.mian_path):
+            self.logger.info("finish navigate to the precondition")
+            # 说明已经走到最后一个state了，check property
+            rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+            if len(rules_to_check) > 0:
+                self.time_needed_to_satisfy_precondition.append(self.time_recoder.get_time_duration())
+                self.check_rule_with_precondition()
+            else:
+                self.logger.info("no rule matches the precondition")
+            self.logger.info("finish current path ")
+            self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+            self.mutate_node_index_on_main_path -= 1
+            self.next_event = IntentEvent(intent=self.app.get_start_intent())
+            return self.stop_app_events()
+        else:
+            next_event = self.mian_path[self.step_on_the_path][1]
+            if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                # self.logger.info("view in next event: ", str(view_in_next_event))
+                if self.current_state.is_view_exist(view_in_next_event):
+                    self.logger.info("find next event in the %d path" % self.path_index)
+                    self.step_on_the_path += 1
+                    return next_event
+                else:
+                    # 如果没有找到下一个事件，说明当前path走不通
+                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+            else:
+                self.step_on_the_path += 1
+                return next_event
+
+    def navigate_to_the_mutate_node(self):
+        if len(self.navigate_edges_from_node_to_main_path) == 0:
+            self.logger.info("finish navigate to the mutate node")
+            self.mode = "navigate_to_the_precondition_from_the_mutate_node"
+            return self.navigate_to_the_precondition_from_the_mutate_node()
+        next_event = self.navigate_edges_from_node_to_main_path.pop(0)[1]
+        if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                # self.logger.info("view in next event: ", str(view_in_next_event))
+                if self.current_state.is_view_exist(view_in_next_event):
+                    self.logger.info("find next event in the %d path" % self.path_index)
+                    return next_event
+                else:
+                    # 如果没有找到下一个事件，说明当前path走不通
+                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+                    self.mode = "navigate_to_the_precondition_from_the_first_node"
+        return next_event
+        
+
+
+    def mutate_on_the_node(self):
+        # 如果已经开始在主路径上进行变异，则继续变异
+        # 只允许最多变异N步，如果超过N步，则看是否能navigate到main path上的state, 然后navigate 到precondition,否则重新启动app,选择下一个变异的Node
+        
+
+        if (
+            self.current_number_of_mutate_steps_on_single_node
+            > self.max_number_of_mutate_steps_on_single_node
+        ):
+            self.logger.info(
+                "reach the max number of mutate steps on single node, navigate to the main path or restart the app"
+            )
+            self.current_number_of_mutate_steps_on_single_node = 0
+            mutate_node_state = self.actual_main_path[self.mutate_node_index_on_main_path]
+            self.mutate_node_index_on_main_path -= 1
+            if self.utg.reachable_from_one_state_to_another(self.current_state.state_str, mutate_node_state.state_str):
+                self.logger.info("navigate to the main path %s" % mutate_node_state.state_str)
+                self.navigate_edges_from_node_to_main_path = self.utg.get_navigation_steps(self.current_state, mutate_node_state)
+                self.mode = "navigate_to_the_mutate_node"
+                return self.navigate_to_the_mutate_node()
+            else:
+                self.logger.info("cannot navigate to the main path %s" % mutate_node_state.state_str)
+                self.next_event = IntentEvent(intent=self.app.get_start_intent())
+                self.mode = "navigate_to_the_precondition_from_the_first_node"
+                return KillAppEvent(app=self.app)
+            
+        else:
+            self.logger.info(
+                "mutate on the node: %d " % self.mutate_node_index_on_main_path
+            )
+            self.current_number_of_mutate_steps_on_single_node += 1
+            event = self.generate_random_event_based_on_utg()
+            return event
+            
+    def generate_random_event_based_on_utg(self):
+        """
+        generate an event based on current UTG
+        @return: InputEvent
+        """
+        current_state = self.current_state
+        self.logger.info("Current state: %s" % current_state.state_str)
+        if current_state.state_str in self.__missed_states:
+            self.__missed_states.remove(current_state.state_str)
+
+        if current_state.get_app_activity_depth(self.app) < 0:
+            # If the app is not in the activity stack
+            start_app_intent = self.app.get_start_intent()
+
+            # It seems the app stucks at some state, has been
+            # 1) force stopped (START, STOP)
+            #    just start the app again by increasing self.__num_restarts
+            # 2) started at least once and cannot be started (START)
+            #    pass to let viewclient deal with this case
+            # 3) nothing
+            #    a normal start. clear self.__num_restarts.
+
+            if self.__event_trace.endswith(
+                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+            ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                self.__num_restarts += 1
+                self.logger.info(
+                    "The app had been restarted %d times.", self.__num_restarts
+                )
+            else:
+                self.__num_restarts = 0
+
+            # pass (START) through
+            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                if self.__num_restarts > MAX_NUM_RESTARTS:
+                    # If the app had been restarted too many times, enter random mode
+                    msg = "The app had been restarted too many times. Entering random mode."
+                    self.logger.info(msg)
+                    self.__random_explore = True
+                else:
+                    # Start the app
+                    self.__event_trace += EVENT_FLAG_START_APP
+                    self.logger.info("Trying to start the app...")
+                    return IntentEvent(intent=start_app_intent)
+
+        elif current_state.get_app_activity_depth(self.app) > 0:
+            # If the app is in activity stack but is not in foreground
+            self.__num_steps_outside += 1
+
+            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
+                # If the app has not been in foreground for too long, try to go back
+                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
+                    stop_app_intent = self.app.get_stop_intent()
+                    go_back_event = IntentEvent(stop_app_intent)
+                else:
+                    go_back_event = KeyEvent(name="BACK")
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                self.logger.info("Going back to the app...")
+                return go_back_event
+        else:
+            # If the app is in foreground
+            self.__num_steps_outside = 0
+
+        # if self.guide:
+        #     event = self.guide_the_exploration()
+        #     if event is not None:
+        #         return event
+        # if self.guide:
+        #     if self.device.get_activity_short_name() == self.guide.target_activity:
+        #         raise InputInterruptedException("Target state reached.")
+        # Get all possible input events
+        possible_events = current_state.get_possible_input()
+
+        if self.random_input:
+            random.shuffle(possible_events)
+        possible_events.append(KeyEvent(name="BACK"))
+        # 旋转屏幕事件。如果之前执行过旋转屏幕事件，那么下一次执行的旋转屏幕事件应该是相反的
+        
+        if self.last_rotate_events == KEY_RotateDeviceNeutralEvent:
+            rotate_event = RotateDeviceRightEvent()
+        else:
+            rotate_event = RotateDeviceNeutralEvent()
+        possible_events.append(rotate_event)
+
+        self.__event_trace += EVENT_FLAG_EXPLORE
+        return random.choice(possible_events)
+    
+    def __update_utg(self):
+        self.utg.add_transition(self.last_event, self.last_state, self.current_state)
+
+    def tear_down(self):
+        """
+        输出一些统计信息
+        """
+        self.logger.info("----------------------------------------")
+        if len(self.time_needed_to_satisfy_precondition)>0:
+
+            self.logger.info("the first time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition[0])
+            self.logger.info("How many times satisfy the precondition: %s" % len(self.time_needed_to_satisfy_precondition))
+            self.logger.info("the time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition)
+            self.logger.info("How many times check the property: %s" % len(self.time_to_check_rule))
+            self.logger.info("the time needed to check the property: %s" % self.time_to_check_rule)     
+        else:
+            self.logger.info("did not satisfy the precondition")
+            return
+
+        if len(self.time_needed_to_trigger_bug) > 0:
+            self.logger.info("the first time needed to trigger the bug: %s" % self.time_needed_to_trigger_bug[0])
+            self.logger.info("How many times trigger the bug: %s" % len(self.time_needed_to_trigger_bug)) 
+            self.logger.info("the time needed to trigger the bug: %s" % self.time_needed_to_trigger_bug)
+        else:
+            self.logger.info("did not trigger the bug")
+            return
+    
+
 class BuildModelPolicy(UtgBasedInputPolicy):
     """
     DFS/BFS (according to search_method) strategy to explore UFG (new)
@@ -1496,7 +1902,10 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             return KeyEvent(name="BACK")
 
         self.__update_utg()
-    
+
+        if self.action_count % 100 == 0 and self.restart_app_after_100_events:
+            self.logger.info("restart app after 100 events")
+            return KillAppEvent(app=self.app)
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         
         if len(rules_to_check) > 0:
