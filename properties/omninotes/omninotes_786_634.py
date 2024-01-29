@@ -122,13 +122,13 @@ class Test(AndroidCheck):
         self.device(text="OK").click()
         time.sleep(1)
 
-        assert not self.device(textContains=select_tag_name).exists()    
+        assert not self.device(textContains=select_tag_name).exists(), "tag should be removed from note" 
         new_content = self.device(resourceId="it.feio.android.omninotes:id/detail_content").info["text"].strip()
         print("new_content: " + str(new_content))
         origin_content_exlude_tag = origin_content.replace(select_tag_name, "").strip()
         print("origin_content_exlude_tag: " + str(origin_content_exlude_tag))
         time.sleep(1)
-        assert new_content == origin_content_exlude_tag
+        assert new_content == origin_content_exlude_tag, "content should not be affected by removing tag"
     
 start_time = time.time()
 
