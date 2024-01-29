@@ -98,8 +98,11 @@ class Test(AndroidCheck):
         note_title = selected_note.child(resourceId="it.feio.android.omninotes:id/note_title").get_text()
         print("note_title: " + note_title)
         time.sleep(1)
-        note_content = selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text()
-        print("note_content: " + note_content)
+        has_content = False
+        if selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").exists():
+            has_content = True
+            note_content = selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text()
+            print("note_content: " + note_content)
         time.sleep(1)
         has_attachment = selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists()
         print("has_attachment: " + str(has_attachment))
@@ -134,7 +137,8 @@ class Test(AndroidCheck):
         # 检查note的title，content，是否有attachment是否发生了变化
         assert selected_note.exists(), "selected note not exists"
         assert selected_note.child(resourceId="it.feio.android.omninotes:id/note_title").get_text() == note_title, "note_title: "  + selected_note.child(resourceId="it.feio.android.omninotes:id/note_title").get_text()
-        assert selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text() == note_content, "note_content: " + selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text()
+        if has_content:
+            assert selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text() == note_content, "note_content: " + selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text()
         assert selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists() == has_attachment, "has_attachment: " + str(selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists())
 
 
