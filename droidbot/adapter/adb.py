@@ -380,3 +380,62 @@ class ADB(Adapter):
         Rotate the device to the neutral position
         """
         self.shell("content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:0")
+
+    # clear the app data (including user data, cache)
+    def clear_app_data(self, package_name: str):
+        """
+        clear the app data (including user data and cache)
+        :param package_name: the app package name
+        :return:
+        """
+        # By default, "pm clear" will clear an app's private data and public data.
+        #   private data: /data/data/#{package_name}/
+        #   public data: /sdcard/Android/data/#{package_name}/
+        out = self.shell("pm clear %s" % package_name)
+        logging.info("clear app data: %s" % out)
+
+        # Some apps may dump data to external storage (e.g., SDCard), so we need to add additional data clear commands
+        if package_name.startswith('nl.mpcjanssen.simpletask'):
+            self.shell('rm -rf /sdcard/data/nl.mpcjanssen.simpletask')
+            logging.info('clear data on external storage for nl.mpcjanssen.simpletask')
+        elif package_name.startswith('net.gsantner.markor'):
+            self.shell('rm -rf /sdcard/Documents/markor')
+            logging.info('clear data on external storage for net.gsantner.markor')
+        elif package_name.startswith('net.programmierecke.radiodroid2'):
+            self.shell('rm -rf /sdcard/Music/Recordings')
+            logging.info('clear data on external storage for net.programmierecke.radiodroid2')
+        elif package_name.startswith('free.rm.skytube.extra'):
+            self.shell('rm -f /sdcard/Movies/*.mp4')
+            logging.info('clear data on external storage for free.rm.skytube.extra')
+        elif package_name.startswith('com.ichi2.anki'):
+            self.shell('rm -rf /sdcard/AnkiDroid')
+            logging.info('clear data on external storage for free.rm.skytube.extra')
+        elif package_name.startswith('org.liberty.android.fantastischmemo'):
+            self.shell('rm -rf /sdcard/anymemo')
+            logging.info('clear data on external storage for org.liberty.android.fantastischmemo')
+
+    #  grant runtime permissions
+    def grant_runtime_permissions(self, package_name, runtime_permissions):
+        """
+        grant the runtime permissions
+        :param package_name: the app package name
+        :param runtime_permissions: the list of runtime permissions
+        :return:
+        """
+        if len(runtime_permissions) == 0:
+            logging.warning("no runtime permissions exist")
+        
+        for permission in runtime_permissions:
+            out = self.shell("pm grant %s %s" % (package_name, permission))
+            if str.strip(out) == "":
+                logging.info("grant runtime permission %s succeeds." % permission)
+            else:
+                logging.info("grant runtime permission %s fails." % permission)
+    
+    def grant_all_the_permission(self,package_name):
+
+        out = self.shell("pm grant -g %s" % package_name)
+        if str.strip(out) == "":
+            logging.info("grant runtime permission %s succeeds." % package_name)
+        else:
+            logging.info("grant runtime permission %s fails." % package_name)

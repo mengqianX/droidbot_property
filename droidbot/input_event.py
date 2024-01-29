@@ -68,6 +68,7 @@ POSSIBLE_BROADCASTS = [
 KEY_KeyEvent = "key"
 KEY_ManualEvent = "manual"
 KEY_ExitEvent = "exit"
+KEY_FRESH_RESTART = "fresh_restart"
 KEY_TouchEvent = "touch"
 KEY_LongTouchEvent = "long_touch"
 KEY_SwipeEvent = "swipe"
@@ -454,7 +455,41 @@ class KeyEvent(InputEvent):
             self.name,
         )
 
+#  restart event
+class RestartEvent(InputEvent):
+    """
+    an event to restart the app with a fresh state
+    """
 
+    def __init__(self, intent=None, package=None,app=None, event_dict=None):
+        super(RestartEvent, self).__init__()
+        self.app = app
+        self.event_type = KEY_FRESH_RESTART
+        self.package = package
+        if isinstance(intent, Intent):
+            self.intent = intent.get_cmd()
+        elif isinstance(intent, str):
+            self.intent = intent
+        elif event_dict is not None:
+            self.__dict__.update(event_dict)
+        else:
+            msg = "intent must be either an instance of Intent or a string."
+            raise InvalidEventException(msg)
+
+    @staticmethod
+    def get_random_instance(device, app):
+        return None
+
+    def send(self, device):
+        device.clear_data(self.package)
+        device.uninstall_app(self.app)
+        device.install_app(self.app)
+        device.send_intent(intent=self.intent)
+        time.sleep(3)
+
+    def get_event_str(self, state, content_free=False):
+        return "%s()" % self.__class__.__name__
+    
 class UIEvent(InputEvent):
     """
     This class describes a UI event of app, such as touch, click, etc
@@ -500,7 +535,13 @@ class UIEvent(InputEvent):
         view_short_sig = f'{state.activity_short_name}/{view_class}-{view_text}'
         return f"state={state.state_str}, view={view['view_str']}({view_short_sig})"
 
+    def set_view(self, view):
+        self.view = view
 
+    def set_xy(self, x, y):
+        self.x = x
+        self.y = y
+        
 class TouchEvent(UIEvent):
     """
     a touch on screen
@@ -798,6 +839,8 @@ class SetTextEvent(UIEvent):
     def get_views(self):
         return [self.view] if self.view else []
 
+    def set_text(self, text):
+        self.text = text
 
 class IntentEvent(InputEvent):
     """

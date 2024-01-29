@@ -98,6 +98,7 @@ class DroidBot(object):
         self.android_check = android_check
         self.guide = guide
         try:
+            self.app = App(app_path, output_dir=self.output_dir)
             self.device = Device(
                 device_serial=device_serial,
                 is_emulator=is_emulator,
@@ -107,6 +108,7 @@ class DroidBot(object):
                 enable_accessibility_hard=self.enable_accessibility_hard,
                 humanoid=self.humanoid,
                 ignore_ad=ignore_ad,
+                app_package_name=self.app.package_name
             )
             self.app = App(app_path, output_dir=self.output_dir)
 

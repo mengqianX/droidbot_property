@@ -54,6 +54,9 @@ class UTG(object):
     def num_transitions(self):
         return len(self.transitions)
 
+    def clear_graph(self):
+        self.G.clear()
+        self.G2.clear()
     # yiheng: set the target state
     def set_target_state(self, state):
         self.target_state = state

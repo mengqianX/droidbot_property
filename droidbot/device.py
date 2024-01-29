@@ -41,6 +41,7 @@ class Device(object):
         enable_accessibility_hard=False,
         humanoid=None,
         ignore_ad=False,
+        app_package_name=None
     ):
         """
         initialize a device connection
@@ -49,7 +50,7 @@ class Device(object):
         :return:
         """
         self.logger = logging.getLogger(self.__class__.__name__)
-
+        self.app_package_name = app_package_name
         if device_serial is None:
             from .utils import get_available_devices
 
@@ -987,3 +988,12 @@ class Device(object):
         self.adb.disable_auto_rotation()
         time.sleep(1)
         self.adb.rotate_neutral()
+
+    # clear the app data (including user data and cache)
+    def clear_data(self, package_name):
+        """
+        clear the app data (including user data and cache)
+        :param package_name: the app package name
+        """
+        self.adb.clear_app_data(package_name)
+        

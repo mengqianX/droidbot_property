@@ -14,6 +14,7 @@ from .input_event import (
     KEY_RotateDeviceRightEvent,
     KeyEvent,
     IntentEvent,
+    RestartEvent,
     RotateDevice,
     RotateDeviceNeutralEvent,
     RotateDeviceRightEvent,
@@ -92,6 +93,8 @@ class InputPolicy(object):
         self.time_to_check_rule = []
         self.time_needed_to_trigger_bug = []
 
+        self.last_event = None
+
     def run_initial_rules(self):
         if len(self.android_check.initialize_rules()) == 0:
             self.logger.info("No initialize rules")
@@ -131,6 +134,7 @@ class InputPolicy(object):
                     event = IntentEvent(self.app.get_start_intent())
                 else:
                     event = self.generate_event()
+                self.last_event = event
                 input_manager.add_event(event)
             except KeyboardInterrupt:
                 break
@@ -824,20 +828,23 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
 
         self.last_rotate_events = KEY_RotateDeviceNeutralEvent
 
-        # 记录在随机探索的过程中是否满足了precondition
-        self.satisfy_precondition = False
-        # 记录从app entry 到满足precondition的state的path
+        # 记录从app entry 到满足precondition的state的path,但是是shortest path
         self.mian_path = []
+        # 记录从app entry 到满足precondition的state的path,但是是实际走的path
+        self.longest_path = []
+        # 记录当前是在main path上还是在longest path上
+        self.main_path_or_longest_path = True
         # 记录之后每次走main path的实际state
         self.actual_main_path = []
         # 记录每次app重启之后的第一个state
         self.first_state = None
 
-        self.max_number_of_mutate_steps_on_single_node = 10
+        self.max_number_of_mutate_steps_on_single_node = 20
         self.current_number_of_mutate_steps_on_single_node = 0
         self.mutate_node_index_on_main_path = 0
         self.step_on_the_path = 0
 
+        self.navigate_edges_from_node_to_main_path = []
         # 定义不同的状态，表示现在应该执行哪种策略
         # explpore: 随机探索
         # navigate_to_the_mutate_node: 引导app到达变异的node
@@ -851,30 +858,37 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         @return:
         """
         # 在app 启动后执行定义好的初始化事件
-        if self.action_count == 2:
+        if self.action_count == 2 or isinstance(self.last_event,RestartEvent):
+            self.utg.clear_graph()
             self.run_initial_rules()
     
         # Get current device state
         self.current_state = self.device.get_current_state(self.action_count)
-        if self.action_count == 2:
+        self.logger.info("Current state: %s" % self.current_state.state_str)
+        
+        if (self.action_count == 2 or isinstance(self.last_event,RestartEvent)) and self.mode == "explore":
+            self.actual_main_path = []
             self.first_state = self.current_state
+
         if self.current_state is None:
             import time
             time.sleep(5)
             return KeyEvent(name="BACK")
 
         self.__update_utg()
-        if self.action_count % 100 == 1:
-            self.first_state = self.current_state
 
         # 如果还没有满足precondition，则每100个事件就重启app
-        if self.action_count % 100 == 0 and self.restart_app_after_100_events and not self.satisfy_precondition:
+        if self.action_count % 100 == 0 and self.restart_app_after_100_events and self.mode == "explore":
             self.logger.info("restart app after 100 events")
-            return KillAppEvent(app=self.app)
+            fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
+            
+            self.last_state = self.current_state
+            return fresh_restart_event
         
         # 在kill app之后，需要重启app。这个操作是在第一次满足preocndition之后需要的
         if self.next_event is not None:
             next_event = self.next_event
+            self.last_state = self.current_state
             self.next_event = None
             return next_event
         
@@ -896,24 +910,29 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             else:
                 self.logger.info("don't check rule")
             if self.mode == "explore":
-                self.mode = "navigate_to_the_mutate_node_from_the_first_node"
-                self.next_event = IntentEvent(intent=self.app.get_start_intent())
-                return KillAppEvent(app=self.app)
+                # 首先尝试最短路径能否走到precondition,如果不能，则尝试最长的路径，如果再不能，就重新开始随机探索
+                self.mode = "try_to_navigate_to_the_precondition_from_the_first_node"
+                fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
+                self.last_state = self.current_state
+                return fresh_restart_event
                     
         
         event = None
         if self.mode == "explore":
             event = self.generate_random_event_based_on_utg()
+            self.longest_path.append((self.current_state,event))
         elif self.mode == "navigate_to_the_mutate_node_from_the_first_node":
             event = self.navigate_to_the_mutate_node_from_the_first_node()
         elif self.mode == "mutate_on_the_node":
             event = self.mutate_on_the_node()
         elif self.mode == "navigate_to_the_mutate_node":
-            event  = self.navigate_back_to_the_mutate_node()
+            event  = self.navigate_to_the_mutate_node()
         elif self.mode == "navigate_to_the_precondition_from_the_mutate_node":
             event = self.navigate_to_the_precondition_from_the_mutate_node()
         elif self.mode == "navigate_to_the_precondition_from_the_first_node":
             event = self.navigate_to_the_precondition_from_the_first_node()
+        elif self.mode == "try_to_navigate_to_the_precondition_from_the_first_node":
+            event = self.try_to_navigate_to_the_precondition_from_the_first_node()
         else:
             raise Exception("wrong mode")
 
@@ -926,40 +945,54 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         self.last_state = self.current_state
         self.last_event = event
         return event
-        
 
     def navigate_to_the_mutate_node_from_the_first_node(self):
         self.actual_main_path[self.step_on_the_path] = self.current_state
         if self.mutate_node_index_on_main_path == -1:
             self.logger.info("finish mutate all the nodes on the main path")
-            # self.mode = "navigate_to_the_precondition_from_the_first_node"
-            raise InputInterruptedException("finish explore all paths")
+            self.logger.info("start to mutate the main path again")
+            self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+            self.mutate_node_index_on_main_path = len(self.mian_path) 
+            self.step_on_the_path = 0
+            fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
+            return fresh_restart_event
+            
         if self.step_on_the_path == self.mutate_node_index_on_main_path:
-                self.logger.info(
-                    "reach the node and start mutate on the node: %d"
-                    % self.mutate_node_index_on_main_path
-                )
-                self.step_on_the_path = 0
-                self.mode = "mutate_on_the_node"
-                return None
+            self.logger.info(
+                "reach the node and start mutate on the node: %d"
+                % self.mutate_node_index_on_main_path
+            )
+            self.step_on_the_path = 0
+            self.mode = "mutate_on_the_node"
+            return None
         else:
             # 如果还没到达目标node，则继续引导app到目标node
             next_event = self.mian_path[self.step_on_the_path][1]
             if isinstance(next_event, UIEvent):
                 view_in_next_event = next_event.view
                 # self.logger.info("view in next event: ", str(view_in_next_event))
-                if self.current_state.is_view_exist(view_in_next_event):
+                view_in_current_state = self.current_state.is_view_exist(view_in_next_event)
+                if view_in_current_state:
                     self.logger.info("find next event in the %d step" % self.step_on_the_path)
                     self.step_on_the_path += 1
+                    next_event.set_view(view_in_current_state)
                     return next_event
                 else:
-                    # 如果没有找到下一个事件，说明当前path走不通
+                    # 如果没有找到下一个事件，说明当前path走不通,mutate下一个node
                     self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+                    self.logger.info("current mutate node index: %d" % self.mutate_node_index_on_main_path)
+                    self.logger.info("restart app and mutate the next node")
+                    self.step_on_the_path = 0
+                    self.mutate_node_index_on_main_path -= 1
+                    self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+                    self.next_event = IntentEvent(intent=self.app.get_start_intent())
+                    return KillAppEvent(app=self.app)
             else:
                 self.step_on_the_path += 1
                 return next_event
+
+    # 在确定main path可以走通到precondition之后，会不断走这条main path
     def navigate_to_the_precondition_from_the_first_node(self):
-        # self.actual_main_path[self.step_on_the_path] = self.current_state
         if self.step_on_the_path == len(self.mian_path):
             self.logger.info(
                 "reach the node and start mutate on the node: %d"
@@ -970,13 +1003,132 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             # 说明已经走到最后一个state了，check property
             rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
             if len(rules_to_check) > 0:
-                self.time_needed_to_satisfy_precondition.append(self.time_recoder.get_time_duration())
+                t = self.time_recoder.get_time_duration()
+                self.time_needed_to_satisfy_precondition.append(t)
+                self.time_to_check_rule.append(t)
                 self.check_rule_with_precondition()
+            else:
+                # 说明这条path不能走到preocndition，那么就重新开始随机探索
+                self.logger.info("no rule matches the precondition, start explore mode again")
+                self.mode = "explore"
+                self.step_on_the_path = 0
+                fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
+                return fresh_restart_event
+            
             self.next_event = IntentEvent(intent=self.app.get_start_intent())
             return KillAppEvent(app=self.app)
                 
         else:
             # 如果还没到达目标node，则继续引导app到目标node
+            next_event = self.mian_path[self.step_on_the_path][1]
+            if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                view_in_current_state = self.current_state.is_view_exist(view_in_next_event)
+                # self.logger.info("view in next event: ", str(view_in_next_event))
+                if view_in_current_state:
+                    self.logger.info("find next event in the %d step" % self.step_on_the_path)
+                    self.step_on_the_path += 1
+                    if isinstance(view_in_current_state,SetTextEvent):
+                        view_in_current_state.set_text(st.text(alphabet=string.ascii_letters, min_size=1, max_size=5).example())
+                    next_event.set_view(view_in_current_state)
+                    return next_event
+                else:
+                    # 如果没有找到下一个事件，说明当前path走不通,那么重新开始随机探索
+                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+                    self.mode = "explore"
+                    self.step_on_the_path = 0
+                    fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
+                    return fresh_restart_event
+            else:
+                self.step_on_the_path += 1
+                return next_event
+
+    # 在自由探索的过程中满足了precondition。然后开始看能否走到precondition
+    # 首先在最短的main path上进行探索，如果不能走到precondition，则在最长的main path上进行探索
+    # 如果在最长的main path 上还是无法到达precondition,则放弃这条path，重新开始随机探索
+    def try_to_navigate_to_the_precondition_from_the_first_node(self):
+        if self.step_on_the_path == len(self.mian_path):
+            self.logger.info(
+                "reach the node and start mutate on the node: %d"
+                % self.mutate_node_index_on_main_path
+            )
+            self.step_on_the_path = 0
+            self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+            # 说明已经走到最后一个state了，check property
+            rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+            if len(rules_to_check) > 0:
+                t = self.time_recoder.get_time_duration()
+                self.time_needed_to_satisfy_precondition.append(t)
+                self.time_to_check_rule.append(t)
+                self.check_rule_with_precondition()
+            else:
+                # 说明这条path不能走到preocndition，如果是在最短的path上，则尝试在最长的path上进行探索
+                if self.main_path_or_longest_path:
+                    self.mian_path = self.longest_path
+                    self.main_path_or_longest_path = False
+                    self.mode = "try_to_navigate_to_the_precondition_from_the_first_node"
+                else:
+                    # 说明最长path不能走到preocndition，那么就重新开始随机探索
+                    self.logger.info("no rule matches the precondition, start explore mode again")
+                    self.mode = "explore"
+                self.step_on_the_path = 0
+                fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
+                return fresh_restart_event
+            
+            self.next_event = IntentEvent(intent=self.app.get_start_intent())
+            return KillAppEvent(app=self.app)
+                
+        else:
+            # 如果还没到达目标node，则继续引导app到目标node
+            next_event = self.mian_path[self.step_on_the_path][1]
+            if isinstance(next_event, UIEvent):
+                view_in_next_event = next_event.view
+                view_in_current_state = self.current_state.is_view_exist(view_in_next_event)
+                # self.logger.info("view in next event: ", str(view_in_next_event))
+                if view_in_current_state:
+                    self.logger.info("find next event in the %d step" % self.step_on_the_path)
+                    self.step_on_the_path += 1
+                    if isinstance(view_in_current_state,SetTextEvent):
+                        view_in_current_state.set_text(st.text(alphabet=string.ascii_letters, min_size=1, max_size=5).example())
+                    next_event.set_view(view_in_current_state)
+                    return next_event
+                else:
+                    # 如果没有找到下一个事件，说明当前path走不通,那么重新开始随机探索
+                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+                    # 说明这条path不能走到preocndition，如果是在最短的path上，则尝试在最长的path上进行探索
+                    if self.main_path_or_longest_path:
+                        self.logger.info("try to navigate to the precondition from the longest path")
+                        self.mian_path = self.longest_path
+                        self.main_path_or_longest_path = False
+                    else:
+                        # 说明最长path不能走到preocndition，那么就重新开始随机探索
+                        self.logger.info("start explore mode again")
+                        self.mode = "explore"
+                    self.step_on_the_path = 0
+                    fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
+                    return fresh_restart_event
+            else:
+                self.step_on_the_path += 1
+                return next_event
+
+    def navigate_to_the_precondition_from_the_mutate_node(self):
+        if self.step_on_the_path == len(self.mian_path):
+            self.logger.info("finish navigate to the precondition")
+            # 说明已经走到最后一个state了，check property
+            rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+            if len(rules_to_check) > 0:
+                t = self.time_recoder.get_time_duration()
+                self.time_needed_to_satisfy_precondition.append(t)
+                self.time_to_check_rule.append(t)
+                self.check_rule_with_precondition()
+            else:
+                self.logger.info("no rule matches the precondition")
+            self.logger.info("finish current path ")
+            self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+            # self.mutate_node_index_on_main_path -= 1
+            self.next_event = IntentEvent(intent=self.app.get_start_intent())
+            return self.stop_app_events()
+        else:
             next_event = self.mian_path[self.step_on_the_path][1]
             if isinstance(next_event, UIEvent):
                 view_in_next_event = next_event.view
@@ -988,36 +1140,10 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 else:
                     # 如果没有找到下一个事件，说明当前path走不通
                     self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
-            else:
-                self.step_on_the_path += 1
-                return next_event        
-    def navigate_to_the_precondition_from_the_mutate_node(self):
-        if self.step_on_the_path == len(self.mian_path):
-            self.logger.info("finish navigate to the precondition")
-            # 说明已经走到最后一个state了，check property
-            rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
-            if len(rules_to_check) > 0:
-                self.time_needed_to_satisfy_precondition.append(self.time_recoder.get_time_duration())
-                self.check_rule_with_precondition()
-            else:
-                self.logger.info("no rule matches the precondition")
-            self.logger.info("finish current path ")
-            self.mode = "navigate_to_the_mutate_node_from_the_first_node"
-            self.mutate_node_index_on_main_path -= 1
-            self.next_event = IntentEvent(intent=self.app.get_start_intent())
-            return self.stop_app_events()
-        else:
-            next_event = self.mian_path[self.step_on_the_path][1]
-            if isinstance(next_event, UIEvent):
-                view_in_next_event = next_event.view
-                # self.logger.info("view in next event: ", str(view_in_next_event))
-                if self.current_state.is_view_exist(view_in_next_event):
-                    self.logger.info("find next event in the %d path" % self.path_index)
-                    self.step_on_the_path += 1
-                    return next_event
-                else:
-                    # 如果没有找到下一个事件，说明当前path走不通
-                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+                    self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+                    self.step_on_the_path = 0
+                    self.next_event = IntentEvent(intent=self.app.get_start_intent())
+                    return self.stop_app_events()
             else:
                 self.step_on_the_path += 1
                 return next_event
@@ -1029,23 +1155,22 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             return self.navigate_to_the_precondition_from_the_mutate_node()
         next_event = self.navigate_edges_from_node_to_main_path.pop(0)[1]
         if isinstance(next_event, UIEvent):
-                view_in_next_event = next_event.view
-                # self.logger.info("view in next event: ", str(view_in_next_event))
-                if self.current_state.is_view_exist(view_in_next_event):
-                    self.logger.info("find next event in the %d path" % self.path_index)
-                    return next_event
-                else:
-                    # 如果没有找到下一个事件，说明当前path走不通
-                    self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
-                    self.mode = "navigate_to_the_precondition_from_the_first_node"
+            view_in_next_event = next_event.view
+            # self.logger.info("view in next event: ", str(view_in_next_event))
+            if self.current_state.is_view_exist(view_in_next_event):
+                self.logger.info("find next event in the %d step" % self.step_on_the_path)
+                return next_event
+            else:
+                # 如果没有找到下一个事件，说明当前path走不通
+                self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+                self.mode = "navigate_to_the_precondition_from_the_first_node"
+                self.next_event = IntentEvent(intent=self.app.get_start_intent())
+                return self.stop_app_events()
         return next_event
-        
-
 
     def mutate_on_the_node(self):
         # 如果已经开始在主路径上进行变异，则继续变异
-        # 只允许最多变异N步，如果超过N步，则看是否能navigate到main path上的state, 然后navigate 到precondition,否则重新启动app,选择下一个变异的Node
-        
+        # 只允许最多变异N步，如果超过N步，则看是否能navigate到main path上的state, 然后navigate 到precondition,否则重新启动app,走一遍main path，然后选择下一个变异的Node
 
         if (
             self.current_number_of_mutate_steps_on_single_node

@@ -287,7 +287,8 @@ class DeviceState(object):
             return view_dict['signature']
 
         view_text = DeviceState.__safe_dict_get(view_dict, 'text', "None")
-        if view_text is None or len(view_text) > 50:
+        # Yiheng: ignore the view text if it is a edit text
+        if view_text is None or len(view_text) > 50 or DeviceState.__safe_dict_get(view_dict, 'class', "None") == "android.widget.EditText":
             view_text = "None"
 
         signature = "[class]%s[resource_id]%s[text]%s[%s,%s,%s]" % (
@@ -595,16 +596,16 @@ class DeviceState(object):
             self.logger.info("No view found for %s" % attribute_value)
         return view_list
 
-    # 判断view 是否存在
+    # 判断view 是否存在,如果存在，则返回view，否则返回None
     def is_view_exist(self, view_dict):
         """
         判断view 是否存在
         :param view_dict: view dict
-        :return: boolean
+        :return: None or view
         """
         for view in self.views:
             if DeviceState.__get_view_signature(view) == DeviceState.__get_view_signature(
                 view_dict
             ):
-                return True
-        return False
+                return view
+        return None
