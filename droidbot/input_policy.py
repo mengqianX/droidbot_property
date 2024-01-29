@@ -824,7 +824,6 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         self.__event_trace = ""
         self.__missed_states = set()
         self.number_of_steps_outside_the_shortest_path = 0
-        self.reached_state_on_the_shortest_path = []
 
         self.last_rotate_events = KEY_RotateDeviceNeutralEvent
 
@@ -915,8 +914,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
                 self.last_state = self.current_state
                 return fresh_restart_event
-                    
-        
+
         event = None
         if self.mode == "explore":
             event = self.generate_random_event_based_on_utg()
@@ -1028,8 +1026,8 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 if view_in_current_state:
                     self.logger.info("find next event in the %d step" % self.step_on_the_path)
                     self.step_on_the_path += 1
-                    if isinstance(view_in_current_state,SetTextEvent):
-                        view_in_current_state.set_text(st.text(alphabet=string.ascii_letters, min_size=1, max_size=5).example())
+                    if isinstance(next_event,SetTextEvent):
+                        next_event.set_text(st.text(alphabet=string.ascii_letters, min_size=1, max_size=5).example())
                     next_event.set_view(view_in_current_state)
                     return next_event
                 else:
@@ -1070,6 +1068,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 else:
                     # 说明最长path不能走到preocndition，那么就重新开始随机探索
                     self.logger.info("no rule matches the precondition, start explore mode again")
+                    self.main_path_or_longest_path = True
                     self.mode = "explore"
                 self.step_on_the_path = 0
                 fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
@@ -1088,8 +1087,8 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 if view_in_current_state:
                     self.logger.info("find next event in the %d step" % self.step_on_the_path)
                     self.step_on_the_path += 1
-                    if isinstance(view_in_current_state,SetTextEvent):
-                        view_in_current_state.set_text(st.text(alphabet=string.ascii_letters, min_size=1, max_size=5).example())
+                    if isinstance(next_event,SetTextEvent):
+                        next_event.set_text(st.text(alphabet=string.ascii_letters, min_size=1, max_size=5).example())
                     next_event.set_view(view_in_current_state)
                     return next_event
                 else:
@@ -1125,6 +1124,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 self.logger.info("no rule matches the precondition")
             self.logger.info("finish current path ")
             self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+            self.step_on_the_path = 0
             # self.mutate_node_index_on_main_path -= 1
             self.next_event = IntentEvent(intent=self.app.get_start_intent())
             return self.stop_app_events()
@@ -1171,6 +1171,18 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
     def mutate_on_the_node(self):
         # 如果已经开始在主路径上进行变异，则继续变异
         # 只允许最多变异N步，如果超过N步，则看是否能navigate到main path上的state, 然后navigate 到precondition,否则重新启动app,走一遍main path，然后选择下一个变异的Node
+        rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+        if len(rules_to_check) > 0 and random.random() < 0.5:
+            self.logger.info("precondition is satisfied during mutate on the node")
+            t = self.time_recoder.get_time_duration()
+            self.time_needed_to_satisfy_precondition.append(t)
+            self.time_to_check_rule.append(t)
+            self.check_rule_with_precondition()
+            self.mutate_node_index_on_main_path -= 1
+            self.current_number_of_mutate_steps_on_single_node = 0
+            self.next_event = IntentEvent(intent=self.app.get_start_intent())
+            self.mode = "navigate_to_the_mutate_node_from_the_first_node"
+            return KillAppEvent(app=self.app)
 
         if (
             self.current_number_of_mutate_steps_on_single_node
@@ -1207,7 +1219,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         @return: InputEvent
         """
         current_state = self.current_state
-        self.logger.info("Current state: %s" % current_state.state_str)
+        # self.logger.info("Current state: %s" % current_state.state_str)
         if current_state.state_str in self.__missed_states:
             self.__missed_states.remove(current_state.state_str)
 

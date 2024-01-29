@@ -326,6 +326,7 @@ class UTG(object):
 
     def get_navigation_steps(self, from_state, to_state):
         if from_state is None or to_state is None:
+            self.logger.warning("from_state or to_state is none")
             return None
         try:
             steps = []
@@ -350,7 +351,7 @@ class UTG(object):
                 start_state_str = state_str
             return steps
         except Exception as e:
-            print(e)
+            self.logger.error(e)
             self.logger.warning(
                 f"Cannot find a path from {from_state.state_str} to {to_state.state_str}"
             )
