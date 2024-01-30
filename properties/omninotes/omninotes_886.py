@@ -142,9 +142,9 @@ start_time = time.time()
 t = Test(
     apk_path="./apk/omninotes/OmniNotes-6.1.0.apk",
     device_serial="emulator-5554",
-    output_dir="output/omninotes/886/1",
-    policy_name="random",
-    timeout=7200,
+    output_dir="output/omninotes/886/mutate_main_path/1",
+    policy_name="mutate_main_path",
+    timeout=3600,
     build_model_timeout=3600
 )
 t.start()

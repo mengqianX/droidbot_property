@@ -159,8 +159,7 @@ t = Test(
     device_serial="emulator-5554",
     output_dir="output/omninotes/786/1",
     policy_name="mutate_main_path",
-    timeout=7200,
-    build_model_timeout=3600
+    timeout=7200
 )
 t.start()
 execution_time = time.time() - start_time

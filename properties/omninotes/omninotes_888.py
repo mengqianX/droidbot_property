@@ -124,8 +124,7 @@ t = Test(
     device_serial="emulator-5554",
     output_dir="output/omninotes/888/1",
     policy_name="random_100",
-    timeout=600,
-    build_model_timeout=300
+    timeout=7200
 )
 t.start()
 execution_time = time.time() - start_time

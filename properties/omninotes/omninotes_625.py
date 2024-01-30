@@ -10,8 +10,8 @@ class Test(AndroidCheck):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        explore_event_count=0,
-        diverse_event_count=100,
+        explore_event_count=9999999,
+        diverse_event_count=9999999,
         main_path_path=None,
         xml_path="None",
         source_activity=None,
@@ -100,9 +100,14 @@ class Test(AndroidCheck):
         print("category_name: " + category_name)
         time.sleep(1)
         #assert self.device(resourceId="it.feio.android.omninotes.alpha:id/md_contentRecyclerView").child_by_text(category_name,allow_scroll_search=True).exists()
+        if not self.device(text=category_name).exists():
+            if self.device(scrollable=True).exists():
+                print("scroll to category_name: " + category_name)
+                self.device(scrollable=True).scroll.to(text=category_name)
         assert self.device(text=category_name).exists(), "category_name: " + category_name
+        # assert self.device(text=category_name).exists(), "category_name: " + category_name
         time.sleep(1)
-        assert self.device(text=category_name).right(resourceId="it.feio.android.omninotes:id/count").get_text() == "1"
+        assert self.device(text=category_name).right(resourceId="it.feio.android.omninotes:id/count").get_text() == "1", "category_name: " + category_name
     
 start_time = time.time()
 
@@ -129,10 +134,8 @@ t = Test(
     apk_path="./apk/omninotes/OmniNotes-5.4.0.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/625/1",
-    explore_event_count=500,
-    diverse_event_count=500,
     policy_name="random",
-    build_model_timeout=300
+    timeout=7200
 )
 t.start()
 execution_time = time.time() - start_time
