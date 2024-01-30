@@ -162,7 +162,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/OmniNotes-6.0.5.apk",
+    apk_path="./apk/omninotes/OmniNotes-6.0.5.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/801/1",
     explore_event_count=500,

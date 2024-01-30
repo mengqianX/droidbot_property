@@ -49,6 +49,9 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/done").click()
         time.sleep(1)
+        if self.device(text="OK").exists():
+            self.device(text="OK").click()
+            time.sleep(1)
         # 打开设置-在navigation 中显示没有被分类的Notes
         # self.device(description="drawer open").click()
         # time.sleep(1)

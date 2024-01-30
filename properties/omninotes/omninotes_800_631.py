@@ -10,8 +10,8 @@ class Test(AndroidCheck):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        explore_event_count=0,
-        diverse_event_count=100,
+        explore_event_count=5000,
+        diverse_event_count=5000,
         main_path_path=None,
         xml_path="None",
         source_activity=None,
@@ -140,11 +140,9 @@ t = Test(
     apk_path="./apk/omninotes/OmniNotes-6.0.5.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/800/1",
-    explore_event_count=1000,
-    diverse_event_count=1000,
-    policy_name="build_model",
-    timeout=3000,
-    build_model_timeout=1800
+    policy_name="mutate_main_path",
+    timeout=7200,
+    build_model_timeout=3600
 )
 t.start()
 execution_time = time.time() - start_time

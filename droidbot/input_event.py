@@ -68,7 +68,8 @@ POSSIBLE_BROADCASTS = [
 KEY_KeyEvent = "key"
 KEY_ManualEvent = "manual"
 KEY_ExitEvent = "exit"
-KEY_FRESH_RESTART = "fresh_restart"
+KEY_FRESH_Reinstall_App_Event = "fresh_reinstall_app"
+KEY_Kill_Restart_App_Event = "KillAndRestartAppEvent"
 KEY_TouchEvent = "touch"
 KEY_LongTouchEvent = "long_touch"
 KEY_SwipeEvent = "swipe"
@@ -390,6 +391,37 @@ class KillAppEvent(InputEvent):
     def get_event_str(self, state):
         return "%s()" % self.__class__.__name__
 
+
+class KillAndRestartAppEvent(InputEvent):
+    """
+    an event to kill and restart app
+    """
+
+    def __init__(self, app=None, event_dict=None):
+        super().__init__()
+        self.event_type = KEY_KillAppEvent
+        self.stop_intent = None
+        self.start_intent = None
+        if app:
+            self.stop_intent = app.get_stop_intent().get_cmd()
+            self.start_intent = app.get_start_intent().get_cmd()
+        elif event_dict is not None:
+            self.__dict__.update(event_dict)
+
+    @staticmethod
+    def get_random_instance(device, app):
+        return None
+
+    def send(self, device):
+        if self.stop_intent:
+            device.send_intent(self.stop_intent)
+        device.key_press('HOME')
+        if self.start_intent:
+            device.send_intent(self.start_intent)
+
+    def get_event_str(self, state):
+        return "%s()" % self.__class__.__name__
+
 class RotateDevice(InputEvent):
     def __init__(self):
         super().__init__()
@@ -456,15 +488,15 @@ class KeyEvent(InputEvent):
         )
 
 #  restart event
-class RestartEvent(InputEvent):
+class ReInstallAppEvent(InputEvent):
     """
     an event to restart the app with a fresh state
     """
 
     def __init__(self, intent=None, package=None,app=None, event_dict=None):
-        super(RestartEvent, self).__init__()
+        super(ReInstallAppEvent, self).__init__()
         self.app = app
-        self.event_type = KEY_FRESH_RESTART
+        self.event_type = KEY_FRESH_Reinstall_App_Event
         self.package = package
         if isinstance(intent, Intent):
             self.intent = intent.get_cmd()
