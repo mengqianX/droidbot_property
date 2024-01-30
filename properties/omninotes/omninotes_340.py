@@ -48,7 +48,7 @@ class Test(AndroidCheck):
         self.device(resourceId="it.feio.android.omninotes:id/next").click()
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/done").click()
-        time.sleep(1)
+        time.sleep(2)
         if self.device(text="OK").exists():
             self.device(text="OK").click()
             time.sleep(1)
@@ -131,7 +131,7 @@ t = Test(
     apk_path="./apk/omninotes/OmniNotes-5.3.1.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/340/1",
-    policy_name="build_model",
+    policy_name="random",
     timeout=7200,
     build_model_timeout=3600
 )

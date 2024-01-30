@@ -834,7 +834,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         # 记录当前是在main path上还是在longest path上
         self.main_path_or_longest_path = True
         # 记录之后每次走main path的实际state
-        self.actual_main_path = []
+        self.actual_main_path = [None] * 100
         # 记录每次app重启之后的第一个state
         self.first_state = None
 
@@ -896,7 +896,6 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         if len(rules_to_check) > 0 and self.mode == "explore":
             if self.mode == "explore":
                 self.mian_path = self.utg.get_navigation_steps(self.first_state, self.current_state)
-                self.actual_main_path = [None] * (len(self.mian_path)+1)
                 self.mutate_node_index_on_main_path = len(self.mian_path)
             t = self.time_recoder.get_time_duration()
             self.time_needed_to_satisfy_precondition.append(t)
@@ -999,8 +998,10 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             self.step_on_the_path = 0
             self.mode = "navigate_to_the_mutate_node_from_the_first_node"
             # 说明已经走到最后一个state了，check property
+            self.logger.info("reach to the precondition node, start to check rule")
             rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
             if len(rules_to_check) > 0:
+                self.logger.info("has rule that matches the precondition")
                 t = self.time_recoder.get_time_duration()
                 self.time_needed_to_satisfy_precondition.append(t)
                 self.time_to_check_rule.append(t)
@@ -1033,6 +1034,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 else:
                     # 如果没有找到下一个事件，说明当前path走不通,那么重新开始随机探索
                     self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
+                    self.logger.info("start explore mode again")
                     self.mode = "explore"
                     self.step_on_the_path = 0
                     fresh_restart_event = RestartEvent(self.app.get_start_intent(), self.app.get_package_name(),self.app)
@@ -1046,22 +1048,22 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
     # 如果在最长的main path 上还是无法到达precondition,则放弃这条path，重新开始随机探索
     def try_to_navigate_to_the_precondition_from_the_first_node(self):
         if self.step_on_the_path == len(self.mian_path):
-            self.logger.info(
-                "reach the node and start mutate on the node: %d"
-                % self.mutate_node_index_on_main_path
-            )
             self.step_on_the_path = 0
             self.mode = "navigate_to_the_mutate_node_from_the_first_node"
             # 说明已经走到最后一个state了，check property
             rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
+            self.logger.info("reach to the precondition node, start to check rule")
             if len(rules_to_check) > 0:
+                self.logger.info("has rule that matches the precondition")
                 t = self.time_recoder.get_time_duration()
                 self.time_needed_to_satisfy_precondition.append(t)
                 self.time_to_check_rule.append(t)
                 self.check_rule_with_precondition()
             else:
                 # 说明这条path不能走到preocndition，如果是在最短的path上，则尝试在最长的path上进行探索
+                self.logger.info("no rule matches the precondition")
                 if self.main_path_or_longest_path:
+                    self.logger.info("try to navigate to the precondition from the longest path")
                     self.mian_path = self.longest_path
                     self.main_path_or_longest_path = False
                     self.mode = "try_to_navigate_to_the_precondition_from_the_first_node"
