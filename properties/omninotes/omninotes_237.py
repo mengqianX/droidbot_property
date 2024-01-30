@@ -111,7 +111,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(resourceId="it.feio.android.omninotes:id/menu_tag").click()
         time.sleep(1)
-        assert self.device(resourceId="it.feio.android.omninotes:id/title",textContains=text).exists()
+        assert self.device(resourceId="it.feio.android.omninotes:id/title",textContains=text).exists(), "tag not found"
 
 start_time = time.time()
 
