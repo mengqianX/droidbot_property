@@ -974,8 +974,8 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
     def navigate_to_the_precondition_from_the_first_node(self):
         if self.step_on_the_path == len(self.mian_path):
             self.logger.info(
-                "reach the node and start mutate on the node: %d"
-                % self.mutate_node_index_on_main_path
+                "reach the node and start check on the node: %d"
+                % self.step_on_the_path
             )
             self.step_on_the_path = 0
             self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
