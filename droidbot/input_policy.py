@@ -936,6 +936,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
 
     def navigate_to_the_mutate_node_from_the_first_node(self):
         self.logger.info("step on the path: %d" % self.step_on_the_path)
+        self.logger.info("current mutate node index: %d" % self.mutate_node_index_on_main_path)
         self.actual_main_path[self.step_on_the_path] = self.current_state
         if self.mutate_node_index_on_main_path == -1:
             self.logger.info("finish mutate all the nodes on the main path")
@@ -963,21 +964,11 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 view_in_current_state = self.current_state.is_view_exist(view_in_next_event)
                 if view_in_current_state:
                     self.logger.info("find next event in the %d step" % self.step_on_the_path)
-                    self.step_on_the_path += 1
-                    next_event.set_view(view_in_current_state)
-                    return next_event
                 else:
-                    # 如果没有找到下一个事件，说明当前path走不通,mutate下一个node
+                    # 如果没有找到下一个事件，说明当前path走不通,但是我们还是会继续执行这个event，因为有可能是某些原因导致没有匹配上
                     self.logger.warning("cannot find next event in the %d step" % self.step_on_the_path)
-                    self.logger.info("current mutate node index: %d" % self.mutate_node_index_on_main_path)
-                    self.logger.info("restart app and mutate the next node")
-                    self.step_on_the_path = 0
-                    self.mutate_node_index_on_main_path -= 1
-                    self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
-                    return KillAndRestartAppEvent(app=self.app)
-            else:
-                self.step_on_the_path += 1
-                return next_event
+            self.step_on_the_path += 1
+            return next_event
 
     # 在确定main path可以走通到precondition之后，会不断走这条main path
     def navigate_to_the_precondition_from_the_first_node(self):
