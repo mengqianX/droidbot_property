@@ -521,7 +521,8 @@ class DeviceState(object):
                 )
 
         for view_id in enabled_view_ids:
-            if self.__safe_dict_get(self.views[view_id], 'long_clickable'):
+            # yiheng: add long click event and do not generate the "long click" event for EditText
+            if self.__safe_dict_get(self.views[view_id], 'long_clickable') and not self.__safe_dict_get(self.views[view_id], 'class') == 'android.widget.EditText':
                 possible_events.append(LongTouchEvent(view=self.views[view_id]))
 
         for view_id in enabled_view_ids:
@@ -599,10 +600,14 @@ class DeviceState(object):
     # 判断view 是否存在,如果存在，则返回view，否则返回None
     def is_view_exist(self, view_dict):
         """
-        判断view 是否存在
+        判断view 是否存在,首先通过view_str 来判断, 如果不在, 则通过view_signature 来判断
         :param view_dict: view dict
         :return: None or view
         """
+        for view in self.views:
+            if self.__get_view_str(view) == self.__get_view_str(view_dict):
+                return view
+            
         for view in self.views:
             if DeviceState.__get_view_signature(view) == DeviceState.__get_view_signature(
                 view_dict
