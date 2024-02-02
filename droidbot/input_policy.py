@@ -1988,7 +1988,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         self.__update_utg()
 
-        if self.action_count % 10 == 0 and self.clear_and_restart_app_data_after_100_events:
+        if self.action_count % 100 == 0 and self.clear_and_restart_app_data_after_100_events:
             self.logger.info("clear and restart app after 100 events")
             return ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
