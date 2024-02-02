@@ -135,7 +135,7 @@ class InputManager(object):
         elif self.policy_name == POLICY_RANDOM_TWO:
             input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check, restart_app_after_check_property=True)
         elif self.policy_name == POLICY_RANDOM_100:
-            input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check, restart_app_after_100_events=True)
+            input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check, clear_and_restart_app_data_after_100_events=True)
         elif self.policy_name == POLICY_MUTATE_MAIN_PATH:
             input_policy = Mutate_Main_Path_Policy(device,app,random_input=self.random_input,android_check=self.android_check,restart_app_after_100_events=True)
         elif self.policy_name == POLICY_MEMORY_GUIDED:

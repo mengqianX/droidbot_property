@@ -1938,12 +1938,13 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
     random input policy based on UTG
     """
 
-    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False, restart_app_after_100_events=False):
+    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False, restart_app_after_100_events=False, clear_and_restart_app_data_after_100_events=False):
         super(UtgRandomPolicy, self).__init__(
             device, app, random_input, android_check
         )
         self.restart_app_after_check_property = restart_app_after_check_property
         self.restart_app_after_100_events = restart_app_after_100_events
+        self.clear_and_restart_app_data_after_100_events = clear_and_restart_app_data_after_100_events
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferred_buttons = [
@@ -1975,7 +1976,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         @return:
         """
         # 在app 启动后执行定义好的初始化事件
-        if self.action_count == 2:
+        if self.action_count == 2 or isinstance(self.last_event, ReInstallAppEvent):
             self.run_initial_rules()
     
         # Get current device state
@@ -1987,9 +1988,9 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         self.__update_utg()
 
-        if self.action_count % 100 == 0 and self.restart_app_after_100_events:
-            self.logger.info("restart app after 100 events")
-            return KillAppEvent(app=self.app)
+        if self.action_count % 10 == 0 and self.clear_and_restart_app_data_after_100_events:
+            self.logger.info("clear and restart app after 100 events")
+            return ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         
         if len(rules_to_check) > 0:
