@@ -117,7 +117,7 @@ class InputPolicy(object):
         while (
             input_manager.enabled
             and self.action_count
-            < input_manager.diverse_event_count + input_manager.explore_event_count
+            < input_manager.event_count
         ):
             try:
                 # # make sure the first event is go to HOME screen
@@ -1388,11 +1388,9 @@ class BuildModelPolicy(UtgBasedInputPolicy):
             self.utg.first_state_after_initialization = self.current_state
 
         # first explore the app, then generate diverse paths to test the properties
-        if self.action_count < self.input_manager.explore_event_count and self.enable_buide_model:
+        if self.enable_buide_model:
             self.logger.info("Explore the app")
             event = self.explore_app() 
-        elif self.action_count == self.input_manager.explore_event_count:
-            event = KillAppEvent(app=self.app)
         else:
             self.logger.info("Test the app")
             event = self.generate_event_based_on_utg()

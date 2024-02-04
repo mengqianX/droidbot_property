@@ -50,9 +50,8 @@ class InputManager(object):
         app,
         policy_name,
         random_input,
-        diverse_event_count,
         event_interval,
-        explore_event_count=0,  # the number of event generated in the explore phase.
+        event_count=DEFAULT_EVENT_COUNT,  # the number of event generated in the explore phase.
         script_path=None,
         profiling_method=None,
         master=None,
@@ -79,9 +78,8 @@ class InputManager(object):
         self.events = []
         self.policy = None
         self.script = None
-        self.diverse_event_count = diverse_event_count
+        self.event_count = event_count
         self.event_interval = event_interval
-        self.explore_event_count = explore_event_count
         self.replay_output = replay_output
 
         self.monkey = None
