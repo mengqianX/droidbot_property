@@ -964,7 +964,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 "reach the node and start mutate on the node: %d"
                 % self.mutate_node_index_on_main_path
             )
-            self.step_on_the_path = 0
+            # self.step_on_the_path = 0
             self.mode = Mutate_On_the_Node
             return None
         else:
@@ -1138,6 +1138,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             self.time_to_check_rule.append(t)
             self.check_rule_with_precondition()
             self.mutate_node_index_on_main_path -= 1
+            self.step_on_the_path = 0
             self.current_number_of_mutate_steps_on_single_node = 0
             self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
             return ReInstallAppEvent(self.app)
@@ -1159,7 +1160,10 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 return self.navigate_to_the_mutate_node()
             else:
                 self.logger.info("cannot navigate to the main path %s" % mutate_node_state.state_str)
-                self.mode = Navigate_to_Precondition_From_the_First_Node
+                self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
+                self.step_on_the_path = 0
+                self.mutate_node_index_on_main_path -= 1
+                self.current_number_of_mutate_steps_on_single_node = 0
                 return ReInstallAppEvent(self.app)
             
         else:
