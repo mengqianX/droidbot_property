@@ -67,7 +67,7 @@ class Test(AndroidCheck):
     @rule()
     def share_file_to_quicknote_shouldnot_influence_original_content(self):
         original_content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text()
-        print("original content: " + original_content)
+        print("original content: " + str(original_content))
         self.device(text="Files").click()
         time.sleep(1)
         self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").click()
@@ -98,7 +98,8 @@ class Test(AndroidCheck):
         time.sleep(1)
         new_content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text()
         print("new content: " + new_content)
-        assert original_content in new_content, "original content should be in new content"
+        if original_content  is not None:
+            assert str(original_content) in new_content, "original content should be in new content"
         assert shared_content in new_content, "shared content should be in new content"
 
 start_time = time.time()

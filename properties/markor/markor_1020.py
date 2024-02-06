@@ -73,7 +73,7 @@ class Test(AndroidCheck):
         print("file_name_suffix: " + file_name_suffix)
         if file_type == "Markdown":
             assert file_name_suffix == ".md"
-        elif file_type == "Plain text":
+        elif file_type == "Plain Text":
             assert file_name_suffix == ".txt"
         elif file_type == "todo.txt":
             assert file_name_suffix == ".todo.txt"

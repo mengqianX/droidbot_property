@@ -63,7 +63,7 @@ class Test(AndroidCheck):
         
     
     @precondition(
-        lambda self: self.device(text="Settings").exists()  
+        lambda self: self.device(text="Settings").exists() and self.device(text="More").exists() 
     )
     @rule()
     def change_language_to_other_should_not_influence_functionality(self):

@@ -71,15 +71,15 @@ class Test(AndroidCheck):
         print("content: " + str(content))
         added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
         print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(content + " "+ str(added_content))
+        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
         time.sleep(1)
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
         for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
             print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
-            if content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
+            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
                 return True
-        assert False, "content not found in preview"
+        assert False, "added_content not found in preview"
 
 start_time = time.time()
 
