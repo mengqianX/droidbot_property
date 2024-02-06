@@ -10,8 +10,6 @@ class Test(AndroidCheck):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        explore_event_count=9999999,
-        diverse_event_count=9999999,
         main_path_path=None,
         xml_path="None",
         source_activity=None,
@@ -24,8 +22,6 @@ class Test(AndroidCheck):
             apk_path,
             device_serial=device_serial,
             output_dir=output_dir,
-            explore_event_count=explore_event_count,
-            diverse_event_count=diverse_event_count,
             xml_path=xml_path,
             main_path_path=main_path_path,
             source_activity=source_activity,
@@ -110,7 +106,7 @@ start_time = time.time()
 t = Test(
     apk_path="./apk/markor/2.8.5.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/1961/1",
+    output_dir="output/markor/1569/1",
     policy_name="random",
     timeout=7200
 )
