@@ -493,11 +493,12 @@ class ReInstallAppEvent(InputEvent):
     an event to restart the app with a fresh state
     """
 
-    def __init__(self, intent=None, package=None,app=None, event_dict=None):
+    def __init__(self, app=None, event_dict=None):
         super(ReInstallAppEvent, self).__init__()
         self.app = app
         self.event_type = KEY_FRESH_Reinstall_App_Event
-        self.package = package
+        self.package = self.app.get_package_name()
+        intent = self.app.get_start_intent()
         if isinstance(intent, Intent):
             self.intent = intent.get_cmd()
         elif isinstance(intent, str):

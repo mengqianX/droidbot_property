@@ -878,7 +878,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         # 如果还没有满足precondition，则每100个事件就重启app
         if self.action_count % 100 == 0 and self.restart_app_after_100_events and self.mode == Random_Explore_Mode:
             self.logger.info("restart app after 100 events")
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             
             self.last_state = self.current_state
             return fresh_restart_event
@@ -902,7 +902,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             if self.mode == Random_Explore_Mode:
                 # 首先尝试最短路径能否走到precondition,如果不能，则尝试最长的路径，如果再不能，就重新开始随机探索
                 self.mode = Try_To_Navigate_to_Precondition_From_the_First_Node_Mode
-                fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+                fresh_restart_event = ReInstallAppEvent(self.app)
                 self.last_state = self.current_state
                 return fresh_restart_event
 
@@ -939,13 +939,24 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
         self.logger.info("step on the path: %d" % self.step_on_the_path)
         self.logger.info("current mutate node index: %d" % self.mutate_node_index_on_main_path)
         self.actual_main_path[self.step_on_the_path] = self.current_state
+
+        max_number_of_nodes_to_mutate = 5
+        if len(self.mian_path) - self.mutate_node_index_on_main_path > max_number_of_nodes_to_mutate:
+            self.logger.info("finish mutate 5 nodes on the main path")
+            self.logger.info("start to mutate the main path again")
+            self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
+            self.mutate_node_index_on_main_path = len(self.mian_path) 
+            self.step_on_the_path = 0
+            fresh_restart_event = ReInstallAppEvent(self.app)
+            return fresh_restart_event
+        
         if self.mutate_node_index_on_main_path == -1:
             self.logger.info("finish mutate all the nodes on the main path")
             self.logger.info("start to mutate the main path again")
             self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
             self.mutate_node_index_on_main_path = len(self.mian_path) 
             self.step_on_the_path = 0
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             return fresh_restart_event
             
         if self.step_on_the_path == self.mutate_node_index_on_main_path:
@@ -993,9 +1004,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                 # 说明这条path不能走到preocndition，那么就重新开始随机探索
                 self.logger.info("no rule matches the precondition, start explore mode again")
                 self.mode = Random_Explore_Mode
-                fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
-                return fresh_restart_event
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             return fresh_restart_event
                 
         else:
@@ -1044,7 +1053,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
                     self.logger.info("no rule matches the precondition, start explore mode again")
                     self.main_path_or_longest_path = True
                     self.mode = Random_Explore_Mode
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             return fresh_restart_event
         else:
             # 如果还没到达目标node，则继续引导app到目标node
@@ -1081,7 +1090,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             self.step_on_the_path = 0
             # self.mutate_node_index_on_main_path -= 1
             
-            return KillAndRestartAppEvent(self.app)
+            return ReInstallAppEvent(self.app)
         else:
             # 如果还没到达目标node，则继续引导app到目标node
             next_event = self.mian_path[self.step_on_the_path][1]
@@ -1131,7 +1140,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             self.mutate_node_index_on_main_path -= 1
             self.current_number_of_mutate_steps_on_single_node = 0
             self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
-            return KillAndRestartAppEvent(app=self.app)
+            return ReInstallAppEvent(self.app)
 
         if (
             self.current_number_of_mutate_steps_on_single_node
@@ -1151,7 +1160,7 @@ class Mutate_Main_Path_Policy(UtgBasedInputPolicy):
             else:
                 self.logger.info("cannot navigate to the main path %s" % mutate_node_state.state_str)
                 self.mode = Navigate_to_Precondition_From_the_First_Node
-                return KillAndRestartAppEvent(app=self.app)
+                return ReInstallAppEvent(self.app)
             
         else:
             self.logger.info(
@@ -1358,7 +1367,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                 self.logger.info("long time no satisfy precondition, start to mutate the app")
                 self.mode = Try_To_Navigate_to_Precondition_From_the_First_Node_Mode
                 self.number_of_successive_iter_that_did_not_satisfy_precondition = 0
-                fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+                fresh_restart_event = ReInstallAppEvent(self.app)
                 return fresh_restart_event
 
 
@@ -1372,7 +1381,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
         # 如果还没有满足precondition，则每100个事件就重启app
         if self.action_count % 100 == 0 and self.restart_app_after_100_events and self.mode == Random_Explore_Mode:
             self.logger.info("restart app after 100 events")
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             
             self.last_state = self.current_state
             return fresh_restart_event
@@ -1397,7 +1406,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
             # if self.mode == Random_Explore_Mode:
             #     # 首先尝试最短路径能否走到precondition,如果不能，则尝试最长的路径，如果再不能，就重新开始随机探索
             #     self.mode = Try_To_Navigate_to_Precondition_From_the_First_Node_Mode
-            #     fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            #     fresh_restart_event = ReInstallAppEvent(self.app)
             #     self.last_state = self.current_state
             #     return fresh_restart_event
                 
@@ -1434,13 +1443,22 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
         self.logger.info("step on the path: %d" % self.step_on_the_path)
         self.logger.info("current mutate node index: %d" % self.mutate_node_index_on_main_path)
         self.actual_main_path[self.step_on_the_path] = self.current_state
+        max_number_of_nodes_to_mutate = 5
+        if len(self.mian_path) - self.mutate_node_index_on_main_path > max_number_of_nodes_to_mutate:
+            self.logger.info("finish mutate 5 nodes on the main path")
+            self.logger.info("start to mutate the main path again")
+            self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
+            self.mutate_node_index_on_main_path = len(self.mian_path) 
+            self.step_on_the_path = 0
+            fresh_restart_event = ReInstallAppEvent(self.app)
+            return fresh_restart_event
         if self.mutate_node_index_on_main_path == -1:
             self.logger.info("finish mutate all the nodes on the main path")
             self.logger.info("start to mutate the main path again")
             self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
             self.mutate_node_index_on_main_path = len(self.mian_path) 
             self.step_on_the_path = 0
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             return fresh_restart_event
             
         if self.step_on_the_path == self.mutate_node_index_on_main_path:
@@ -1486,11 +1504,11 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                 self.check_rule_with_precondition()
             else:
                 # 说明这条path不能走到preocndition，那么就重新开始随机探索
-                self.logger.info("no rule matches the precondition, start explore mode again")
+                self.logger.warning("no rule matches the precondition, start explore mode again")
                 self.mode = Random_Explore_Mode
-                fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+                fresh_restart_event = ReInstallAppEvent(self.app)
                 return fresh_restart_event
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             return fresh_restart_event
                 
         else:
@@ -1536,10 +1554,10 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                     self.mode = Try_To_Navigate_to_Precondition_From_the_First_Node_Mode
                 else:
                     # 说明最长path不能走到preocndition，那么就重新开始随机探索
-                    self.logger.info("no rule matches the precondition, start explore mode again")
+                    self.logger.warning("no rule matches the precondition, start explore mode again")
                     self.main_path_or_longest_path = True
                     self.mode = Random_Explore_Mode
-            fresh_restart_event = ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            fresh_restart_event = ReInstallAppEvent(self.app)
             return fresh_restart_event
         else:
             # 如果还没到达目标node，则继续引导app到目标node
@@ -2483,7 +2501,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         if self.action_count % 100 == 0 and self.clear_and_restart_app_data_after_100_events:
             self.logger.info("clear and restart app after 100 events")
-            return ReInstallAppEvent(self.app.get_start_intent(), self.app.get_package_name(), self.app)
+            return ReInstallAppEvent(self.app)
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         
         if len(rules_to_check) > 0:
