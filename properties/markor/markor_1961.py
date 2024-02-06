@@ -10,8 +10,6 @@ class Test(AndroidCheck):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        explore_event_count=9999999,
-        diverse_event_count=9999999,
         main_path_path=None,
         xml_path="None",
         source_activity=None,
@@ -24,8 +22,6 @@ class Test(AndroidCheck):
             apk_path,
             device_serial=device_serial,
             output_dir=output_dir,
-            explore_event_count=explore_event_count,
-            diverse_event_count=diverse_event_count,
             xml_path=xml_path,
             main_path_path=main_path_path,
             source_activity=source_activity,
@@ -71,6 +67,11 @@ class Test(AndroidCheck):
     @rule()
     def search_in_the_file(self):
         content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").info['text']
+        if content is None:
+            random_text = st.text(alphabet=string.printable,min_size=1, max_size=10).example()
+            print("random text: "+str(random_text))
+            self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text(random_text)
+            content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").info['text']
         time.sleep(1)
         words = content.split(" ")
         search_word = random.choice(words)

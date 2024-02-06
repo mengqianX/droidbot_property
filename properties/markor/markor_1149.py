@@ -10,8 +10,6 @@ class Test(AndroidCheck):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        explore_event_count=9999999,
-        diverse_event_count=9999999,
         main_path_path=None,
         xml_path="None",
         source_activity=None,
@@ -24,8 +22,6 @@ class Test(AndroidCheck):
             apk_path,
             device_serial=device_serial,
             output_dir=output_dir,
-            explore_event_count=explore_event_count,
-            diverse_event_count=diverse_event_count,
             xml_path=xml_path,
             main_path_path=main_path_path,
             source_activity=source_activity,
@@ -72,10 +68,10 @@ class Test(AndroidCheck):
     @rule()
     def change_view_mode_should_not_change_position(self):
         content = self.device(className="android.widget.EditText").get_text()
-        print("content: " + content)
+        print("content: " + str(content))
         added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + added_content)
-        self.device(className="android.widget.EditText").set_text(content + " "+ added_content)
+        print("added_content: " + str(added_content))
+        self.device(className="android.widget.EditText").set_text(content + " "+ str(added_content))
         time.sleep(1)
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
@@ -83,7 +79,7 @@ class Test(AndroidCheck):
             print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"])
             if content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["contentDescription"]):
                 return True
-        assert False
+        assert False, "content not found in preview"
 
 start_time = time.time()
 
