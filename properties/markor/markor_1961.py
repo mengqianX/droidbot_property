@@ -73,7 +73,7 @@ class Test(AndroidCheck):
             self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text(random_text)
             content = self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").info['text']
         time.sleep(1)
-        words = content.split(" ")
+        words = content.split("")
         search_word = random.choice(words)
         print("search word: "+str(search_word))
         self.device(resourceId="net.gsantner.markor:id/action_search").click()
