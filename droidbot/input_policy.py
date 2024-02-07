@@ -1549,7 +1549,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                 self.check_rule_with_precondition()
             else:
                 # 说明这条path不能走到preocndition，如果是在最短的path上，则尝试在最长的path上进行探索
-                self.logger.info("no rule matches the precondition when try to reach the precondition from the loggest path %d" % len(self.main_path))
+                self.logger.info("no rule matches the precondition when try to reach the precondition from the loggest path %d" % len(self.mian_path))
                 self.mode = Random_Explore_Mode
                 # if self.main_path_or_longest_path:
                 #     self.logger.info("try to navigate to the precondition from the longest path %d" % len(self.longest_path))
@@ -1649,6 +1649,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
             self.mutate_node_index_on_main_path -= 1
             self.current_number_of_mutate_steps_on_single_node = 0
             self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
+            self.step_on_the_path = 0
             return ReInstallAppEvent(app=self.app)
 
         if (
