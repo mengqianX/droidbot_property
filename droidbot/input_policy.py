@@ -1400,7 +1400,9 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
             if len(self.mian_path) == 0:
                 self.logger.info("assign lognest path to main path ")
                 self.mian_path = self.longest_path
+                self.longest_path = []
                 self.mutate_node_index_on_main_path = len(self.mian_path)
+                self.logger.info("length of main path: %d" % len(self.mian_path))
             t = self.time_recoder.get_time_duration()
             self.time_needed_to_satisfy_precondition.append(t)
             self.logger.info("has rule that matches the precondition and the time duration is "+ self.time_recoder.get_time_duration())
