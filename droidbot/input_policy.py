@@ -1314,7 +1314,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
         # 记录从app entry 到满足precondition的state的path,但是是实际走的path
         self.longest_path = []
         # 记录当前是在main path上还是在longest path上
-        self.main_path_or_longest_path = True
+        # self.main_path_or_longest_path = True
         # 记录之后每次走main path的实际state
         self.actual_main_path = [None] * 100
         # 记录每次app重启之后的第一个state
@@ -1357,7 +1357,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
             self.first_state = self.current_state
             # 每回合开始，初始化一下变量
             
-            self.main_path_or_longest_path = True
+            #self.main_path_or_longest_path = True
 
             # 如果在上一轮中没有满足precondition,则+1，否则置为0
             if not self.satisfy_precondition_in_current_iter:
@@ -1549,18 +1549,19 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                 self.check_rule_with_precondition()
             else:
                 # 说明这条path不能走到preocndition，如果是在最短的path上，则尝试在最长的path上进行探索
-                self.logger.info("no rule matches the precondition")
-                if self.main_path_or_longest_path:
-                    self.logger.info("try to navigate to the precondition from the longest path %d" % len(self.longest_path))
-                    self.mutate_node_index_on_main_path = len(self.longest_path)
-                    self.mian_path = self.longest_path
-                    self.main_path_or_longest_path = False
-                    self.mode = Try_To_Navigate_to_Precondition_From_the_First_Node_Mode
-                else:
-                    # 说明最长path不能走到preocndition，那么就重新开始随机探索
-                    self.logger.warning("no rule matches the precondition, start explore mode again")
-                    self.main_path_or_longest_path = True
-                    self.mode = Random_Explore_Mode
+                self.logger.info("no rule matches the precondition when try to reach the precondition from the loggest path %d" % len(self.main_path))
+                self.mode = Random_Explore_Mode
+                # if self.main_path_or_longest_path:
+                #     self.logger.info("try to navigate to the precondition from the longest path %d" % len(self.longest_path))
+                #     self.mutate_node_index_on_main_path = len(self.longest_path)
+                #     self.mian_path = self.longest_path
+                #     self.main_path_or_longest_path = False
+                #     self.mode = Try_To_Navigate_to_Precondition_From_the_First_Node_Mode
+                # else:
+                #     # 说明最长path不能走到preocndition，那么就重新开始随机探索
+                #     self.logger.warning("no rule matches the precondition, start explore mode again")
+                #     self.main_path_or_longest_path = True
+                
             fresh_restart_event = ReInstallAppEvent(self.app)
             return fresh_restart_event
         else:
