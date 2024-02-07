@@ -1675,7 +1675,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                 self.logger.info("cannot navigate to the main path %s" % mutate_node_state.state_str)
                 self.mode = Navigate_To_the_Mutate_Node_From_the_First_Node
                 self.step_on_the_path = 0
-                self.mutate_node_index_on_main_path -= 1
+                # self.mutate_node_index_on_main_path -= 1
                 self.current_number_of_mutate_steps_on_single_node = 0
                 return ReInstallAppEvent(self.app)
             
