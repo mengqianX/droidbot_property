@@ -1397,8 +1397,10 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
         if len(rules_to_check) > 0 and self.mode == Random_Explore_Mode:
             self.number_of_successive_iter_that_did_not_satisfy_precondition = 0  
             self.satisfy_precondition_in_current_iter = True
-            self.mian_path = self.utg.get_navigation_steps(self.first_state, self.current_state)
-            self.mutate_node_index_on_main_path = len(self.mian_path)
+            if len(self.mian_path) == 0:
+                self.logger.info("assign lognest path to main path ")
+                self.mian_path = self.longest_path
+                self.mutate_node_index_on_main_path = len(self.mian_path)
             t = self.time_recoder.get_time_duration()
             self.time_needed_to_satisfy_precondition.append(t)
             self.logger.info("has rule that matches the precondition and the time duration is "+ self.time_recoder.get_time_duration())
