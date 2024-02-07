@@ -1353,10 +1353,10 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
         
         if (self.action_count == 2 or isinstance(self.last_event, ReInstallAppEvent)) and self.mode == Random_Explore_Mode:
             self.logger.info("start to explore the app")
-            self.logger.info("number of successive iter that did not satisfy precondition: %d" % self.number_of_successive_iter_that_did_not_satisfy_precondition)
+            
             self.first_state = self.current_state
             # 每回合开始，初始化一下变量
-            self.longest_path = []
+            
             self.main_path_or_longest_path = True
 
             # 如果在上一轮中没有满足precondition,则+1，否则置为0
@@ -1364,7 +1364,7 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                 self.number_of_successive_iter_that_did_not_satisfy_precondition += 1
             else:
                 self.number_of_successive_iter_that_did_not_satisfy_precondition = 0
-            
+            self.logger.info("number of successive iter that did not satisfy precondition: %d" % self.number_of_successive_iter_that_did_not_satisfy_precondition)
             self.satisfy_precondition_in_current_iter = False
             # 如果已经连续多次没有满足precondition,则开始mutate app
             if self.number_of_successive_iter_that_did_not_satisfy_precondition >= self.Max_number_of_iter_that_did_not_satisfy_precondition and len(self.mian_path) > 0:
@@ -1373,6 +1373,8 @@ class Mix_random_and_mutate_policy(UtgBasedInputPolicy):
                 self.number_of_successive_iter_that_did_not_satisfy_precondition = 0
                 fresh_restart_event = ReInstallAppEvent(self.app)
                 return fresh_restart_event
+            
+            self.longest_path = []
 
 
         if self.current_state is None:
