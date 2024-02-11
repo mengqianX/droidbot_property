@@ -101,7 +101,8 @@ t = Test(
     device_serial="emulator-5554",
     output_dir="output/markor/1020/1",
     policy_name="random",
-    timeout=7200
+    timeout=7200,
+    number_of_events_that_restart_app = 100
 )
 t.start()
 execution_time = time.time() - start_time
