@@ -130,7 +130,8 @@ class AndroidCheck(object):
         humanoid=None,
         ignore_ad=None,
         replay_output=None,
-        build_model_timeout=-1
+        build_model_timeout=-1,
+        number_of_events_that_restart_app=100
     ):
         self.apk_path = apk_path
         self.device_serial = device_serial
@@ -165,7 +166,8 @@ class AndroidCheck(object):
             android_check=self,
             guide=self.guide,
             main_path_path=main_path_path,
-            build_model_timeout=build_model_timeout
+            build_model_timeout=build_model_timeout,
+            number_of_events_that_restart_app=number_of_events_that_restart_app
         )
         self.device = u2.connect(self.device_serial)
         # disable keyboard
