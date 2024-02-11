@@ -90,7 +90,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="OK").click()
         time.sleep(1)
-        assert self.device(text=name).exists()
+        assert self.device(resourceId="net.gsantner.markor:id/ui__filesystem_dialog__list").child_by_text(name,allow_scroll_search=True).exists()
 
 
 start_time = time.time()
