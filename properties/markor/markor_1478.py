@@ -42,24 +42,24 @@ class Test(AndroidCheck):
         
         if self.device(text="OK").exists():
             self.device(text="OK").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_sort").click()
-        time.sleep(1)
-        self.device(text="Date").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_sort").click()
-        time.sleep(1)
-        self.device(text="Reverse order").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_sort").click()
-        time.sleep(1)
-        self.device(text="Folder first").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
+        # time.sleep(1)
+        # self.device(text="Date").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
+        # time.sleep(1)
+        # self.device(text="Reverse order").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
+        # time.sleep(1)
+        # self.device(text="Folder first").click()
         
     
     @precondition(
         lambda self: self.device(
             resourceId="net.gsantner.markor:id/fab_add_new_item"
-        ).exists() and self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"] and self.device(resourceId="net.gsantner.markor:id/action_go_to").exists()
+        ).exists() and self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title").exists() and int(self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title").count) > 1 and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"] and self.device(resourceId="net.gsantner.markor:id/action_go_to").exists()
     )
     @rule()
     def view_file_should_exist_in_recent_viewed_documents(self):
