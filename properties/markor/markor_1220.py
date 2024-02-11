@@ -57,23 +57,44 @@ class Test(AndroidCheck):
         
     
     @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists() and not self.device(text="Save").exists()
+        lambda self: self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").exists() and not self.device(text="Settings").exists() and not self.device(text="Date").exists() and not self.device(resourceId="net.gsantner.markor:id/action_rename_selected_item").exists()
         )
     @rule()
-    def change_view_mode_should_not_change_position(self):
-        content = self.device(className="android.widget.EditText").get_text()
-        print("content: " + str(content))
-        added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
+    def change_file_format_should_work(self):
+        file_count = self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title").count
+        print("file count: "+str(file_count))
+        if file_count == 0:
+            print("no file ")
+            return
+        file_index = random.randint(0, file_count - 1)
+        selected_file = self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title")[file_index]
+        file_name = selected_file.info['text']
+        
+        if "." not in file_name or ".." in file_name:
+            print("not a file")
+            return
+        print("file name: "+str(file_name))
+        selected_file.click()
+        time.sleep(1)
+        self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text("# test")
+        time.sleep(1)
+        self.device(description="More options").click()
+        time.sleep(1)
+        self.device(text="File settings").click()
+        time.sleep(1)
+        self.device(text="Format").click()
+        time.sleep(1)
+        self.device(text="Markdown").click()
         time.sleep(1)
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
-        for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
-                return True
-        assert False, "added_content not found in preview"
+        assert "#" not in self.device(className="android.webkit.WebView").child(className="android.view.View").info["contentDescription"], "1 markdown format failed"
+        time.sleep(1)
+        self.device(description="Navigate up").click()
+        time.sleep(1)
+        self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title")[file_index].click()
+        time.sleep(1)
+        assert "#" not in self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").get_text(), "2 markdown format failed"
 
 start_time = time.time()
 
@@ -97,9 +118,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/markor/2.4.0.apk",
+    apk_path="./apk/markor/2.5.0.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/1149/1",
+    output_dir="output/markor/1220/1",
     policy_name="random",
     timeout=7200,
     number_of_events_that_restart_app = 10

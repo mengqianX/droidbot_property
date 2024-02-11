@@ -57,23 +57,17 @@ class Test(AndroidCheck):
         
     
     @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists() and not self.device(text="Save").exists()
+        lambda self: self.device(resourceId="net.gsantner.markor:id/nav_notebook").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"] and self.device(resourceId="net.gsantner.markor:id/toolbar").child(className="android.widget.TextView").get_text() != "markor"
         )
     @rule()
-    def change_view_mode_should_not_change_position(self):
-        content = self.device(className="android.widget.EditText").get_text()
-        print("content: " + str(content))
-        added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
+    def rotate_device_should_not_change_the_title(self):
+        title = self.device(resourceId="net.gsantner.markor:id/toolbar").child(className="android.widget.TextView").get_text()
+        self.device.set_orientation("l")
         time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_preview").click()
+        self.device.set_orientation("n")
         time.sleep(1)
-        for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
-                return True
-        assert False, "added_content not found in preview"
+        after_title = self.device(resourceId="net.gsantner.markor:id/toolbar").child(className="android.widget.TextView").get_text()
+        assert title == after_title, "rotate device should not change the title "+title+" to "+after_title
 
 start_time = time.time()
 
@@ -97,9 +91,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/markor/2.4.0.apk",
+    apk_path="./apk/markor/2.3.2.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/1149/1",
+    output_dir="output/markor/1020/1",
     policy_name="random",
     timeout=7200,
     number_of_events_that_restart_app = 10

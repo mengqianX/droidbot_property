@@ -43,37 +43,55 @@ class Test(AndroidCheck):
         if self.device(text="OK").exists():
             self.device(text="OK").click()
         time.sleep(1)
-        # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
-        # time.sleep(1)
-        # self.device(text="Date").click()
-        # time.sleep(1)
-        # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
-        # time.sleep(1)
-        # self.device(text="Reverse order").click()
-        # time.sleep(1)
-        # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
-        # time.sleep(1)
-        # self.device(text="Folder first").click()
+        self.device(resourceId="net.gsantner.markor:id/action_sort").click()
+        time.sleep(1)
+        self.device(text="Date").click()
+        time.sleep(1)
+        self.device(resourceId="net.gsantner.markor:id/action_sort").click()
+        time.sleep(1)
+        self.device(text="Reverse order").click()
+        time.sleep(1)
+        self.device(resourceId="net.gsantner.markor:id/action_sort").click()
+        time.sleep(1)
+        self.device(text="Folder first").click()
         
     
     @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists() and not self.device(text="Save").exists()
-        )
+        lambda self: self.device(
+            resourceId="net.gsantner.markor:id/fab_add_new_item"
+        ).exists()
+    )
     @rule()
-    def change_view_mode_should_not_change_position(self):
-        content = self.device(className="android.widget.EditText").get_text()
-        print("content: " + str(content))
-        added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
+    def rule_rename_file(self):
+        file_count = self.device(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title").count
+        print("file count: "+str(file_count))
+        if file_count == 0:
+            print("no file to rename")
+            return
+        file_index = random.randint(0, file_count - 1)
+        selected_file = self.device(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title")[file_index]
+        file_name = selected_file.info['text']
+        is_file = True
+        if "." not in file_name:
+            is_file = False
+            print("not a file")
+            return
+        file_name_suffix = file_name.split(".")[-1]
+        print("file name: "+str(file_name))
+        selected_file.long_click()
         time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_preview").click()
+        self.device(resourceId="net.gsantner.markor:id/action_rename_selected_item").click()
         time.sleep(1)
-        for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
-                return True
-        assert False, "added_content not found in preview"
+        name = st.text(alphabet=string.ascii_letters,min_size=1, max_size=6).example()
+        if is_file:
+            name = name+"."+file_name_suffix
+        print("new file name: "+str(name))
+        self.device(resourceId="net.gsantner.markor:id/new_name").set_text(name)
+        time.sleep(1)
+        self.device(text="OK").click()
+        time.sleep(1)
+        assert self.device(text=name).exists()
+
 
 start_time = time.time()
 
@@ -97,9 +115,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/markor/2.4.0.apk",
+    apk_path="./apk/markor/2.11.1.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/1149/1",
+    output_dir="output/markor/1961/1",
     policy_name="random",
     timeout=7200,
     number_of_events_that_restart_app = 10

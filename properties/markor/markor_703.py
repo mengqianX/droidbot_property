@@ -55,25 +55,32 @@ class Test(AndroidCheck):
         # time.sleep(1)
         # self.device(text="Folder first").click()
         
-    
+    #bug 703
     @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists() and not self.device(text="Save").exists()
+        lambda self: self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").exists() and not self.device(text="Settings").exists() and not self.device(text="Date").exists() and not self.device(resourceId="net.gsantner.markor:id/action_rename_selected_item").exists()
         )
     @rule()
-    def change_view_mode_should_not_change_position(self):
-        content = self.device(className="android.widget.EditText").get_text()
-        print("content: " + str(content))
-        added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
+    def format_change_should_work_in_view_mode(self):
+        self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").click()
+        time.sleep(1)
+        title = st.text(alphabet=string.ascii_letters, min_size=1, max_size=4).example()
+        self.device(resourceId="net.gsantner.markor:id/new_file_dialog__name").set_text(title)
+        self.device(resourceId="net.gsantner.markor:id/new_file_dialog__ext").set_text("")
+        time.sleep(1)
+        self.device(text="OK").click()
+        time.sleep(1)
+        self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text("# test")
         time.sleep(1)
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
-        for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
-                return True
-        assert False, "added_content not found in preview"
+        self.device(description="More options").click()
+        time.sleep(1)
+        self.device(text="Format").click()
+        time.sleep(1)
+        self.device(text="Markdown").click()
+        time.sleep(1)
+        assert not "#" in str(self.device(className="android.webkit.WebView").child(className="android.view.View").info["contentDescription"])
+
 
 start_time = time.time()
 
@@ -97,9 +104,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/markor/2.4.0.apk",
+    apk_path="./apk/markor/2.1.3.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/1149/1",
+    output_dir="output/markor/703/1",
     policy_name="random",
     timeout=7200,
     number_of_events_that_restart_app = 10

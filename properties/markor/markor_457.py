@@ -27,22 +27,20 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(text="DONE").click()
-        time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(text="DONE").click()
+        # time.sleep(1)
         
         if self.device(text="OK").exists():
             self.device(text="OK").click()
-        time.sleep(1)
+        # time.sleep(1)
         # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
         # time.sleep(1)
         # self.device(text="Date").click()
@@ -56,24 +54,12 @@ class Test(AndroidCheck):
         # self.device(text="Folder first").click()
         
     
-    @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists() and not self.device(text="Save").exists()
-        )
+    # bug #457
+    @precondition(lambda self: self.device(resourceId="net.gsantner.markor:id/nav_notebook").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"])
     @rule()
-    def change_view_mode_should_not_change_position(self):
-        content = self.device(className="android.widget.EditText").get_text()
-        print("content: " + str(content))
-        added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_preview").click()
-        time.sleep(1)
-        for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
-                return True
-        assert False, "added_content not found in preview"
+    def swipe_should_update_title(self):
+        self.device.swipe_ext("left")
+        assert self.device(resourceId="net.gsantner.markor:id/nav_todo").info["selected"] and self.device(resourceId="net.gsantner.markor:id/toolbar").child(text="Todo").exists()
 
 start_time = time.time()
 
@@ -97,11 +83,10 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/markor/2.4.0.apk",
+    apk_path="./apk/markor/1.5.1.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/1149/1",
+    output_dir="output/markor/457/1",
     policy_name="random",
-    timeout=7200,
     number_of_events_that_restart_app = 10
 )
 t.start()

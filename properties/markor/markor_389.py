@@ -24,25 +24,22 @@ class Test(AndroidCheck):
             build_model_timeout=build_model_timeout,
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
-
     @initialize()
     def set_up(self):
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(text="DONE").click()
-        time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(resourceId="net.gsantner.markor:id/next").click()
+        # time.sleep(1)
+        # self.device(text="DONE").click()
+        # time.sleep(1)
         
         if self.device(text="OK").exists():
             self.device(text="OK").click()
-        time.sleep(1)
+        # time.sleep(1)
         # self.device(resourceId="net.gsantner.markor:id/action_sort").click()
         # time.sleep(1)
         # self.device(text="Date").click()
@@ -56,25 +53,26 @@ class Test(AndroidCheck):
         # self.device(text="Folder first").click()
         
     
-    @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists() and not self.device(text="Save").exists()
-        )
+    # bug #389
+    @precondition(lambda self: self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").exists() and self.device(resourceId="net.gsantner.markor:id/note_title").count < 4)
     @rule()
-    def change_view_mode_should_not_change_position(self):
-        content = self.device(className="android.widget.EditText").get_text()
+    def create_file_should_only_create_one(self):
+        file_count = int(self.device(resourceId="net.gsantner.markor:id/note_title").count)
+        print("file_count: " + str(file_count))
+        self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").click()
+        time.sleep(1)
+        content = st.text(alphabet=string.ascii_lowercase,min_size=5, max_size=6).example()
         print("content: " + str(content))
-        added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
+        self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text(content)
         time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_preview").click()
+        self.device.press("back")
+        if self.device(resourceId="net.gsantner.markor:id/action_preview").exists():
+            self.device.press("back")
         time.sleep(1)
-        for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
-                return True
-        assert False, "added_content not found in preview"
-
+        new_count = int(self.device(resourceId="net.gsantner.markor:id/note_title").count)
+        print("new_count: " + str(new_count))
+        assert new_count == file_count + 1
+        
 start_time = time.time()
 
 # args = sys.argv[1:]
@@ -97,9 +95,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/markor/2.4.0.apk",
+    apk_path="./apk/markor/1.3.0.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/1149/1",
+    output_dir="output/markor/389/1",
     policy_name="random",
     timeout=7200,
     number_of_events_that_restart_app = 10

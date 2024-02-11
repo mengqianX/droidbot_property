@@ -60,20 +60,14 @@ class Test(AndroidCheck):
         lambda self: self.device(resourceId="net.gsantner.markor:id/action_preview").exists() and not self.device(text="Save").exists()
         )
     @rule()
-    def change_view_mode_should_not_change_position(self):
-        content = self.device(className="android.widget.EditText").get_text()
-        print("content: " + str(content))
-        added_content = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()
-        print("added_content: " + str(added_content))
-        self.device(className="android.widget.EditText").set_text(str(content) + " "+ str(added_content))
-        time.sleep(1)
+    def rotation_should_keep_view_mode(self):
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
-        for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
-            if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
-                return True
-        assert False, "added_content not found in preview"
+        self.device.set_orientation("l")
+        time.sleep(1)
+        self.device.set_orientation("n")
+        time.sleep(1)
+        assert self.device(resourceId="net.gsantner.markor:id/action_edit").exists()
 
 start_time = time.time()
 
