@@ -59,7 +59,7 @@ class Test(AndroidCheck):
     @precondition(
         lambda self: self.device(
             resourceId="net.gsantner.markor:id/fab_add_new_item"
-        ).exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"] and self.device(resourceId="net.gsantner.markor:id/action_go_to").exists()
+        ).exists() and self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"] and self.device(resourceId="net.gsantner.markor:id/action_go_to").exists()
     )
     @rule()
     def view_file_should_exist_in_recent_viewed_documents(self):
