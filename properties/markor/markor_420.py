@@ -55,7 +55,7 @@ class Test(AndroidCheck):
         
     
     # bug #457
-    @precondition(lambda self: not self.device(text="Select entries").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"])
+    @precondition(lambda self: not self.device(text="Select entries").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").exists() and self.device(resourceId="net.gsantner.markor:id/nav_notebook").info["selected"] and self.device(resourceId="net.gsantner.markor:id/note_title").exists())
     @rule()
     def selection_should_discard_after_clicking_new(self):
         self.device(resourceId="net.gsantner.markor:id/note_title").long_click()

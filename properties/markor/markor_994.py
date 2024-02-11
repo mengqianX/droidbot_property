@@ -57,7 +57,7 @@ class Test(AndroidCheck):
         
     
     @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").exists() and not self.device(text="Settings").exists() and not self.device(text="Date").exists() and not self.device(resourceId="net.gsantner.markor:id/action_rename_selected_item").exists()
+        lambda self: self.device(resourceId="net.gsantner.markor:id/ui__filesystem_item__title").exists() and self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").exists() and not self.device(text="Settings").exists() and not self.device(text="Date").exists() and not self.device(resourceId="net.gsantner.markor:id/action_rename_selected_item").exists()
         )
     @rule()
     def create_file_with_same_name_should_not_overwrite(self):
