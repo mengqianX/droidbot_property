@@ -61,7 +61,8 @@ class InputManager(object):
         android_check=None,
         guide=None,
         main_path_path=None,
-        build_model_timeout=-1
+        build_model_timeout=-1,
+        number_of_events_that_restart_app=100,
     ):
         """
         manage input event sent to the target device
@@ -99,7 +100,7 @@ class InputManager(object):
         
         self.profiling_method = profiling_method
         self.build_model_timeout = build_model_timeout
-
+        self.number_of_events_that_restart_app = number_of_events_that_restart_app
         self.policy = self.get_input_policy(device, app, master)
 
     def get_input_policy(self, device, app, master):
@@ -131,7 +132,7 @@ class InputManager(object):
                 main_path_path=self.main_path_path
             )
         elif self.policy_name == POLICY_RANDOM:
-            input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check)
+            input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check,number_of_events_that_restart_app = self.number_of_events_that_restart_app, clear_and_restart_app_data_after_100_events=True)
         elif self.policy_name == POLICY_RANDOM_TWO:
             input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check, restart_app_after_check_property=True)
         elif self.policy_name == POLICY_RANDOM_100:

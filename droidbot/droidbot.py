@@ -50,7 +50,8 @@ class DroidBot(object):
         android_check=None,
         guide=None,
         main_path_path=None,
-        build_model_timeout=-1
+        build_model_timeout=-1,
+        number_of_events_that_restart_app=100
     ):
         """
         initiate droidbot with configurations
@@ -61,7 +62,6 @@ class DroidBot(object):
 
         self.logger = logging.getLogger('DroidBot')
         DroidBot.instance = self
-
         self.output_dir = output_dir
         if output_dir is not None:
             if not os.path.isdir(output_dir):
@@ -128,7 +128,8 @@ class DroidBot(object):
                 android_check=android_check,
                 guide=self.guide,
                 main_path_path=main_path_path,
-                build_model_timeout=build_model_timeout
+                build_model_timeout=build_model_timeout,
+                number_of_events_that_restart_app=number_of_events_that_restart_app
             )
         except Exception:
             import traceback
