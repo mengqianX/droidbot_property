@@ -30,6 +30,9 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
 
     @precondition(lambda self:  self.device(text="Amaze").exists() and self.device(resourceId="com.amaze.filemanager:id/fullpath").exists() and not self.device(resourceId="com.amaze.filemanager:id/item_count").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists())
     @rule()

@@ -30,6 +30,9 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
 
     # @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(description="More options").exists() and self.device(resourceId="com.amaze.filemanager:id/firstline").count < 7 and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
     # @rule()

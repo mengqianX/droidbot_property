@@ -29,7 +29,10 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
-
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
+            
     @precondition(lambda self: self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(text="Internal Storage").exists())
     @rule()
     def search_folder_should_be_opened(self):

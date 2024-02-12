@@ -29,7 +29,9 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
-
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
     @precondition(lambda self: self.device(textContains=".zip").exists() and not self.device(text="Internal Storage").exists())
     @rule()
     def extract_zip_file_shouldnot_need_password(self):

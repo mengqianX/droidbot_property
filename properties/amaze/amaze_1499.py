@@ -29,6 +29,9 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
         self.device(description="Navigate up").click()
         time.sleep(1)
         self.device(scrollable=True).scroll(steps=10)

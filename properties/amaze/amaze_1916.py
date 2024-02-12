@@ -29,7 +29,10 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
-
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
+            
     @precondition(lambda self: self.device(text="Documents").exists()  and self.device(text="Internal Storage").exists() and len(self.add_file_names) > 0)
     @rule()
     def rule_documnets(self):

@@ -30,6 +30,9 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
     
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/action_mode_close_button").exists() and self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and self.device(resourceId="com.amaze.filemanager:id/cpy").exists())
     @rule()
