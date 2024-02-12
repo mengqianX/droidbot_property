@@ -27,8 +27,11 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
-        self.device.set_fastinput_ime(True)
-        self.device(text="Not now").click()
+        if self.device(text="OK").exists():
+            self.device(text="OK").click()
+        time.sleep(1)
+        if self.device(text="Not now").exists():
+            self.device(text="Not now").click()
         time.sleep(1)
         # 创建一个新的Note
         self.device(resourceId="it.feio.android.omninotes:id/menu_add").click()
