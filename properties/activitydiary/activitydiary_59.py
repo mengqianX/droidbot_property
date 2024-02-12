@@ -27,21 +27,31 @@ class Test(AndroidCheck):
 
 
     @precondition(
-        lambda self: self.device(text="Activity Diary").exists() and self.device(resourceId="de.rampro.activitydiary:id/select_card_view").exists() and not self.device(text="Settings").exists()
+        lambda self: self.device(text="Manage Activities").exists() and self.device(resourceId="de.rampro.activitydiary.debug:id/action_add_activity").exists() and self.device(description="Navigate up").exists() and self.device(resourceId="de.rampro.activitydiary.debug:id/activity_name").exists()
     )
     @rule()
-    def long_click_activity_should_edit_it(self):
-        # random select an activity
-        activity_count = self.device(resourceId="de.rampro.activitydiary:id/select_card_view").count
-        random_index = random.randint(0, activity_count - 1)
-        selected_activity = self.device(resourceId="de.rampro.activitydiary:id/select_card_view")[random_index]
-        activity_name = selected_activity.child(resourceId="de.rampro.activitydiary:id/activity_name").get_text()
-        print("activity name: " + activity_name)
+    def delete_activity(self):
+        activity_count = int(self.device(resourceId="de.rampro.activitydiary.debug:id/activity_name").count)
+        print("activity count: " + str(activity_count))
+        selected_activity_index = random.randint(0, activity_count - 1)
+        selected_activity = self.device(resourceId="de.rampro.activitydiary.debug:id/activity_name")[selected_activity_index]
+        selected_activity_name = selected_activity.get_text()
+        print("selected activity: " + selected_activity_name)
+        selected_activity.click()
         time.sleep(1)
-        selected_activity.long_click()
+        self.device(resourceId="de.rampro.activitydiary.debug:id/action_edit_delete").click()
         time.sleep(1)
-        current_activity_name = self.device(resourceId="de.rampro.activitydiary:id/edit_activity_name").get_text()
-        assert current_activity_name == activity_name, "activity name not match "+ str(activity_name) + " " + str(current_activity_name)
+        assert self.device(text=selected_activity_name).exists() == False, "activity not deleted"
+
+        
+
+
+
+        
+        
+
+
+
 start_time = time.time()
 
 # args = sys.argv[1:]
@@ -64,9 +74,9 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/activitydiary/1.2.5.apk",
+    apk_path="./apk/activitydiary/1.0.0.apk",
     device_serial="emulator-5554",
-    output_dir="output/activitydiary/176/random_100/1",
+    output_dir="output/activitydiary/59/random_100/1",
     policy_name="random",
     timeout=21600,
     number_of_events_that_restart_app = 100
