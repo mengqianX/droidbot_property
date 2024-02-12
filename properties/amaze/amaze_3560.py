@@ -25,6 +25,12 @@ class Test(AndroidCheck):
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
 
+    @initialize()
+    def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
+            
     # @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(description="More options").exists() and self.device(resourceId="com.amaze.filemanager:id/firstline").count < 7 and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
     # @rule()
     # def action_create_folder(self):

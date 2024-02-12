@@ -25,6 +25,12 @@ class Test(AndroidCheck):
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
 
+    @initialize()
+    def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
+
     @precondition(lambda self: self.device(text="App Manager").exists() and self.device(description="More options").exists())
     @rule()
     def click_exist_button_should_work(self):
@@ -58,7 +64,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-9f3f1dc6c3.apk",
+    apk_path="./apk/amaze/amaze-9f3f1dc6c3.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/2518/random_100/1",
     policy_name="random",

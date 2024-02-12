@@ -24,6 +24,11 @@ class Test(AndroidCheck):
             build_model_timeout=build_model_timeout,
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
+    @initialize()
+    def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
 
     @precondition(lambda self: self.device(textContains=".zip").exists() and not self.device(text="Internal Storage").exists())
     @rule()
@@ -61,7 +66,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.4.2.apk",
+    apk_path="./apk/amaze/amaze-3.4.2.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/1834/random_100/1",
     policy_name="random",

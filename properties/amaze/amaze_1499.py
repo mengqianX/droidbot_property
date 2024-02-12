@@ -26,6 +26,9 @@ class Test(AndroidCheck):
         )
     @initialize()
     def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
         self.device(description="Navigate up").click()
         time.sleep(1)
         self.device(scrollable=True).scroll(steps=10)
@@ -45,6 +48,8 @@ class Test(AndroidCheck):
         print("time: " + str(time.time() - start_time))
         original_path = self.device(resourceId="com.amaze.filemanager:id/fullpath").get_text()
         print("original path: "+str(original_path))
+        if str(original_path) == "..":
+            return
         time.sleep(1)
         self.device(text="Go Back",resourceId="com.amaze.filemanager:id/secondLine").click()
         time.sleep(1)
@@ -76,7 +81,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.3.0RC10.apk",
+    apk_path="./apk/amaze/amaze-3.3.0RC10.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/1499/random_100/1",
     policy_name="random",

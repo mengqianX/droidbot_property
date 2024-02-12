@@ -25,6 +25,11 @@ class Test(AndroidCheck):
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
 
+    @initialize()
+    def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
     
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/action_mode_close_button").exists() and self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and self.device(resourceId="com.amaze.filemanager:id/cpy").exists())
     @rule()
@@ -57,7 +62,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.5.2.apk",
+    apk_path="./apk/amaze/amaze-3.5.2.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/2910/random_100/1",
     policy_name="random",

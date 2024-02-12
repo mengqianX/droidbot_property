@@ -24,36 +24,37 @@ class Test(AndroidCheck):
             build_model_timeout=build_model_timeout,
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
-        self.add_file_names = []
-    
+    @initialize()
+    def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
 
-    @precondition(lambda self: self.device(text="Recent files").exists()  and self.device(text="Internal Storage").exists() and len(self.add_file_names) > 0)
+    @precondition(lambda self: self.device(text="Documents").exists()  and self.device(text="Internal Storage").exists() and len(self.add_file_names) > 0)
     @rule()
-    def rule_recent_file(self):
+    def rule_documnets(self):
         print("time: " + str(time.time() - start_time))
-        self.device(text="Recent files").click()
+        self.device(text="Documents").click()
         time.sleep(1)
-        recent_added_file = self.add_file_names[-1]
-        print("recent added file: "+str(recent_added_file))
-        assert self.device(text=recent_added_file).exists()
+        assert self.device(resourceId="com.amaze.filemanager:id/firstline").exists()
 
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(resourceId="com.amaze.filemanager:id/instagram").exists())
-    @rule()
-    def add_file(self):
-        print("time: " + str(time.time() - start_time))
-        self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
-        time.sleep(1)
-        self.device(text="File").click()
-        time.sleep(1)
-        file_name = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()+".txt"
-        print("file name: "+str(file_name))
+    # @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(resourceId="com.amaze.filemanager:id/search").exists() and not self.device(resourceId="com.amaze.filemanager:id/instagram").exists())
+    # @rule()
+    # def add_file(self):
+    #     print("time: " + str(time.time() - start_time))
+    #     self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
+    #     time.sleep(1)
+    #     self.device(text="File").click()
+    #     time.sleep(1)
+    #     file_name = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=6).example()+".txt"
+    #     print("file name: "+str(file_name))
 
-        self.device(resourceId="com.amaze.filemanager:id/singleedittext_input").set_text(file_name)
-        time.sleep(1)
-        self.device(text="CREATE").click()
-        time.sleep(1)
-        self.add_file_names.append(file_name)
-        assert self.device(text=file_name).exists()    
+    #     self.device(resourceId="com.amaze.filemanager:id/singleedittext_input").set_text(file_name)
+    #     time.sleep(1)
+    #     self.device(text="CREATE").click()
+    #     time.sleep(1)
+    #     self.add_file_names.append(file_name)
+    #     assert self.device(text=file_name).exists()    
 start_time = time.time()
 
 # args = sys.argv[1:]
@@ -76,7 +77,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.4.3.apk",
+    apk_path="./apk/amaze/amaze-3.4.3.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/1916/random_100/1",
     policy_name="random",

@@ -25,9 +25,15 @@ class Test(AndroidCheck):
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
 
+    @initialize()
+    def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
+            
     @precondition(lambda self: self.device(text="FTP Server").exists())
     @rule()
-    def should_display_files(self):
+    def should_not_contains_fba(self):
         print("time: " + str(time.time() - start_time))
         self.device.set_orientation("l")
         time.sleep(1)

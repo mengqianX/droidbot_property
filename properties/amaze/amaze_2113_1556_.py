@@ -25,6 +25,12 @@ class Test(AndroidCheck):
             number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
 
+    @initialize()
+    def set_up(self):
+        if self.device(text="ALLOW").exists():
+            self.device(text="ALLOW").click()
+            time.sleep(1)
+
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(resourceId="com.amaze.filemanager:id/fab_expand_menu_button").exists() and not self.device(resourceId="com.amaze.filemanager:id/design_menu_item_action_area").exists())
     @rule()
     def rule_rename(self):
@@ -71,7 +77,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.3.2.apk",
+    apk_path="./apk/amaze/amaze-3.3.2.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/1556/random_100/1",
     policy_name="random",
