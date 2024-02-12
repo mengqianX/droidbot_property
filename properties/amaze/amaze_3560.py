@@ -10,42 +10,36 @@ class Test(AndroidCheck):
         apk_path,
         device_serial="emulator-5554",
         output_dir="output",
-        explore_event_count=0,
-        diverse_event_count=100,
-        main_path_path=None,
-        xml_path="None",
-        source_activity=None,
-        target_activity=None,
         policy_name="pbt",
+        timeout=-1,
+        build_model_timeout=-1,
+        number_of_events_that_restart_app=100,
     ):
         super().__init__(
             apk_path,
             device_serial=device_serial,
             output_dir=output_dir,
-            explore_event_count=explore_event_count,
-            diverse_event_count=diverse_event_count,
-            xml_path=xml_path,
-            main_path_path=main_path_path,
-            source_activity=source_activity,
-            target_activity=target_activity,
             policy_name=policy_name,
+            timeout=timeout,
+            build_model_timeout=build_model_timeout,
+            number_of_events_that_restart_app=number_of_events_that_restart_app,
         )
 
-    @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(description="More options").exists() and self.device(resourceId="com.amaze.filemanager:id/firstline").count < 7 and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
-    @rule()
-    def action_create_folder(self):
-        print("time: " + str(time.time() - start_time))
-        self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
-        time.sleep(1)
-        self.device(text="Folder").click()
-        time.sleep(1)
-        folder_name = st.text(alphabet=string.printable,min_size=1, max_size=5).example()
-        print("folder_name: " + folder_name)
-        self.device(resourceId="com.amaze.filemanager:id/singleedittext_input").set_text(folder_name)
-        time.sleep(1)
-        self.device(text="CREATE").click()
-        time.sleep(1)
-        assert self.device(resourceId="com.amaze.filemanager:id/firstline",text=folder_name).exists(), "create folder failed with folder_name: " + folder_name
+    # @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(description="More options").exists() and self.device(resourceId="com.amaze.filemanager:id/firstline").count < 7 and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
+    # @rule()
+    # def action_create_folder(self):
+    #     print("time: " + str(time.time() - start_time))
+    #     self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").click()
+    #     time.sleep(1)
+    #     self.device(text="Folder").click()
+    #     time.sleep(1)
+    #     folder_name = st.text(alphabet=string.printable,min_size=1, max_size=5).example()
+    #     print("folder_name: " + folder_name)
+    #     self.device(resourceId="com.amaze.filemanager:id/singleedittext_input").set_text(folder_name)
+    #     time.sleep(1)
+    #     self.device(text="CREATE").click()
+    #     time.sleep(1)
+    #     assert self.device(resourceId="com.amaze.filemanager:id/firstline",text=folder_name).exists(), "create folder failed with folder_name: " + folder_name
 
     # bug #3560  
     @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/firstline").exists() and self.device(text="Folders").exists() and self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not self.device(resourceId="com.amaze.filemanager:id/donate").exists() and not self.device(resourceId="com.amaze.filemanager:id/check_icon").exists() and not self.device(text="Type to search…").exists())
@@ -97,9 +91,9 @@ t = Test(
     apk_path="./apk/amaze-3.8.4.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/3560/1",
-    explore_event_count=500,
-    diverse_event_count=500,
     policy_name="random",
+    timeout=21600,
+    number_of_events_that_restart_app = 100
 )
 t.start()
 execution_time = time.time() - start_time
