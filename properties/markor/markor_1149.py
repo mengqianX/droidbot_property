@@ -70,7 +70,7 @@ class Test(AndroidCheck):
         self.device(resourceId="net.gsantner.markor:id/action_preview").click()
         time.sleep(1)
         for i in range(int(self.device(className="android.webkit.WebView").child(className="android.view.View").count)):
-            print(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["test"])
+            print("content: " + str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]))
             if added_content in str(self.device(className="android.webkit.WebView").child(className="android.view.View")[i].info["text"]):
                 return True
         assert False, "added_content not found in preview"

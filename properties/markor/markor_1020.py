@@ -65,6 +65,10 @@ class Test(AndroidCheck):
         print("file_type: " + file_type)
         file_name_suffix = self.device(resourceId="net.gsantner.markor:id/new_file_dialog__ext").get_text()
         print("file_name_suffix: " + file_name_suffix)
+        suffix = [".md", ".txt", ".todo.txt", ".md"]
+        if file_name_suffix not in suffix:
+            print("not a valid suffix")
+            return 
         if file_type == "Markdown":
             assert file_name_suffix == ".md"
         elif file_type == "Plain Text":

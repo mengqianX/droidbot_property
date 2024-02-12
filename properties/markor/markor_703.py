@@ -79,7 +79,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="Markdown").click()
         time.sleep(1)
-        assert not "#" in str(self.device(className="android.webkit.WebView").child(className="android.view.View").info["contentDescription"])
+        assert not "#" in str(self.device(className="android.webkit.WebView").child(className="android.view.View").info["text"])
 
 
 start_time = time.time()
