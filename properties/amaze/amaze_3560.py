@@ -30,7 +30,7 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
-            
+
     # @precondition(lambda self: self.device(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and self.device(description="More options").exists() and self.device(resourceId="com.amaze.filemanager:id/firstline").count < 7 and not self.device(resourceId="com.amaze.filemanager:id/donate").exists())
     # @rule()
     # def action_create_folder(self):
@@ -94,7 +94,7 @@ start_time = time.time()
 #     policy_name="random", dfs_greedy
 # )
 t = Test(
-    apk_path="./apk/amaze-3.8.4.apk",
+    apk_path="./apk/amaze/amaze-3.8.4.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/3560/random_100/1",
     policy_name="random",
