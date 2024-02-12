@@ -121,7 +121,6 @@ class Test(AndroidCheck):
         self.device(text="Confirm").click()
         time.sleep(1)
         self.device(text="Confirm").click()
-        self.device.press("back")
         time.sleep(1)
         self.device.press("back")
         time.sleep(1)
