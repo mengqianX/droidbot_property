@@ -82,6 +82,12 @@ class Test(AndroidCheck):
     @rule()
     def rule_remove_tag_from_note_shouldnot_affect_content(self):
         print("time: " + str(time.time() - start_time))
+        self.device(description = "More options").click()
+        time.sleep(1)
+        if self.device(text="Disable checklist").exists():
+            self.device(text="Disable checklist").click()
+        else:
+            self.device.press("back")
         origin_content = self.device(resourceId="it.feio.android.omninotes:id/detail_content").info["text"]
         print("origin_content: " + str(origin_content))
         time.sleep(1)
