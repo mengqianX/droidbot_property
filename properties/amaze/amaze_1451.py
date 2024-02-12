@@ -29,7 +29,9 @@ class Test(AndroidCheck):
         if self.device(text="ALLOW").exists():
             self.device(text="ALLOW").click()
             time.sleep(1)
-            
+        elif self.device(text="Allow").exists():
+            self.device(text="Allow").click()
+            time.sleep(1)
     @precondition(lambda self: self.device(text="Recent files").exists() and self.device(text="Images").exists())
     @rule()
     def rule_open_recent_files(self):
