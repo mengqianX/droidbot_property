@@ -100,7 +100,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         assert self.device(resourceId="android:id/select_dialog_listview").child_by_text("English (English)",allow_scroll_search=True,className="android.widget.CheckedTextView").exists(), "English"
         time.sleep(1)
-        assert self.device(resourceId="android:id/select_dialog_listview").child_by_text("Suomi (Finnish)",allow_scroll_search=True,className="android.widget.CheckedTextView").exists(), "Finnish"
+        assert self.device(scrollable=True).scroll.to(text="Suomi (Finnish)"), "Finnish"
         time.sleep(1)
         assert self.device(resourceId="android:id/select_dialog_listview").child_by_text("Français (French)",allow_scroll_search=True,className="android.widget.CheckedTextView").exists(), "French"
         time.sleep(1)

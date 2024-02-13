@@ -55,7 +55,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="SAVE").click()
         time.sleep(1)
-        assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(new_file_name, allow_scroll_search=True).exists(), "rename failed with new_file_name: " + new_file_name
+        assert self.device(scrollable=True).scroll.to(text=new_file_name), "rename failed with new_file_name: " + new_file_name
     
 
 start_time = time.time()

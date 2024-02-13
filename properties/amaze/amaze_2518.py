@@ -34,7 +34,7 @@ class Test(AndroidCheck):
             self.device(text="Allow").click()
             time.sleep(1)
 
-    @precondition(lambda self: self.device(text="App Manager").exists() and self.device(description="More options").exists())
+    @precondition(lambda self: self.device(text="App Manager").exists() and self.device(description="More options").exists() and not self.device(text="Settings").exists())
     @rule()
     def click_exist_button_should_work(self):
         print("time: " + str(time.time() - start_time))

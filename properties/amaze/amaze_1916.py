@@ -32,8 +32,8 @@ class Test(AndroidCheck):
         elif self.device(text="Allow").exists():
             self.device(text="Allow").click()
             time.sleep(1)
-            
-    @precondition(lambda self: self.device(text="Documents").exists()  and self.device(text="Internal Storage").exists() and len(self.add_file_names) > 0)
+
+    @precondition(lambda self: self.device(text="Documents").exists()  and self.device(text="Internal Storage").exists())
     @rule()
     def rule_documnets(self):
         print("time: " + str(time.time() - start_time))
