@@ -89,10 +89,10 @@ start_time = time.time()
 t = Test(
     apk_path="./apk/markor/1.3.0.apk",
     device_serial="emulator-5554",
-    output_dir="output/markor/420/1",
+    output_dir="output/markor/420/random_10/1",
     policy_name="random",
-    timeout=7200,
-    number_of_events_that_restart_app = 100
+    timeout=21600,
+    number_of_events_that_restart_app = 10
 )
 t.start()
 execution_time = time.time() - start_time
