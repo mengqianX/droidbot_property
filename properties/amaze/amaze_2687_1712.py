@@ -63,7 +63,7 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="CLOSE").click()
         time.sleep(1)
-        assert self.device(resourceId="com.amaze.filemanager:id/listView").child_by_text(selected_file_name, allow_scroll_search=True).exists(), "unhide file failed with file name: " + str(selected_file_name)
+        assert self.device(scrollable=True).scroll.to(text=selected_file_name), "unhide file failed with file name: " + str(selected_file_name)
 
 start_time = time.time()
 
