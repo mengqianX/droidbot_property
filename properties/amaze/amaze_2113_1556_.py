@@ -55,6 +55,8 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="SAVE").click()
         time.sleep(1)
+        self.device(scrollable=True).fling.toEnd()
+        time.sleep(2)
         assert self.device(scrollable=True).scroll.to(text=new_file_name), "rename failed with new_file_name: " + new_file_name
     
 
