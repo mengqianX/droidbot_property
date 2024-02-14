@@ -33,7 +33,7 @@ class Test(AndroidCheck):
             self.device(text="Allow").click()
             time.sleep(1)
 
-    @precondition(lambda self: self.device(text="Documents").exists()  and self.device(text="Internal Storage").exists())
+    @precondition(lambda self: self.device(text="Documents").exists()  and self.device(text="Audio").exists())
     @rule()
     def rule_documnets(self):
         print("time: " + str(time.time() - start_time))
