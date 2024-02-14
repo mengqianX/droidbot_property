@@ -63,6 +63,8 @@ class Test(AndroidCheck):
         time.sleep(1)
         self.device(text="CLOSE").click()
         time.sleep(1)
+        self.device(scrollable=True).fling.toEnd()
+        time.sleep(2)
         assert self.device(scrollable=True).scroll.to(text=selected_file_name), "unhide file failed with file name: " + str(selected_file_name)
 
 start_time = time.time()
