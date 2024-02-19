@@ -7,7 +7,7 @@ __pycache__/
 droidbot/output*/*
 droidbot/apk/*
 *output/
-
+.vscode/
 #*.sh
 # test_*.py
 .vscode/*
